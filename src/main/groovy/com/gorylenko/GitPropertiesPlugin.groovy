@@ -27,7 +27,6 @@ class GitPropertiesPlugin implements Plugin<Project> {
     static class GenerateGitPropertiesTask extends DefaultTask {
         @TaskAction
         void generate() {
-            def repo = Grgit.open(dir: project.rootProject.file('.'))
             def dir = new File(project.buildDir, "resources/main")
             def file = new File(project.buildDir, "resources/main/git.properties")
             if (!dir.exists()) {
@@ -36,14 +35,14 @@ class GitPropertiesPlugin implements Plugin<Project> {
             if (!file.exists()) {
                 file.createNewFile()
             }
-            def map = ["git.branch"                : repo.branch.current.name
-                       , "git.commit.id"           : repo.head().id
-                       , "git.commit.id.abbrev"    : repo.head().abbreviatedId
-                       , "git.commit.user.name"    : repo.head().author.name
-                       , "git.commit.user.email"   : repo.head().author.email
-                       , "git.commit.message.short": repo.head().shortMessage
-                       , "git.commit.message.full" : repo.head().fullMessage
-                       , "git.commit.time"         : repo.head().time.toString()]
+            def map = ["git.branch"                : grgit.branch.current.name
+                       , "git.commit.id"           : grgit.head().id
+                       , "git.commit.id.abbrev"    : grgit.head().abbreviatedId
+                       , "git.commit.user.name"    : grgit.head().author.name
+                       , "git.commit.user.email"   : grgit.head().author.email
+                       , "git.commit.message.short": grgit.head().shortMessage
+                       , "git.commit.message.full" : grgit.head().fullMessage
+                       , "git.commit.time"         : grgit.head().time.toString()]
             def props = new Properties()
             props.putAll(map)
             props.store(file.newWriter(), "")
