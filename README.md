@@ -9,7 +9,9 @@ Idea - @lievendoclo, originally published in article [Spring Boot's info endpoin
 Declare this in your `build.gradle`
 
 ```groovy
-apply plugin: `com.gorylenko.gradle-git-properties'
+plugins {
+  id "com.gorylenko.gradle-git-properties" version "1.1"
+}
 ```
 
 and you're done.
