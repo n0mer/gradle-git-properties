@@ -1,3 +1,5 @@
+package com.gorylenko
+
 import org.ajoberstar.grgit.Grgit
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
@@ -7,6 +9,9 @@ import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.TaskAction
 
+/**
+ * @link <a href="http://www.insaneprogramming.be/blog/2014/08/15/spring-boot-info-git/">Spring Boot's info endpoint, Git and Gradle - InsaneProgramming</a>
+ */
 class GitPropertiesPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
@@ -15,7 +20,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
         ensureTaskRunsOnJavaClassesTask(project, task)
     }
 
-    private void ensureTaskRunsOnJavaClassesTask(Project project, Task task) {
+    private static void ensureTaskRunsOnJavaClassesTask(Project project, Task task) {
         project.getTasks().getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn(task)
     }
 
