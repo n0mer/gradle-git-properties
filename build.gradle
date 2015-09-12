@@ -22,7 +22,7 @@ dependencies {
   compile 'org.ajoberstar:gradle-git:1.3.0'
 }
 
-version = "1.4.1"
+version = "1.4.2"
 group = "com.gorylenko.gradle-git-properties"
 
 pluginBundle {
