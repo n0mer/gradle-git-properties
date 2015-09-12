@@ -9,6 +9,8 @@ import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.TaskAction
 
+import java.text.SimpleDateFormat
+
 /**
  * @link <a href="http://www.insaneprogramming.be/blog/2014/08/15/spring-boot-info-git/">Spring Boot's info endpoint, Git and Gradle - InsaneProgramming</a>
  */
@@ -43,7 +45,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
                        , "git.commit.user.email"   : repo.head().author.email
                        , "git.commit.message.short": repo.head().shortMessage
                        , "git.commit.message.full" : repo.head().fullMessage
-                       , "git.commit.time"         : repo.head().time.toString()]
+                       , "git.commit.time"         : new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").format(repo.head().time)]
             def props = new Properties()
             props.putAll(map)
             props.store(file.newWriter(), "")
