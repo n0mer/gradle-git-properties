@@ -23,7 +23,7 @@ dependencies {
     compile 'org.ajoberstar:gradle-git:1.3.0'
 }
 
-version = "1.4.5"
+version = "1.4.6"
 group = "com.gorylenko.gradle-git-properties"
 
 publishing {
