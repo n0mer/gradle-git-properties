@@ -1,41 +1,64 @@
 buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
-  }
-  dependencies {
-    classpath "com.gradle.publish:plugin-publish-plugin:0.9.1"
-  }
+    dependencies {
+        classpath "com.gradle.publish:plugin-publish-plugin:0.9.1"
+    }
 }
 
 apply plugin: "com.gradle.plugin-publish"
+apply plugin: 'maven-publish'
 apply plugin: 'groovy'
 
 repositories {
-  jcenter()
+    jcenter()
 }
 
 dependencies {
-  compile gradleApi()
-  compile localGroovy()
-  compile 'org.ajoberstar:gradle-git:1.3.0'
+    compile gradleApi()
+    compile localGroovy()
+    compile 'org.ajoberstar:gradle-git:1.3.0'
 }
 
-version = "1.4.2"
+version = "1.4.5"
 group = "com.gorylenko.gradle-git-properties"
 
-pluginBundle {
-  website = 'http://github.com/n0mer/gradle-git-properties'
-  vcsUrl = 'https://github.com/n0mer/gradle-git-properties'
-  description = 'Produce git.properties for spring-boot-actuator'
-  tags = ['git', 'spring-boot']
+publishing {
 
-  plugins {
-    gitPropertiesPlugin{
-      id = 'com.gorylenko.gradle-git-properties'
-      displayName = 'Gradle Git Properties plugin'
+    publications {
+
+        pluginJar(MavenPublication) {
+
+            groupId project.group
+            artifactId jar.baseName
+
+            from components.java
+
+            artifact sourceJar {
+                classifier "sources"
+            }
+        }
     }
-  }
 }
 
+task sourceJar(type: Jar, dependsOn: classes) {
+    classifier = "sources"
+    from sourceSets.main.resources, sourceSets.main.groovy
+}
+
+pluginBundle {
+    website = 'http://github.com/n0mer/gradle-git-properties'
+    vcsUrl = 'https://github.com/n0mer/gradle-git-properties'
+    description = 'Produce git.properties for spring-boot-actuator'
+    tags = ['git', 'spring-boot']
+
+    plugins {
+        gitPropertiesPlugin {
+            id = 'com.gorylenko.gradle-git-properties'
+            displayName = 'Gradle Git Properties plugin'
+        }
+    }
+}

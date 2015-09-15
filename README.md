@@ -10,11 +10,18 @@ Declare this in your `build.gradle`
 
 ```groovy
 plugins {
-  id "com.gorylenko.gradle-git-properties" version "1.4.2"
+  id "com.gorylenko.gradle-git-properties" version "1.4.5"
 }
 ```
 
-and you're all set.
+If needed - override location of `git.properties` file like this:
+```groovy
+gitProperties {
+    gitPropertiesDir = new File("${project.rootDir}/your/custom/dir")
+}
+```
+
+> Please note that `spring-boot-actuator` expects `git.properties` to be available at certain location.
 
 This is enough to see git details via `info` endpoint of [spring-boot-actuator](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready).
  

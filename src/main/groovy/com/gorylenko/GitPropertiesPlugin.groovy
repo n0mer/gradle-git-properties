@@ -13,9 +13,13 @@ import org.gradle.api.tasks.TaskAction
  * @link <a href="http://www.insaneprogramming.be/blog/2014/08/15/spring-boot-info-git/">Spring Boot's info endpoint, Git and Gradle - InsaneProgramming</a>
  */
 class GitPropertiesPlugin implements Plugin<Project> {
+
     @Override
     void apply(Project project) {
+
+        project.extensions.create("gitProperties", GitPropertiesPluginExtension)
         def task = project.tasks.create('generateGitProperties', GenerateGitPropertiesTask)
+
         task.setGroup(BasePlugin.BUILD_GROUP)
         ensureTaskRunsOnJavaClassesTask(project, task)
     }
@@ -28,13 +32,14 @@ class GitPropertiesPlugin implements Plugin<Project> {
         @TaskAction
         void generate() {
             def repo = Grgit.open(dir: project.rootProject.file('.'))
-            def dir = new File(project.buildDir, "resources/main")
-            def file = new File(project.buildDir, "resources/main/git.properties")
+            def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, "resources/main")
+            def file = new File(dir, "git.properties")
             if (!dir.exists()) {
                 dir.mkdirs()
             }
             if (!file.exists()) {
                 file.createNewFile()
+                logger.info "writing to [${file}]"
             }
             def map = ["git.branch"                : repo.branch.current.name
                        , "git.commit.id"           : repo.head().id
@@ -49,4 +54,8 @@ class GitPropertiesPlugin implements Plugin<Project> {
             props.store(file.newWriter(), "")
         }
     }
+}
+
+class GitPropertiesPluginExtension {
+    File gitPropertiesDir
 }
