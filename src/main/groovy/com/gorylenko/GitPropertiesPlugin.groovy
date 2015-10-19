@@ -31,7 +31,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
     static class GenerateGitPropertiesTask extends DefaultTask {
         @TaskAction
         void generate() {
-            def repo = Grgit.open(dir: project.rootProject.file('.'))
+            def repo = Grgit.open(dir: project.gitProperties.gitRepositoryRoot ?: project.rootProject.file('.'))
             def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, "resources/main")
             def file = new File(dir, "git.properties")
             if (!dir.exists()) {
@@ -58,4 +58,5 @@ class GitPropertiesPlugin implements Plugin<Project> {
 
 class GitPropertiesPluginExtension {
     File gitPropertiesDir
+    File gitRepositoryRoot
 }
