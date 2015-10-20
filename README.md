@@ -21,11 +21,18 @@ gitProperties {
 }
 ```
 
+If project root dir is not the same git repo root dir, it can be overridden like so.
+```groovy
+gitProperties {
+    gitRepositoryRoot = new File("${project.rootDir}/../..")
+}
+```
+
 > Please note that `spring-boot-actuator` expects `git.properties` to be available at certain location.
 
 This is enough to see git details via `info` endpoint of [spring-boot-actuator](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready).
- 
-Plugin is available from [Gradle Plugins repository](https://plugins.gradle.org/plugin/com.gorylenko.gradle-git-properties). 
+
+Plugin is available from [Gradle Plugins repository](https://plugins.gradle.org/plugin/com.gorylenko.gradle-git-properties).
 
 ## result
 
