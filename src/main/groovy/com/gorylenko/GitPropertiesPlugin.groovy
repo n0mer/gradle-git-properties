@@ -19,6 +19,10 @@ class GitPropertiesPlugin implements Plugin<Project> {
 
         project.extensions.create("gitProperties", GitPropertiesPluginExtension)
         def task = project.tasks.create('generateGitProperties', GenerateGitPropertiesTask)
+        task.inputs.dir(new File(project.gitProperties.gitRepositoryRoot ?: project.rootProject.file('.'),".git"))
+
+        def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, "resources/main")
+        task.outputs.file(new File(dir, "git.properties"))
 
         task.setGroup(BasePlugin.BUILD_GROUP)
         ensureTaskRunsOnJavaClassesTask(project, task)
