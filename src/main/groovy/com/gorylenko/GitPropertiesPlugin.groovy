@@ -38,6 +38,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
             def repo = Grgit.open(dir: project.gitProperties.gitRepositoryRoot ?: project.rootProject.file('.'))
             def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, "resources/main")
             def file = new File(dir, "git.properties")
+            def keys = project.gitProperties.keys ?: ['git.branch', 'git.commit.id', 'git.commit.id.abbrev', 'git.commit.user.name', 'git.commit.user.email', 'git.commit.message.short', 'git.commit.message.full', 'git.commit.time']
             if (!dir.exists()) {
                 dir.mkdirs()
             }
@@ -54,7 +55,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
                        , "git.commit.message.full" : repo.head().fullMessage
                        , "git.commit.time"         : repo.head().time.toString()]
             def props = new Properties()
-            props.putAll(map)
+            props.putAll(map.subMap(project.gitProperties.keys))
             props.store(file.newWriter(), "")
         }
     }
@@ -63,4 +64,5 @@ class GitPropertiesPlugin implements Plugin<Project> {
 class GitPropertiesPluginExtension {
     File gitPropertiesDir
     File gitRepositoryRoot
+    Map keys
 }
