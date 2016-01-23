@@ -64,5 +64,5 @@ class GitPropertiesPlugin implements Plugin<Project> {
 class GitPropertiesPluginExtension {
     File gitPropertiesDir
     File gitRepositoryRoot
-    Map keys
+    List keys
 }
