@@ -55,7 +55,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
                        , "git.commit.message.full" : repo.head().fullMessage
                        , "git.commit.time"         : repo.head().time.toString()]
             def props = new Properties()
-            props.putAll(map.subMap(project.gitProperties.keys))
+            props.putAll(map.subMap(keys))
             props.store(file.newWriter(), "")
         }
     }
