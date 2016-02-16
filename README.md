@@ -10,7 +10,7 @@ Declare this in your `build.gradle`
 
 ```groovy
 plugins {
-  id "com.gorylenko.gradle-git-properties" version "1.4.7"
+  id "com.gorylenko.gradle-git-properties" version "1.4.11"
 }
 ```
 
