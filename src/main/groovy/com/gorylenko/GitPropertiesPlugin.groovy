@@ -29,6 +29,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
     }
 
     private static void ensureTaskRunsOnJavaClassesTask(Project project, Task task) {
+        project.plugins.apply JavaPlugin
         project.getTasks().getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn(task)
     }
 
