@@ -5,8 +5,11 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.FileTree
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
 /**
@@ -19,10 +22,6 @@ class GitPropertiesPlugin implements Plugin<Project> {
 
         project.extensions.create("gitProperties", GitPropertiesPluginExtension)
         def task = project.tasks.create('generateGitProperties', GenerateGitPropertiesTask)
-        task.inputs.dir(new File(project.gitProperties.gitRepositoryRoot ?: project.rootProject.file('.'),".git"))
-
-        def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, "resources/main")
-        task.outputs.file(new File(dir, "git.properties"))
 
         task.setGroup(BasePlugin.BUILD_GROUP)
         ensureTaskRunsOnJavaClassesTask(project, task)
@@ -34,6 +33,18 @@ class GitPropertiesPlugin implements Plugin<Project> {
     }
 
     static class GenerateGitPropertiesTask extends DefaultTask {
+
+        @InputFiles
+        public FileTree getSource() {
+            return project.files(new File(project.gitProperties.gitRepositoryRoot ?: project.rootProject.file('.'),".git")).getAsFileTree()
+        }
+
+        @OutputFile
+        public File getOutput() {
+            def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, "resources/main")
+            return new File(dir, "git.properties")
+        }
+
         @TaskAction
         void generate() {
             def repo = Grgit.open(dir: project.gitProperties.gitRepositoryRoot ?: project.rootProject.file('.'))
