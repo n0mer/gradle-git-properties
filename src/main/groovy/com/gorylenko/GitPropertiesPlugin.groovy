@@ -57,7 +57,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
                        , "git.commit.time"         : repo.head().time.toString()]
             def props = new Properties()
             props.putAll(map.subMap(keys))
-            props.store(file.newWriter(), "")
+            props.store(file.newWriter(), null)
         }
     }
 }
