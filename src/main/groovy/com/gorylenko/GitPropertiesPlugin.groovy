@@ -45,10 +45,8 @@ class GitPropertiesPlugin implements Plugin<Project> {
             }
             if (file.exists()) {
                 assert file.delete()
-                assert file.createNewFile()
-            } else {
-                file.createNewFile()
             }
+            assert file.createNewFile()
             logger.info "writing to [${file}]"
             def map = ["git.branch"                : repo.branch.current.name
                        , "git.commit.id"           : repo.head().id
@@ -59,11 +57,9 @@ class GitPropertiesPlugin implements Plugin<Project> {
                        , "git.commit.message.full" : repo.head().fullMessage
                        , "git.commit.time"         : repo.head().time.toString()]
 
-            def fileWriter = new OutputStreamWriter(new FileOutputStream(file, true), 'UTF-8')
-            
-            file.withWriterAppend( 'UTF-8' ) { fileWriter ->
+            file.withWriter('UTF-8') { w ->
                 map.subMap(keys).each { key, value ->
-                    fileWriter.writeLine "$key=$value"
+                    w.writeLine "$key=$value"
                 }
             }
         }
