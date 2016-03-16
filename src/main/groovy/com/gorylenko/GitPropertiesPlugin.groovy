@@ -43,10 +43,13 @@ class GitPropertiesPlugin implements Plugin<Project> {
             if (!dir.exists()) {
                 dir.mkdirs()
             }
-            if (!file.exists()) {
+            if (file.exists()) {
+                assert file.delete()
+                assert file.createNewFile()
+            } else {
                 file.createNewFile()
-                logger.info "writing to [${file}]"
             }
+            logger.info "writing to [${file}]"
             def map = ["git.branch"                : repo.branch.current.name
                        , "git.commit.id"           : repo.head().id
                        , "git.commit.id.abbrev"    : repo.head().abbreviatedId
@@ -55,9 +58,14 @@ class GitPropertiesPlugin implements Plugin<Project> {
                        , "git.commit.message.short": repo.head().shortMessage
                        , "git.commit.message.full" : repo.head().fullMessage
                        , "git.commit.time"         : repo.head().time.toString()]
-            def props = new Properties()
-            props.putAll(map.subMap(keys))
-            props.store(file.newWriter(), null)
+
+            def fileWriter = new OutputStreamWriter(new FileOutputStream(file, true), 'UTF-8')
+            
+            file.withWriterAppend( 'UTF-8' ) { fileWriter ->
+                map.subMap(keys).each { key, value ->
+                    fileWriter.writeLine "$key=$value"
+                }
+            }
         }
     }
 }
