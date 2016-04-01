@@ -1,5 +1,7 @@
 package com.gorylenko
 
+import java.text.SimpleDateFormat
+
 import org.ajoberstar.grgit.Grgit
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
@@ -66,12 +68,25 @@ class GitPropertiesPlugin implements Plugin<Project> {
                        , "git.commit.user.email"   : repo.head().author.email
                        , "git.commit.message.short": repo.head().shortMessage
                        , "git.commit.message.full" : repo.head().fullMessage
-                       , "git.commit.time"         : repo.head().time.toString()]
+                       , "git.commit.time"         : formatDate(repo.head().time, project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone)]
 
             file.withWriter('UTF-8') { w ->
                 map.subMap(keys).each { key, value ->
                     w.writeLine "$key=$value"
                 }
+            }
+        }
+
+        private String formatDate(long timestamp, String dateFormat, String timezone) {
+            String date
+            if (dateFormat) {
+                def sdf = new SimpleDateFormat(dateFormat)
+                if (timezone) {
+                    sdf.setTimeZone(TimeZone.getTimeZone(timezone))
+                }
+                date = sdf.format(new Date(timestamp * 1000L))
+            } else {
+                date = timestamp.toString()
             }
         }
     }
@@ -81,4 +96,6 @@ class GitPropertiesPluginExtension {
     File gitPropertiesDir
     File gitRepositoryRoot
     List keys
+    String dateFormat
+    String dateFormatTimeZone
 }
