@@ -24,8 +24,8 @@ gitProperties {
 If needed - use `dateFormat` and `dateFormatTimeZone` to format `git.commit.time` value (See [SimpleDateFormat](http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html) and [TimeZone](http://docs.oracle.com/javase/7/docs/api/java/util/TimeZone.html) for values)
 ```groovy
 gitProperties {
-    dateformat = "yyyy-MM-dd'T'HH:mmZ"
-    dateformatTimeZone = "PST"
+    dateFormat = "yyyy-MM-dd'T'HH:mmZ"
+    dateFormatTimeZone = "PST"
 }
 ```
 
