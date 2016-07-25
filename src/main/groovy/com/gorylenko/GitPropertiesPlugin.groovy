@@ -18,12 +18,36 @@ import org.gradle.api.tasks.TaskAction
  * @link <a href="http://www.insaneprogramming.be/blog/2014/08/15/spring-boot-info-git/">Spring Boot's info endpoint, Git and Gradle - InsaneProgramming</a>
  */
 class GitPropertiesPlugin implements Plugin<Project> {
+    
+    private static final String EXTENSION_NAME = "gitProperties"
+    private static final String TASK_NAME = "generateGitProperties"
+
+    private static final String GIT_PROPERTIES_FILENAME = "git.properties"
+    private static final String DEFAULT_OUTPUT_DIR = "resources/main"
+
+    private static final String CHARSET = "UTF-8"
+
+    private static final String KEY_GIT_BRANCH = "git.branch"
+    private static final String KEY_GIT_COMMIT_ID = "git.commit.id"
+    private static final String KEY_GIT_COMMIT_ID_ABBREVIATED = "git.commit.id.abbrev"
+    private static final String KEY_GIT_COMMIT_USER_NAME = "git.commit.user.name"
+    private static final String KEY_GIT_COMMIT_USER_EMAIL = "git.commit.user.email"
+    private static final String KEY_GIT_COMMIT_SHORT_MESSAGE = "git.commit.message.short"
+    private static final String KEY_GIT_COMMIT_FULL_MESSAGE = "git.commit.message.full"
+    private static final String KEY_GIT_COMMIT_TIME = "git.commit.time"
+    private static final String[] KEY_ALL = [
+            KEY_GIT_BRANCH,
+            KEY_GIT_COMMIT_ID, KEY_GIT_COMMIT_ID_ABBREVIATED,
+            KEY_GIT_COMMIT_USER_NAME, KEY_GIT_COMMIT_USER_EMAIL,
+            KEY_GIT_COMMIT_SHORT_MESSAGE, KEY_GIT_COMMIT_FULL_MESSAGE,
+            KEY_GIT_COMMIT_TIME
+    ]
 
     @Override
     void apply(Project project) {
 
-        project.extensions.create("gitProperties", GitPropertiesPluginExtension)
-        def task = project.tasks.create('generateGitProperties', GenerateGitPropertiesTask)
+        project.extensions.create(EXTENSION_NAME, GitPropertiesPluginExtension)
+        def task = project.tasks.create(TASK_NAME, GenerateGitPropertiesTask)
 
         task.setGroup(BasePlugin.BUILD_GROUP)
         ensureTaskRunsOnJavaClassesTask(project, task)
@@ -38,21 +62,21 @@ class GitPropertiesPlugin implements Plugin<Project> {
 
         @InputFiles
         public FileTree getSource() {
-            return project.files(new File(project.gitProperties.gitRepositoryRoot ?: project.rootProject.file('.'),".git")).getAsFileTree()
+            return project.files(new File(project.gitProperties.gitRepositoryRoot ?: project.rootProject.file('.'), ".git")).getAsFileTree()
         }
 
         @OutputFile
         public File getOutput() {
-            def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, "resources/main")
-            return new File(dir, "git.properties")
+            def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, DEFAULT_OUTPUT_DIR)
+            return new File(dir, GIT_PROPERTIES_FILENAME)
         }
 
         @TaskAction
         void generate() {
             def repo = Grgit.open(dir: project.gitProperties.gitRepositoryRoot ?: project.rootProject.file('.'))
-            def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, "resources/main")
-            def file = new File(dir, "git.properties")
-            def keys = project.gitProperties.keys ?: ['git.branch', 'git.commit.id', 'git.commit.id.abbrev', 'git.commit.user.name', 'git.commit.user.email', 'git.commit.message.short', 'git.commit.message.full', 'git.commit.time']
+            def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, DEFAULT_OUTPUT_DIR)
+            def file = new File(dir, GIT_PROPERTIES_FILENAME)
+            def keys = project.gitProperties.keys ?: KEY_ALL
             if (!dir.exists()) {
                 dir.mkdirs()
             }
@@ -61,16 +85,16 @@ class GitPropertiesPlugin implements Plugin<Project> {
             }
             assert file.createNewFile()
             logger.info "writing to [${file}]"
-            def map = ["git.branch"                : repo.branch.current.name
-                       , "git.commit.id"           : repo.head().id
-                       , "git.commit.id.abbrev"    : repo.head().abbreviatedId
-                       , "git.commit.user.name"    : repo.head().author.name
-                       , "git.commit.user.email"   : repo.head().author.email
-                       , "git.commit.message.short": repo.head().shortMessage
-                       , "git.commit.message.full" : repo.head().fullMessage
-                       , "git.commit.time"         : formatDate(repo.head().time, project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone)]
+            def map = [(KEY_GIT_BRANCH)                 : repo.branch.current.name
+                       , (KEY_GIT_COMMIT_ID)            : repo.head().id
+                       , (KEY_GIT_COMMIT_ID_ABBREVIATED): repo.head().abbreviatedId
+                       , (KEY_GIT_COMMIT_USER_NAME)     : repo.head().author.name
+                       , (KEY_GIT_COMMIT_USER_EMAIL)    : repo.head().author.email
+                       , (KEY_GIT_COMMIT_SHORT_MESSAGE) : repo.head().shortMessage
+                       , (KEY_GIT_COMMIT_FULL_MESSAGE)  : repo.head().fullMessage
+                       , (KEY_GIT_COMMIT_TIME)          : formatDate(repo.head().time, project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone)]
 
-            file.withWriter('UTF-8') { w ->
+            file.withWriter(CHARSET) { w ->
                 map.subMap(keys).each { key, value ->
                     w.writeLine "$key=$value"
                 }
