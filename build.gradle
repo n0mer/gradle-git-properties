@@ -26,6 +26,10 @@ dependencies {
 version = "1.4.16"
 group = "com.gorylenko.gradle-git-properties"
 
+tasks.withType(GroovyCompile) {
+    targetCompatibility = JavaVersion.VERSION_1_7
+}
+
 publishing {
 
     publications {
