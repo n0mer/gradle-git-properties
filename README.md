@@ -2,7 +2,7 @@
 
 This repository contains packaged Gradle plugin for `git.properties` file generation.
 
-Idea - @lievendoclo, originally published in article [Spring Boot's info endpoint, Git and Gradle - InsaneProgramming](http://www.insaneprogramming.be/blog/2014/08/15/spring-boot-info-git/).
+Idea - @lievendoclo, originally published in article [Spring Boot's info endpoint, Git and Gradle - InsaneProgramming](http://www.insaneprogramming.be/article/2014/08/15/spring-boot-info-git/).
 
 ## usage
 
