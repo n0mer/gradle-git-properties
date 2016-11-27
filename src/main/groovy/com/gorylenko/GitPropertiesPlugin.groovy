@@ -14,9 +14,6 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
-/**
- * @link <a href="http://www.insaneprogramming.be/blog/2014/08/15/spring-boot-info-git/">Spring Boot's info endpoint, Git and Gradle - InsaneProgramming</a>
- */
 class GitPropertiesPlugin implements Plugin<Project> {
     
     private static final String EXTENSION_NAME = "gitProperties"
