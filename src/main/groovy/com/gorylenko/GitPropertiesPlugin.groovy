@@ -3,6 +3,7 @@ package com.gorylenko
 import java.text.SimpleDateFormat
 
 import org.ajoberstar.grgit.Grgit
+import org.eclipse.jgit.errors.RepositoryNotFoundException
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -70,31 +71,36 @@ class GitPropertiesPlugin implements Plugin<Project> {
 
         @TaskAction
         void generate() {
-            def repo = Grgit.open(dir: project.gitProperties.gitRepositoryRoot ?: project.rootProject.file('.'))
-            def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, DEFAULT_OUTPUT_DIR)
-            def file = new File(dir, GIT_PROPERTIES_FILENAME)
-            def keys = project.gitProperties.keys ?: KEY_ALL
-            if (!dir.exists()) {
-                dir.mkdirs()
-            }
-            if (file.exists()) {
-                assert file.delete()
-            }
-            assert file.createNewFile()
-            logger.info "writing to [${file}]"
-            def map = [(KEY_GIT_BRANCH)                 : repo.branch.current.name
-                       , (KEY_GIT_COMMIT_ID)            : repo.head().id
-                       , (KEY_GIT_COMMIT_ID_ABBREVIATED): repo.head().abbreviatedId
-                       , (KEY_GIT_COMMIT_USER_NAME)     : repo.head().author.name
-                       , (KEY_GIT_COMMIT_USER_EMAIL)    : repo.head().author.email
-                       , (KEY_GIT_COMMIT_SHORT_MESSAGE) : repo.head().shortMessage
-                       , (KEY_GIT_COMMIT_FULL_MESSAGE)  : repo.head().fullMessage
-                       , (KEY_GIT_COMMIT_TIME)          : formatDate(repo.head().time, project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone)]
-
-            file.withWriter(CHARSET) { w ->
-                map.subMap(keys).each { key, value ->
-                    w.writeLine "$key=$value"
+            try {
+                def repo = Grgit.open(dir: project.gitProperties.gitRepositoryRoot ?: project.rootProject.file('.'))
+                def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, DEFAULT_OUTPUT_DIR)
+                def file = new File(dir, GIT_PROPERTIES_FILENAME)
+                def keys = project.gitProperties.keys ?: KEY_ALL
+                if (!dir.exists()) {
+                    dir.mkdirs()
                 }
+                if (file.exists()) {
+                    assert file.delete()
+                }
+                assert file.createNewFile()
+                logger.info "writing to [${file}]"
+                def map = [(KEY_GIT_BRANCH)                 : repo.branch.current.name
+                           , (KEY_GIT_COMMIT_ID)            : repo.head().id
+                           , (KEY_GIT_COMMIT_ID_ABBREVIATED): repo.head().abbreviatedId
+                           , (KEY_GIT_COMMIT_USER_NAME)     : repo.head().author.name
+                           , (KEY_GIT_COMMIT_USER_EMAIL)    : repo.head().author.email
+                           , (KEY_GIT_COMMIT_SHORT_MESSAGE) : repo.head().shortMessage
+                           , (KEY_GIT_COMMIT_FULL_MESSAGE)  : repo.head().fullMessage
+                           , (KEY_GIT_COMMIT_TIME)          : formatDate(repo.head().time, project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone)]
+
+                file.withWriter(CHARSET) { w ->
+                    map.subMap(keys).each { key, value ->
+                        w.writeLine "$key=$value"
+                    }
+                }
+            } catch (RepositoryNotFoundException e) {
+                if (project.gitProperties.failOnNoGitDirectory)
+                    throw e
             }
         }
 
@@ -119,4 +125,5 @@ class GitPropertiesPluginExtension {
     List keys
     String dateFormat
     String dateFormatTimeZone
+    boolean failOnNoGitDirectory = true
 }
