@@ -32,12 +32,13 @@ class GitPropertiesPlugin implements Plugin<Project> {
     private static final String KEY_GIT_COMMIT_SHORT_MESSAGE = "git.commit.message.short"
     private static final String KEY_GIT_COMMIT_FULL_MESSAGE = "git.commit.message.full"
     private static final String KEY_GIT_COMMIT_TIME = "git.commit.time"
+    private static final String KEY_GIT_COMMIT_ID_DESCRIBE = "git.commit.id.describe"
     private static final String[] KEY_ALL = [
             KEY_GIT_BRANCH,
             KEY_GIT_COMMIT_ID, KEY_GIT_COMMIT_ID_ABBREVIATED,
             KEY_GIT_COMMIT_USER_NAME, KEY_GIT_COMMIT_USER_EMAIL,
             KEY_GIT_COMMIT_SHORT_MESSAGE, KEY_GIT_COMMIT_FULL_MESSAGE,
-            KEY_GIT_COMMIT_TIME
+            KEY_GIT_COMMIT_TIME, KEY_GIT_COMMIT_ID_DESCRIBE
     ]
 
     @Override
@@ -89,7 +90,8 @@ class GitPropertiesPlugin implements Plugin<Project> {
                        , (KEY_GIT_COMMIT_USER_EMAIL)    : repo.head().author.email
                        , (KEY_GIT_COMMIT_SHORT_MESSAGE) : repo.head().shortMessage
                        , (KEY_GIT_COMMIT_FULL_MESSAGE)  : repo.head().fullMessage
-                       , (KEY_GIT_COMMIT_TIME)          : formatDate(repo.head().time, project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone)]
+                       , (KEY_GIT_COMMIT_TIME)          : formatDate(repo.head().time, project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone)
+                       , (KEY_GIT_COMMIT_ID_DESCRIBE)   : commitIdDescribe(repo, '-dirty')]
 
             file.withWriter(CHARSET) { w ->
                 map.subMap(keys).each { key, value ->
@@ -108,6 +110,15 @@ class GitPropertiesPlugin implements Plugin<Project> {
                 date = sdf.format(new Date(timestamp * 1000L))
             } else {
                 date = timestamp.toString()
+            }
+        }
+
+        private String commitIdDescribe(Grgit repo, String dirtyMark) {
+            String describe
+            if (repo.status().clean) {
+                describe = repo.head().abbreviatedId
+            } else {
+                describe = repo.head().abbreviatedId + dirtyMark
             }
         }
     }
