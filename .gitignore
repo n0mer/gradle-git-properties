@@ -39,3 +39,7 @@ gradle-app.setting
 
 ## mac
 .DS_Store
+/bin/
+.classpath
+.project
+.settings
