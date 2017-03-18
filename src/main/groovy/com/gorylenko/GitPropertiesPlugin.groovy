@@ -15,7 +15,7 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
 class GitPropertiesPlugin implements Plugin<Project> {
-    
+
     private static final String EXTENSION_NAME = "gitProperties"
     private static final String TASK_NAME = "generateGitProperties"
 
@@ -74,14 +74,6 @@ class GitPropertiesPlugin implements Plugin<Project> {
             def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, DEFAULT_OUTPUT_DIR)
             def file = new File(dir, GIT_PROPERTIES_FILENAME)
             def keys = project.gitProperties.keys ?: KEY_ALL
-            if (!dir.exists()) {
-                dir.mkdirs()
-            }
-            if (file.exists()) {
-                assert file.delete()
-            }
-            assert file.createNewFile()
-            logger.info "writing to [${file}]"
             def map = [(KEY_GIT_BRANCH)                 : repo.branch.current.name
                        , (KEY_GIT_COMMIT_ID)            : repo.head().id
                        , (KEY_GIT_COMMIT_ID_ABBREVIATED): repo.head().abbreviatedId
@@ -91,11 +83,39 @@ class GitPropertiesPlugin implements Plugin<Project> {
                        , (KEY_GIT_COMMIT_FULL_MESSAGE)  : repo.head().fullMessage
                        , (KEY_GIT_COMMIT_TIME)          : formatDate(repo.head().time, project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone)]
 
-            file.withWriter(CHARSET) { w ->
-                map.subMap(keys).each { key, value ->
-                    w.writeLine "$key=$value"
+            if (!project.gitProperties.force && hasSameContent(file, map.subMap(keys))) {
+                logger.info "Skipping writing [${file}] as it is up-to-date."
+            } else {
+                logger.info "Writing to [${file}]..."
+                writeToPropertiesFile(map.subMap(keys), file)
+            }
+        }
+
+        private void writeToPropertiesFile(Map<String, String> properties, File propsFile) {
+            if (!propsFile.parentFile.exists()) {
+                propsFile.parentFile.mkdirs()
+            }
+            if (propsFile.exists()) {
+                propsFile.delete()
+            }
+            propsFile.createNewFile()
+            def props = new Properties()
+            props.putAll(properties)
+            props.store(propsFile.newWriter(CHARSET), null)
+        }
+
+        private boolean hasSameContent(File propsFile, Map<String, String> properties) {
+            boolean sameContent = false
+            if (propsFile.exists()) {
+                def props = new Properties()
+                propsFile.withInputStream {
+                    props.load it
+                }
+                if (props.equals(properties)) {
+                    sameContent = true
                 }
             }
+            return sameContent
         }
 
         private String formatDate(long timestamp, String dateFormat, String timezone) {
@@ -119,4 +139,5 @@ class GitPropertiesPluginExtension {
     List keys
     String dateFormat
     String dateFormatTimeZone
+    boolean force
 }
