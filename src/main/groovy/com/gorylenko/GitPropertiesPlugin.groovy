@@ -3,7 +3,6 @@ package com.gorylenko
 import java.text.SimpleDateFormat
 
 import org.ajoberstar.grgit.Grgit
-import org.eclipse.jgit.errors.RepositoryNotFoundException
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -71,13 +70,10 @@ class GitPropertiesPlugin implements Plugin<Project> {
 
         @TaskAction
         void generate() {
-            def repo
-            try {
-                repo = Grgit.open(dir: project.gitProperties.gitRepositoryRoot ?: project.rootProject.file('.'))
-            } catch (RepositoryNotFoundException e) {
-                if (project.gitProperties.failOnNoGitDirectory)
-                    throw e
-            }
+            def source = getSource()
+            if (!project.gitProperties.failOnNoGitDirectory && source.empty)
+                return
+            def repo = Grgit.open(dir: source.head().parentFile)
             def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, DEFAULT_OUTPUT_DIR)
             def file = new File(dir, GIT_PROPERTIES_FILENAME)
             def keys = project.gitProperties.keys ?: KEY_ALL

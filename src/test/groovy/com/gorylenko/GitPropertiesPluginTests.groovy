@@ -40,7 +40,7 @@ class GitPropertiesPluginTests {
     }
 
     @Test
-    public void testGenerateWithMissingGitRepo() {
+    public void testGenerateWithMissingGitRepoShouldNotFail() {
         def projectDir = File.createTempDir("gradle-git-properties", ".tmp");
         projectDir.deleteOnExit()
 
@@ -58,5 +58,28 @@ class GitPropertiesPluginTests {
 
         def gitPropertiesFile = project.buildDir.getAbsolutePath() + '/resources/main/git.properties'
         assertFalse(new File(gitPropertiesFile).exists())
+    }
+
+    @Test
+    public void testGenerateWithMissingGitRepoShouldFail() {
+        def projectDir = File.createTempDir("gradle-git-properties", ".tmp");
+        projectDir.deleteOnExit()
+
+        Project project = ProjectBuilder.builder().withProjectDir(projectDir).build()
+        project.pluginManager.apply 'com.gorylenko.gradle-git-properties'
+
+        // FIXME: Didn't find any way to change `rootProject`, so just set the property.
+        project.gitProperties.gitRepositoryRoot = projectDir
+        // failOnNoGitDirectory is true by default
+
+        def task = project.tasks.generateGitProperties
+        assertTrue(task instanceof GitPropertiesPlugin.GenerateGitPropertiesTask)
+
+        try {
+            task.generate()
+            fail('should have gotten a RepositoryNotFoundException')
+        } catch (Exception e) {
+            assertNotNull(e)
+        }
     }
 }
