@@ -1,5 +1,7 @@
 package com.gorylenko
 
+import groovy.json.StringEscapeUtils
+
 import java.text.SimpleDateFormat
 
 import org.ajoberstar.grgit.Grgit
@@ -15,7 +17,7 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
 class GitPropertiesPlugin implements Plugin<Project> {
-    
+
     private static final String EXTENSION_NAME = "gitProperties"
     private static final String TASK_NAME = "generateGitProperties"
 
@@ -93,7 +95,8 @@ class GitPropertiesPlugin implements Plugin<Project> {
 
             file.withWriter(CHARSET) { w ->
                 map.subMap(keys).each { key, value ->
-                    w.writeLine "$key=$value"
+                    def convertedValue = project.gitProperties.unicodeEscape ? StringEscapeUtils.escapeJava(value) : value
+                    w.writeLine "$key=$convertedValue"
                 }
             }
         }
@@ -119,4 +122,5 @@ class GitPropertiesPluginExtension {
     List keys
     String dateFormat
     String dateFormatTimeZone
+    Boolean unicodeEscape
 }
