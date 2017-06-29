@@ -32,12 +32,13 @@ class GitPropertiesPlugin implements Plugin<Project> {
     private static final String KEY_GIT_COMMIT_SHORT_MESSAGE = "git.commit.message.short"
     private static final String KEY_GIT_COMMIT_FULL_MESSAGE = "git.commit.message.full"
     private static final String KEY_GIT_COMMIT_TIME = "git.commit.time"
+    private static final String KEY_GIT_DIRTY = "git.dirty"
     private static final String[] KEY_ALL = [
             KEY_GIT_BRANCH,
             KEY_GIT_COMMIT_ID, KEY_GIT_COMMIT_ID_ABBREVIATED,
             KEY_GIT_COMMIT_USER_NAME, KEY_GIT_COMMIT_USER_EMAIL,
             KEY_GIT_COMMIT_SHORT_MESSAGE, KEY_GIT_COMMIT_FULL_MESSAGE,
-            KEY_GIT_COMMIT_TIME
+            KEY_GIT_COMMIT_TIME, KEY_GIT_DIRTY
     ]
 
     @Override
@@ -92,7 +93,8 @@ class GitPropertiesPlugin implements Plugin<Project> {
                        , (KEY_GIT_COMMIT_USER_EMAIL)    : repo.head().author.email
                        , (KEY_GIT_COMMIT_SHORT_MESSAGE) : repo.head().shortMessage
                        , (KEY_GIT_COMMIT_FULL_MESSAGE)  : repo.head().fullMessage
-                       , (KEY_GIT_COMMIT_TIME)          : formatDate(repo.head().time, project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone)]
+                       , (KEY_GIT_COMMIT_TIME)          : formatDate(repo.head().time, project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone)
+                       , (KEY_GIT_DIRTY)                : !repo.status().clean]
 
             file.withWriter(CHARSET) { w ->
                 map.subMap(keys).each { key, value ->
