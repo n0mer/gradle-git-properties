@@ -10,7 +10,7 @@ Declare this in your `build.gradle`
 
 ```groovy
 plugins {
-  id "com.gorylenko.gradle-git-properties" version "1.4.16"
+  id "com.gorylenko.gradle-git-properties" version "1.4.18"
 }
 ```
 
@@ -33,6 +33,13 @@ If project root dir is not the same git repo root dir, it can be overridden like
 ```groovy
 gitProperties {
     gitRepositoryRoot = new File("${project.rootDir}/../..")
+}
+```
+
+If needed - use `unicodeEscape` to escape unicode characters.
+```groovy
+gitProperties {
+    unicodeEscape = true // false as default
 }
 ```
 
