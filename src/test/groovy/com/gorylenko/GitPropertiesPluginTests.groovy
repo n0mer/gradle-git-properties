@@ -37,6 +37,7 @@ class GitPropertiesPluginTests {
         assertNotNull(properties.getProperty("git.commit.message.short"))
         assertNotNull(properties.getProperty("git.commit.message.full"))
         assertNotNull(properties.getProperty("git.commit.time"))
+        assertNotNull(properties.getProperty("git.commit.id.describe"))
         assertNotNull(properties.getProperty("git.dirty"))
     }
 
