@@ -34,12 +34,16 @@ class GitPropertiesPlugin implements Plugin<Project> {
     private static final String KEY_GIT_COMMIT_SHORT_MESSAGE = "git.commit.message.short"
     private static final String KEY_GIT_COMMIT_FULL_MESSAGE = "git.commit.message.full"
     private static final String KEY_GIT_COMMIT_TIME = "git.commit.time"
+    private static final String KEY_GIT_COMMIT_ID_DESCRIBE = "git.commit.id.describe"
+    private static final String KEY_GIT_DIRTY = "git.dirty"
+
     private static final String[] KEY_ALL = [
             KEY_GIT_BRANCH,
             KEY_GIT_COMMIT_ID, KEY_GIT_COMMIT_ID_ABBREVIATED,
             KEY_GIT_COMMIT_USER_NAME, KEY_GIT_COMMIT_USER_EMAIL,
             KEY_GIT_COMMIT_SHORT_MESSAGE, KEY_GIT_COMMIT_FULL_MESSAGE,
-            KEY_GIT_COMMIT_TIME
+            KEY_GIT_COMMIT_TIME, KEY_GIT_COMMIT_ID_DESCRIBE,
+            KEY_GIT_COMMIT_TIME, KEY_GIT_DIRTY
     ]
 
     @Override
@@ -72,7 +76,10 @@ class GitPropertiesPlugin implements Plugin<Project> {
 
         @TaskAction
         void generate() {
-            def repo = Grgit.open(dir: project.gitProperties.gitRepositoryRoot ?: project.rootProject.file('.'))
+            def source = getSource()
+            if (!project.gitProperties.failOnNoGitDirectory && source.empty)
+                return
+            def repo = Grgit.open(dir: source.head().parentFile)
             def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, DEFAULT_OUTPUT_DIR)
             def file = new File(dir, GIT_PROPERTIES_FILENAME)
             def keys = project.gitProperties.keys ?: KEY_ALL
@@ -91,7 +98,9 @@ class GitPropertiesPlugin implements Plugin<Project> {
                        , (KEY_GIT_COMMIT_USER_EMAIL)    : repo.head().author.email
                        , (KEY_GIT_COMMIT_SHORT_MESSAGE) : repo.head().shortMessage
                        , (KEY_GIT_COMMIT_FULL_MESSAGE)  : repo.head().fullMessage
-                       , (KEY_GIT_COMMIT_TIME)          : formatDate(repo.head().time, project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone)]
+                       , (KEY_GIT_COMMIT_TIME)          : formatDate(repo.head().time, project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone)
+                       , (KEY_GIT_COMMIT_ID_DESCRIBE)   : commitIdDescribe(repo, '-dirty')]
+                       , (KEY_GIT_DIRTY)                : !repo.status().clean]
 
             file.withWriter(CHARSET) { w ->
                 map.subMap(keys).each { key, value ->
@@ -113,6 +122,15 @@ class GitPropertiesPlugin implements Plugin<Project> {
                 date = timestamp.toString()
             }
         }
+
+        private String commitIdDescribe(Grgit repo, String dirtyMark) {
+            String describe
+            if (repo.status().clean) {
+                describe = repo.head().abbreviatedId
+            } else {
+                describe = repo.head().abbreviatedId + dirtyMark
+            }
+        }
     }
 }
 
@@ -123,4 +141,5 @@ class GitPropertiesPluginExtension {
     String dateFormat
     String dateFormatTimeZone
     Boolean unicodeEscape
+    boolean failOnNoGitDirectory = true
 }
