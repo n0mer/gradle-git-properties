@@ -40,6 +40,15 @@ gitProperties {
 
 This is enough to see git details via `info` endpoint of [spring-boot-actuator](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready).
 
+You can have more fine grained control of the content of 'git.properties':
+```groovy
+gitProperties {
+    keys = ['git.branch','git.commit.id','git.commit.time']
+}
+```
+All available keys can be found in the [source](https://github.com/n0mer/gradle-git-properties/blob/master/src/main/groovy/com/gorylenko/GitPropertiesPlugin.groovy).
+
+
 Plugin is available from [Gradle Plugins repository](https://plugins.gradle.org/plugin/com.gorylenko.gradle-git-properties).
 
 ## result
