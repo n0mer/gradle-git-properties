@@ -97,7 +97,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
                        , (KEY_GIT_COMMIT_SHORT_MESSAGE) : repo.head().shortMessage
                        , (KEY_GIT_COMMIT_FULL_MESSAGE)  : repo.head().fullMessage
                        , (KEY_GIT_COMMIT_TIME)          : formatDate(repo.head().time, project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone)
-                       , (KEY_GIT_COMMIT_ID_DESCRIBE)   : commitIdDescribe(repo, '-dirty')]
+                       , (KEY_GIT_COMMIT_ID_DESCRIBE)   : commitIdDescribe(repo, '-dirty')
                        , (KEY_GIT_DIRTY)                : !repo.status().clean]
 
             file.withWriter(CHARSET) { w ->
