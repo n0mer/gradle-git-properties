@@ -22,7 +22,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
     private static final String GIT_PROPERTIES_FILENAME = "git.properties"
     private static final String DEFAULT_OUTPUT_DIR = "resources/main"
 
-    private static final String CHARSET = "UTF-8"
+    private static final String CHARSET = "ISO-8859-1"
 
     private static final String KEY_GIT_BRANCH = "git.branch"
     private static final String KEY_GIT_COMMIT_ID = "git.commit.id"
