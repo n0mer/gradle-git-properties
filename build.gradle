@@ -5,7 +5,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.9.1"
+        classpath "com.gradle.publish:plugin-publish-plugin:0.9.9"
     }
 }
 
@@ -23,7 +23,7 @@ dependencies {
     compile 'org.ajoberstar:gradle-git:1.4.2'
 }
 
-version = "1.4.19"
+version = "1.4.20"
 group = "com.gorylenko.gradle-git-properties"
 
 tasks.withType(GroovyCompile) {
@@ -68,5 +68,5 @@ pluginBundle {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.12'
+    gradleVersion = '4.2.1'
 }
