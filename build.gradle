@@ -23,7 +23,7 @@ dependencies {
     compile 'org.ajoberstar:gradle-git:1.4.2'
 }
 
-version = "1.4.18"
+version = "1.4.19"
 group = "com.gorylenko.gradle-git-properties"
 
 tasks.withType(GroovyCompile) {
