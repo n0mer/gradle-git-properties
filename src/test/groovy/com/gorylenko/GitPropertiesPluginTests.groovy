@@ -4,6 +4,7 @@ import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
 
+import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertTrue
@@ -83,5 +84,29 @@ class GitPropertiesPluginTests {
         } catch (Exception e) {
             assertNotNull(e)
         }
+    }
+
+    @Test
+    public void testGenerateWithCustomBranchName() {
+        def projectDir = new File('.')
+
+        Project project = ProjectBuilder.builder().withProjectDir(projectDir).build()
+        project.pluginManager.apply 'com.gorylenko.gradle-git-properties'
+
+        // FIXME: Didn't find any way to change `rootProject`, so just set the property.
+        project.gitProperties.gitRepositoryRoot = projectDir
+        project.gitProperties.gitBranchName = "FOO"
+
+        def task = project.tasks.generateGitProperties
+        assertTrue(task instanceof GitPropertiesPlugin.GenerateGitPropertiesTask)
+
+        task.generate()
+
+        def gitPropertiesFile = project.buildDir.getAbsolutePath() + '/resources/main/git.properties'
+
+        Properties properties = new Properties()
+        properties.load(new FileInputStream(gitPropertiesFile))
+        assertNotNull(properties.getProperty("git.branch"))
+        assertEquals("FOO", properties.getProperty("git.branch"))
     }
 }

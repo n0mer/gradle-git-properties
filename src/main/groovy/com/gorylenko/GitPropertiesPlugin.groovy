@@ -15,7 +15,7 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
 class GitPropertiesPlugin implements Plugin<Project> {
-    
+
     private static final String EXTENSION_NAME = "gitProperties"
     private static final String TASK_NAME = "generateGitProperties"
 
@@ -81,6 +81,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
             def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, DEFAULT_OUTPUT_DIR)
             def file = new File(dir, GIT_PROPERTIES_FILENAME)
             def keys = project.gitProperties.keys ?: KEY_ALL
+
             if (!dir.exists()) {
                 dir.mkdirs()
             }
@@ -89,7 +90,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
             }
             assert file.createNewFile()
             logger.info "writing to [${file}]"
-            def map = [(KEY_GIT_BRANCH)                 : repo.branch.current.name
+            def map = [(KEY_GIT_BRANCH)                 : project.gitProperties.gitBranchName ?: repo.branch.current.name
                        , (KEY_GIT_COMMIT_ID)            : repo.head().id
                        , (KEY_GIT_COMMIT_ID_ABBREVIATED): repo.head().abbreviatedId
                        , (KEY_GIT_COMMIT_USER_NAME)     : repo.head().author.name
@@ -134,6 +135,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
 class GitPropertiesPluginExtension {
     File gitPropertiesDir
     File gitRepositoryRoot
+    String gitBranchName
     List keys
     String dateFormat
     String dateFormatTimeZone
