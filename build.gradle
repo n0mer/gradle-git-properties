@@ -20,7 +20,9 @@ repositories {
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    compile 'org.ajoberstar:gradle-git:1.4.2'
+    compile 'org.ajoberstar:gradle-git:1.7.2'
+
+    testCompile 'junit:junit:4.12'
 }
 
 version = "1.4.20"
@@ -68,5 +70,5 @@ pluginBundle {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.2.1'
+    gradleVersion = '4.4.1'
 }
