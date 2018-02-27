@@ -25,7 +25,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-version = "1.4.20"
+version = "1.4.21"
 group = "com.gorylenko.gradle-git-properties"
 
 tasks.withType(GroovyCompile) {
