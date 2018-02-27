@@ -60,10 +60,11 @@ class GitPropertiesPlugin implements Plugin<Project> {
     }
 
     static class GenerateGitPropertiesTask extends DefaultTask {
+        private final File repositoryGitDir = new File(project.gitProperties.gitRepositoryRoot ?: project.rootProject.file('.'), ".git")
 
         @InputFiles
         public FileTree getSource() {
-            return project.files(new File(project.gitProperties.gitRepositoryRoot ?: project.rootProject.file('.'), ".git")).getAsFileTree()
+            return project.files(repositoryGitDir).getAsFileTree()
         }
 
         @OutputFile
@@ -77,7 +78,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
             def source = getSource()
             if (!project.gitProperties.failOnNoGitDirectory && source.empty)
                 return
-            def repo = Grgit.open(dir: source.head().parentFile)
+            def repo = Grgit.open(dir: repositoryGitDir)
             def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, DEFAULT_OUTPUT_DIR)
             def file = new File(dir, GIT_PROPERTIES_FILENAME)
             def keys = project.gitProperties.keys ?: KEY_ALL
