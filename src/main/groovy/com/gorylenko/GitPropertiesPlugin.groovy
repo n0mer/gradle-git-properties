@@ -22,8 +22,6 @@ class GitPropertiesPlugin implements Plugin<Project> {
     private static final String GIT_PROPERTIES_FILENAME = "git.properties"
     private static final String DEFAULT_OUTPUT_DIR = "resources/main"
 
-    private static final String CHARSET = "ISO-8859-1"
-
     private static final String KEY_GIT_BRANCH = "git.branch"
     private static final String KEY_GIT_COMMIT_ID = "git.commit.id"
     private static final String KEY_GIT_COMMIT_ID_ABBREVIATED = "git.commit.id.abbrev"
@@ -83,14 +81,6 @@ class GitPropertiesPlugin implements Plugin<Project> {
             def file = new File(dir, GIT_PROPERTIES_FILENAME)
             def keys = project.gitProperties.keys ?: KEY_ALL
 
-            if (!dir.exists()) {
-                dir.mkdirs()
-            }
-            if (file.exists()) {
-                assert file.delete()
-            }
-            assert file.createNewFile()
-            logger.info "writing to [${file}]"
             def map = [(KEY_GIT_BRANCH)                 : project.gitProperties.gitBranchName ?: repo.branch.current.name
                        , (KEY_GIT_COMMIT_ID)            : repo.head().id
                        , (KEY_GIT_COMMIT_ID_ABBREVIATED): repo.head().abbreviatedId
@@ -100,12 +90,13 @@ class GitPropertiesPlugin implements Plugin<Project> {
                        , (KEY_GIT_COMMIT_FULL_MESSAGE)  : repo.head().fullMessage
                        , (KEY_GIT_COMMIT_TIME)          : formatDate(repo.head().time, project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone)
                        , (KEY_GIT_COMMIT_ID_DESCRIBE)   : commitIdDescribe(repo, '-dirty')
-                       , (KEY_GIT_DIRTY)                : !repo.status().clean]
+                       , (KEY_GIT_DIRTY)                : Boolean.toString(!repo.status().clean)]
 
-            file.withWriter(CHARSET) { w ->
-                map.subMap(keys).each { key, value ->
-                    w.writeLine "$key=$value"
-                }
+            if (!project.gitProperties.force && hasSameContent(file, map.subMap(keys))) {
+                logger.info "Skipping writing [${file}] as it is up-to-date."
+            } else {
+                logger.info "Writing to [${file}]..."
+                writeToPropertiesFile(map.subMap(keys), file)
             }
         }
 
@@ -130,6 +121,35 @@ class GitPropertiesPlugin implements Plugin<Project> {
                 describe = repo.head().abbreviatedId + dirtyMark
             }
         }
+
+        private void writeToPropertiesFile(Map<String, String> properties, File propsFile) {
+            if (!propsFile.parentFile.exists()) {
+                propsFile.parentFile.mkdirs()
+            }
+            if (propsFile.exists()) {
+                propsFile.delete()
+            }
+            propsFile.createNewFile()
+            propsFile.withOutputStream {
+                def props = new Properties()
+                props.putAll(properties)
+                props.store(it, null)
+            }
+        }
+
+        private boolean hasSameContent(File propsFile, Map<String, String> properties) {
+            boolean sameContent = false
+            if (propsFile.exists()) {
+                def props = new Properties()
+                propsFile.withInputStream {
+                    props.load it
+                }
+                if (props.equals(properties)) {
+                    sameContent = true
+                }
+            }
+            return sameContent
+        }
     }
 }
 
@@ -141,4 +161,5 @@ class GitPropertiesPluginExtension {
     String dateFormat
     String dateFormatTimeZone
     boolean failOnNoGitDirectory = true
+    boolean force
 }
