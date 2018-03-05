@@ -81,7 +81,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
             def file = new File(dir, GIT_PROPERTIES_FILENAME)
             def keys = project.gitProperties.keys ?: KEY_ALL
 
-            def map = [(KEY_GIT_BRANCH)                 : project.gitProperties.gitBranchName ?: repo.branch.current.name
+            def map = [(KEY_GIT_BRANCH)                 : determineBranchName(repo)
                        , (KEY_GIT_COMMIT_ID)            : repo.head().id
                        , (KEY_GIT_COMMIT_ID_ABBREVIATED): repo.head().abbreviatedId
                        , (KEY_GIT_COMMIT_USER_NAME)     : repo.head().author.name
@@ -150,13 +150,31 @@ class GitPropertiesPlugin implements Plugin<Project> {
             }
             return sameContent
         }
+
+        private String determineBranchName(Grgit repo) {
+            String branchName = null
+            // Try to detect git branch from environment variables if executed by Hudson/Jenkins
+            // See https://github.com/ktoso/maven-git-commit-id-plugin/blob/master/src/main/java/pl/project13/maven/git/GitDataProvider.java#L170
+            Map<String, String> env = System.getenv()
+            if (env.containsKey("HUDSON_URL") || env.containsKey("JENKINS_URL") ||
+                    env.containsKey("HUDSON_HOME") || env.containsKey("JENKINS_HOME")) {
+                branchName = env.get("GIT_LOCAL_BRANCH")
+                if (!(branchName?.trim())) {
+                    branchName = env.get("GIT_BRANCH")
+                }
+            }
+            if (!(branchName?.trim())) {
+                branchName = repo.branch.current.name
+            }
+            return branchName
+        }
+
     }
 }
 
 class GitPropertiesPluginExtension {
     File gitPropertiesDir
     File gitRepositoryRoot
-    String gitBranchName
     List keys
     String dateFormat
     String dateFormatTimeZone
