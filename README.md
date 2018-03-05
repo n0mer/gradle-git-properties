@@ -38,14 +38,6 @@ gitProperties {
 
 > Please note that `spring-boot-actuator` expects `git.properties` to be available at certain location.
 
-In some situations, for example when you run your build under a CI tool that checks out your code in detached mode, and HEAD no longer points to a branch name, but your CI tool
-exposes the branch in an environment variable, you can explicitly set the branch name to be written into the `git.properties` file:
-```groovy
-gitProperties {
-    gitBranchName = System.getenv('BRANCH_NAME')
-}
-```
-
 This is enough to see git details via `info` endpoint of [spring-boot-actuator](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready).
 
 You can have more fine grained control of the content of 'git.properties':
