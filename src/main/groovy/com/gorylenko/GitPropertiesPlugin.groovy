@@ -81,26 +81,30 @@ class GitPropertiesPlugin implements Plugin<Project> {
             def file = new File(dir, GIT_PROPERTIES_FILENAME)
             def keys = project.gitProperties.keys ?: KEY_ALL
 
-            def map = [(KEY_GIT_BRANCH)                 : determineBranchName(repo)
-                       , (KEY_GIT_COMMIT_ID)            : repo.head().id
-                       , (KEY_GIT_COMMIT_ID_ABBREVIATED): repo.head().abbreviatedId
-                       , (KEY_GIT_COMMIT_USER_NAME)     : repo.head().author.name
-                       , (KEY_GIT_COMMIT_USER_EMAIL)    : repo.head().author.email
-                       , (KEY_GIT_COMMIT_SHORT_MESSAGE) : repo.head().shortMessage
-                       , (KEY_GIT_COMMIT_FULL_MESSAGE)  : repo.head().fullMessage
-                       , (KEY_GIT_COMMIT_TIME)          : formatDate(repo.head().time, project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone)
-                       , (KEY_GIT_COMMIT_ID_DESCRIBE)   : commitIdDescribe(repo, '-dirty')
-                       , (KEY_GIT_DIRTY)                : Boolean.toString(!repo.status().clean)]
+            def map = [(KEY_GIT_BRANCH)                 : { determineBranchName(repo) }
+                       , (KEY_GIT_COMMIT_ID)            : { repo.head().id }
+                       , (KEY_GIT_COMMIT_ID_ABBREVIATED): { repo.head().abbreviatedId }
+                       , (KEY_GIT_COMMIT_USER_NAME)     : { repo.head().author.name }
+                       , (KEY_GIT_COMMIT_USER_EMAIL)    : { repo.head().author.email }
+                       , (KEY_GIT_COMMIT_SHORT_MESSAGE) : { repo.head().shortMessage }
+                       , (KEY_GIT_COMMIT_FULL_MESSAGE)  : { repo.head().fullMessage }
+                       , (KEY_GIT_COMMIT_TIME)          : { formatDate(repo.head().time, project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone) }
+                       , (KEY_GIT_COMMIT_ID_DESCRIBE)   : { commitIdDescribe(repo, '-dirty') }
+                       , (KEY_GIT_DIRTY)                : { !repo.status().clean }]
 
-            if (!project.gitProperties.force && hasSameContent(file, map.subMap(keys))) {
+            def newMap = new HashMap<String, String>()
+            map.subMap(keys).each{ k, v -> newMap.put(k, v.call().toString() ) }
+            project.gitProperties.customProperties.each{ k, v -> newMap.put(k, v instanceof Closure ? v.call(repo).toString() : v.toString() ) }
+
+            if (!project.gitProperties.force && hasSameContent(file, newMap)) {
                 logger.info "Skipping writing [${file}] as it is up-to-date."
             } else {
                 logger.info "Writing to [${file}]..."
-                writeToPropertiesFile(map.subMap(keys), file)
+                writeToPropertiesFile(newMap, file)
             }
         }
 
-        private String formatDate(long timestamp, String dateFormat, String timezone) {
+        String formatDate(long timestamp, String dateFormat, String timezone) {
             String date
             if (dateFormat) {
                 def sdf = new SimpleDateFormat(dateFormat)
@@ -113,7 +117,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
             }
         }
 
-        private String commitIdDescribe(Grgit repo, String dirtyMark) {
+        String commitIdDescribe(Grgit repo, String dirtyMark) {
             String describe
             if (repo.status().clean) {
                 describe = repo.head().abbreviatedId
@@ -151,7 +155,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
             return sameContent
         }
 
-        private String determineBranchName(Grgit repo) {
+        String determineBranchName(Grgit repo) {
             String branchName = null
             // Try to detect git branch from environment variables if executed by Hudson/Jenkins
             // See https://github.com/ktoso/maven-git-commit-id-plugin/blob/master/src/main/java/pl/project13/maven/git/GitDataProvider.java#L170
@@ -176,8 +180,13 @@ class GitPropertiesPluginExtension {
     File gitPropertiesDir
     File gitRepositoryRoot
     List keys
+    Map<String, Object> customProperties = new HashMap<String, Object>()
     String dateFormat
     String dateFormatTimeZone
     boolean failOnNoGitDirectory = true
     boolean force
+
+    void customProperty(String name, Object value) {
+        customProperties.put(name, value)
+    }
 }
