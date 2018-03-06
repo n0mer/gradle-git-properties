@@ -48,6 +48,15 @@ gitProperties {
 ```
 All available keys can be found in the [source](https://github.com/n0mer/gradle-git-properties/blob/master/src/main/groovy/com/gorylenko/GitPropertiesPlugin.groovy).
 
+Custom properties can be added using customProperty method (it supports both expressions and closures):
+```groovy
+gitProperties {
+    customProperty 'greeting', 'Hello' // expression
+    customProperty 'my_custom_git_id', { it.head().id } // closure, 'it' is an instance of org.ajoberstar.grgit.Grgit
+    customProperty 'project_version', { project.version } // closure
+}
+```
+
 In order to see all attributes, you can set the "management.info.git.mode" property to "full" per [the Spring Boot documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html#production-ready-application-info-git), e.g. in application.properties:
 
 `management.info.git.mode=full`
