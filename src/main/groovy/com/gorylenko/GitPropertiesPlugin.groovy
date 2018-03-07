@@ -38,7 +38,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
             KEY_GIT_COMMIT_ID, KEY_GIT_COMMIT_ID_ABBREVIATED,
             KEY_GIT_COMMIT_USER_NAME, KEY_GIT_COMMIT_USER_EMAIL,
             KEY_GIT_COMMIT_SHORT_MESSAGE, KEY_GIT_COMMIT_FULL_MESSAGE,
-            KEY_GIT_COMMIT_TIME, KEY_GIT_COMMIT_ID_DESCRIBE,
+            KEY_GIT_COMMIT_ID_DESCRIBE,
             KEY_GIT_COMMIT_TIME, KEY_GIT_DIRTY
     ]
 
@@ -79,7 +79,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
             def repo = Grgit.open(dir: repositoryGitDir)
             def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, DEFAULT_OUTPUT_DIR)
             def file = new File(dir, GIT_PROPERTIES_FILENAME)
-            def keys = project.gitProperties.keys ?: KEY_ALL
+            def keys = project.gitProperties.keys
 
             def map = [(KEY_GIT_BRANCH)                 : { determineBranchName(repo) }
                        , (KEY_GIT_COMMIT_ID)            : { repo.head().id }
@@ -179,7 +179,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
 class GitPropertiesPluginExtension {
     File gitPropertiesDir
     File gitRepositoryRoot
-    List keys
+    List keys = GitPropertiesPlugin.KEY_ALL.toList()
     Map<String, Object> customProperties = new HashMap<String, Object>()
     String dateFormat
     String dateFormatTimeZone
