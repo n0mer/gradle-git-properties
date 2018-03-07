@@ -40,7 +40,7 @@ gitProperties {
 
 This is enough to see git details via `info` endpoint of [spring-boot-actuator](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready).
 
-You can have more fine grained control of the content of 'git.properties':
+By default, all available git properties (which are supported by the plugin) will be generated. You can have more fine grained control of the content of 'git.properties':
 ```groovy
 gitProperties {
     keys = ['git.branch','git.commit.id','git.commit.time']
