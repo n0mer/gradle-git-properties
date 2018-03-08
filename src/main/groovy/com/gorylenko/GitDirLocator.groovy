@@ -12,7 +12,6 @@ import java.io.FileNotFoundException
 import java.io.FileReader
 import java.io.IOException
 
-import org.eclipse.jgit.lib.Constants
 import org.gradle.api.Project
 
 /**
@@ -64,7 +63,7 @@ class GitDirLocator {
         File basedir = project.getProjectDir()
 
         while (basedir != null) {
-            File gitdir = new File(basedir, Constants.DOT_GIT)
+            File gitdir = new File(basedir, ".git")
 
             if (gitdir.exists()) {
                 if (gitdir.isDirectory()) {
