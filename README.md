@@ -63,6 +63,9 @@ In order to see all attributes, you can set the "management.info.git.mode" prope
 
 Plugin is available from [Gradle Plugins repository](https://plugins.gradle.org/plugin/com.gorylenko.gradle-git-properties).
 
+## notes
+* Plugin requires Java 8+
+
 ## result
 
 This is raw `JSON` from `info` endpoint:
