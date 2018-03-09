@@ -58,7 +58,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
     }
 
     static class GenerateGitPropertiesTask extends DefaultTask {
-        private final File repositoryGitDir = new File(project.gitProperties.gitRepositoryRoot ?: project.rootProject.file('.'), ".git")
+        private final File repositoryGitDir = getDotGitDir(project)
 
         @InputFiles
         public FileTree getSource() {
@@ -102,6 +102,20 @@ class GitPropertiesPlugin implements Plugin<Project> {
                 logger.info "Writing to [${file}]..."
                 writeToPropertiesFile(newMap, file)
             }
+        }
+
+        File getDotGitDir(Project project) {
+
+            File gitRepositoryRoot = project.gitProperties.gitRepositoryRoot
+
+            // Legacy behavior (gitPropertiesDir pointing to parent folder of .git)
+            if (gitRepositoryRoot != null && gitRepositoryRoot.exists() && (new File(gitRepositoryRoot, '.git')).exists()) {
+                gitRepositoryRoot = new File(gitRepositoryRoot, '.git')
+            }
+
+            File result = new GitDirLocator(project).lookupGitDirectory(gitRepositoryRoot)
+
+            return result
         }
 
         String formatDate(long timestamp, String dateFormat, String timezone) {
