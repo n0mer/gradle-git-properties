@@ -20,7 +20,7 @@ repositories {
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    compile 'org.ajoberstar:gradle-git:1.7.2'
+    compile 'org.ajoberstar:grgit:2.1.1'
 
     testCompile 'junit:junit:4.12'
 }
