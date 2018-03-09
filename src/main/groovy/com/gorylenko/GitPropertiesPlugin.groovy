@@ -58,11 +58,11 @@ class GitPropertiesPlugin implements Plugin<Project> {
     }
 
     static class GenerateGitPropertiesTask extends DefaultTask {
-        private final File repositoryGitDir = getDotGitDir(project)
+        private final File dotGitDirectory = getDotGitDirectory(project)
 
         @InputFiles
         public FileTree getSource() {
-            return project.files(repositoryGitDir).getAsFileTree()
+            return (dotGitDirectory == null) ? project.files().asFileTree : project.files(dotGitDirectory).asFileTree
         }
 
         @OutputFile
@@ -76,7 +76,8 @@ class GitPropertiesPlugin implements Plugin<Project> {
             def source = getSource()
             if (!project.gitProperties.failOnNoGitDirectory && source.empty)
                 return
-            def repo = Grgit.open(dir: repositoryGitDir)
+            logger.info "dotGitDirectory = [${dotGitDirectory.absolutePath}]"
+            def repo = Grgit.open(dir: dotGitDirectory)
             def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, DEFAULT_OUTPUT_DIR)
             def file = new File(dir, GIT_PROPERTIES_FILENAME)
             def keys = project.gitProperties.keys
@@ -104,18 +105,8 @@ class GitPropertiesPlugin implements Plugin<Project> {
             }
         }
 
-        File getDotGitDir(Project project) {
-
-            File gitRepositoryRoot = project.gitProperties.gitRepositoryRoot
-
-            // Legacy behavior (gitPropertiesDir pointing to parent folder of .git)
-            if (gitRepositoryRoot != null && gitRepositoryRoot.exists() && (new File(gitRepositoryRoot, '.git')).exists()) {
-                gitRepositoryRoot = new File(gitRepositoryRoot, '.git')
-            }
-
-            File result = new GitDirLocator(project).lookupGitDirectory(gitRepositoryRoot)
-
-            return result
+        File getDotGitDirectory(Project project) {
+            return new GitDirLocator(project).lookupGitDirectory(project.gitProperties.dotGitDirectory)
         }
 
         String formatDate(long timestamp, String dateFormat, String timezone) {
@@ -192,7 +183,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
 
 class GitPropertiesPluginExtension {
     File gitPropertiesDir
-    File gitRepositoryRoot
+    File dotGitDirectory
     List keys = GitPropertiesPlugin.KEY_ALL.toList()
     Map<String, Object> customProperties = new HashMap<String, Object>()
     String dateFormat

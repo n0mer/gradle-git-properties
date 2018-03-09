@@ -66,7 +66,7 @@ class GitDirLocator {
             File gitdir = new File(basedir, ".git")
 
             if (gitdir.exists()) {
-                if (gitdir.isDirectory()) {
+                if (gitdir.isDirectory() && new File(gitdir, "objects").exists()) {
                     return gitdir
                 } else if (gitdir.isFile()) {
                     return processGitDirFile(gitdir)

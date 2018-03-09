@@ -18,7 +18,7 @@ class GitPropertiesPluginTests {
         project.pluginManager.apply 'com.gorylenko.gradle-git-properties'
 
         // FIXME: Didn't find any way to change `rootProject`, so just set the property.
-        project.gitProperties.gitRepositoryRoot = projectDir
+        project.gitProperties.dotGitDirectory = projectDir
 
         def task = project.tasks.generateGitProperties
         assertTrue(task instanceof GitPropertiesPlugin.GenerateGitPropertiesTask)
@@ -50,7 +50,7 @@ class GitPropertiesPluginTests {
         project.pluginManager.apply 'com.gorylenko.gradle-git-properties'
 
         // FIXME: Didn't find any way to change `rootProject`, so just set the property.
-        project.gitProperties.gitRepositoryRoot = projectDir
+        project.gitProperties.dotGitDirectory = projectDir
         project.gitProperties.failOnNoGitDirectory = false;
 
         def task = project.tasks.generateGitProperties
@@ -71,7 +71,7 @@ class GitPropertiesPluginTests {
         project.pluginManager.apply 'com.gorylenko.gradle-git-properties'
 
         // FIXME: Didn't find any way to change `rootProject`, so just set the property.
-        project.gitProperties.gitRepositoryRoot = projectDir
+        project.gitProperties.dotGitDirectory = projectDir
         // failOnNoGitDirectory is true by default
 
         def task = project.tasks.generateGitProperties

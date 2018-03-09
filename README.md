@@ -29,10 +29,10 @@ gitProperties {
 }
 ```
 
-If project root dir is not the same git repo root dir, it can be overridden like so.
+If .git directory for the project cannot be found by plugin, it can be specified manually
 ```groovy
 gitProperties {
-    gitRepositoryRoot = new File("${project.rootDir}/../..")
+    dotGitDirectory = new File("${project.rootDir}/../../.git")
 }
 ```
 
