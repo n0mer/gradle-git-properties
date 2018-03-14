@@ -62,7 +62,7 @@ class PropertiesFileWriterTest {
         }
         long lastModified = file.lastModified()
 
-        // Try to write to same file with same content
+        // Try to write to same file with different content
         writer.write([greeting: 'Hello2'], file, false)
 
         // Make sure the file lastModified changed
