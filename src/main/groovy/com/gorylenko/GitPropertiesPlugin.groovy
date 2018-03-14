@@ -108,7 +108,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
         }
 
         File getDotGitDirectory(Project project) {
-            return new GitDirLocator(project).lookupGitDirectory(project.gitProperties.dotGitDirectory)
+            return new GitDirLocator(project.projectDir).lookupGitDirectory(project.gitProperties.dotGitDirectory)
         }
 
     }

@@ -20,10 +20,10 @@ import org.gradle.api.Project
  */
 class GitDirLocator {
 
-    private Project project
+    private File projectBasedir
 
-    public GitDirLocator(Project project) {
-        this.project = project
+    public GitDirLocator(File projectBasedir) {
+        this.projectBasedir = projectBasedir
     }
 
     public File lookupGitDirectory(File manuallyConfiguredDir) {
@@ -56,11 +56,11 @@ class GitDirLocator {
      *         none found.
      */
     private File findProjectGitDirectory() {
-        if (this.project == null) {
+        if (projectBasedir == null) {
             return null
         }
 
-        File basedir = project.getProjectDir()
+        File basedir = projectBasedir
 
         while (basedir != null) {
             File gitdir = new File(basedir, ".git")
