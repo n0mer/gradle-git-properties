@@ -58,11 +58,11 @@ class GitPropertiesPlugin implements Plugin<Project> {
     }
 
     static class GenerateGitPropertiesTask extends DefaultTask {
-        private final File repositoryGitDir = getDotGitDir(project)
+        private final File dotGitDirectory = getDotGitDirectory(project)
 
         @InputFiles
         public FileTree getSource() {
-            return project.files(repositoryGitDir).getAsFileTree()
+            return (dotGitDirectory == null) ? project.files().asFileTree : project.files(dotGitDirectory).asFileTree
         }
 
         @OutputFile
@@ -76,115 +76,39 @@ class GitPropertiesPlugin implements Plugin<Project> {
             def source = getSource()
             if (!project.gitProperties.failOnNoGitDirectory && source.empty)
                 return
-            def repo = Grgit.open(dir: repositoryGitDir)
+            logger.info "dotGitDirectory = [${dotGitDirectory.absolutePath}]"
+            def repo = Grgit.open(dir: dotGitDirectory)
             def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, DEFAULT_OUTPUT_DIR)
             def file = new File(dir, GIT_PROPERTIES_FILENAME)
             def keys = project.gitProperties.keys
 
-            def map = [(KEY_GIT_BRANCH)                 : { determineBranchName(repo) }
+            def map = [(KEY_GIT_BRANCH)                 : new BranchProperty()
                        , (KEY_GIT_COMMIT_ID)            : { repo.head().id }
                        , (KEY_GIT_COMMIT_ID_ABBREVIATED): { repo.head().abbreviatedId }
                        , (KEY_GIT_COMMIT_USER_NAME)     : { repo.head().author.name }
                        , (KEY_GIT_COMMIT_USER_EMAIL)    : { repo.head().author.email }
                        , (KEY_GIT_COMMIT_SHORT_MESSAGE) : { repo.head().shortMessage }
                        , (KEY_GIT_COMMIT_FULL_MESSAGE)  : { repo.head().fullMessage }
-                       , (KEY_GIT_COMMIT_TIME)          : { formatDate(repo.head().time, project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone) }
-                       , (KEY_GIT_COMMIT_ID_DESCRIBE)   : { commitIdDescribe(repo, '-dirty') }
+                       , (KEY_GIT_COMMIT_TIME)          : new CommitTimeProperty(project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone)
+                       , (KEY_GIT_COMMIT_ID_DESCRIBE)   : new CommitIdDescribeProperty()
                        , (KEY_GIT_DIRTY)                : { !repo.status().clean }]
 
             def newMap = new HashMap<String, String>()
-            map.subMap(keys).each{ k, v -> newMap.put(k, v.call().toString() ) }
+            map.subMap(keys).each{ k, v -> newMap.put(k, v.call(repo).toString() ) }
             project.gitProperties.customProperties.each{ k, v -> newMap.put(k, v instanceof Closure ? v.call(repo).toString() : v.toString() ) }
 
-            if (!project.gitProperties.force && hasSameContent(file, newMap)) {
-                logger.info "Skipping writing [${file}] as it is up-to-date."
+            // Writing to properties file
+            boolean written = new PropertiesFileWriter().write(newMap, file, project.gitProperties.force)
+            if (written) {
+                logger.info("Written to [${file}]...")
             } else {
-                logger.info "Writing to [${file}]..."
-                writeToPropertiesFile(newMap, file)
+                logger.info("Skip writing [${file}] as it is up-to-date.")
             }
+
         }
 
-        File getDotGitDir(Project project) {
-
-            File gitRepositoryRoot = project.gitProperties.gitRepositoryRoot
-
-            // Legacy behavior (gitPropertiesDir pointing to parent folder of .git)
-            if (gitRepositoryRoot != null && gitRepositoryRoot.exists() && (new File(gitRepositoryRoot, '.git')).exists()) {
-                gitRepositoryRoot = new File(gitRepositoryRoot, '.git')
-            }
-
-            File result = new GitDirLocator(project).lookupGitDirectory(gitRepositoryRoot)
-
-            return result
-        }
-
-        String formatDate(long timestamp, String dateFormat, String timezone) {
-            String date
-            if (dateFormat) {
-                def sdf = new SimpleDateFormat(dateFormat)
-                if (timezone) {
-                    sdf.setTimeZone(TimeZone.getTimeZone(timezone))
-                }
-                date = sdf.format(new Date(timestamp * 1000L))
-            } else {
-                date = timestamp.toString()
-            }
-        }
-
-        String commitIdDescribe(Grgit repo, String dirtyMark) {
-            String describe
-            if (repo.status().clean) {
-                describe = repo.head().abbreviatedId
-            } else {
-                describe = repo.head().abbreviatedId + dirtyMark
-            }
-        }
-
-        private void writeToPropertiesFile(Map<String, String> properties, File propsFile) {
-            if (!propsFile.parentFile.exists()) {
-                propsFile.parentFile.mkdirs()
-            }
-            if (propsFile.exists()) {
-                propsFile.delete()
-            }
-            propsFile.createNewFile()
-            propsFile.withOutputStream {
-                def props = new Properties()
-                props.putAll(properties)
-                props.store(it, null)
-            }
-        }
-
-        private boolean hasSameContent(File propsFile, Map<String, String> properties) {
-            boolean sameContent = false
-            if (propsFile.exists()) {
-                def props = new Properties()
-                propsFile.withInputStream {
-                    props.load it
-                }
-                if (props.equals(properties)) {
-                    sameContent = true
-                }
-            }
-            return sameContent
-        }
-
-        String determineBranchName(Grgit repo) {
-            String branchName = null
-            // Try to detect git branch from environment variables if executed by Hudson/Jenkins
-            // See https://github.com/ktoso/maven-git-commit-id-plugin/blob/master/src/main/java/pl/project13/maven/git/GitDataProvider.java#L170
-            Map<String, String> env = System.getenv()
-            if (env.containsKey("HUDSON_URL") || env.containsKey("JENKINS_URL") ||
-                    env.containsKey("HUDSON_HOME") || env.containsKey("JENKINS_HOME")) {
-                branchName = env.get("GIT_LOCAL_BRANCH")
-                if (!(branchName?.trim())) {
-                    branchName = env.get("GIT_BRANCH")
-                }
-            }
-            if (!(branchName?.trim())) {
-                branchName = repo.branch.current.name
-            }
-            return branchName
+        File getDotGitDirectory(Project project) {
+            return new GitDirLocator(project.projectDir).lookupGitDirectory(project.gitProperties.dotGitDirectory)
         }
 
     }
@@ -192,7 +116,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
 
 class GitPropertiesPluginExtension {
     File gitPropertiesDir
-    File gitRepositoryRoot
+    File dotGitDirectory
     List keys = GitPropertiesPlugin.KEY_ALL.toList()
     Map<String, Object> customProperties = new HashMap<String, Object>()
     String dateFormat
