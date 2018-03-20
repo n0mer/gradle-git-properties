@@ -31,6 +31,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
     private static final String KEY_GIT_COMMIT_FULL_MESSAGE = "git.commit.message.full"
     private static final String KEY_GIT_COMMIT_TIME = "git.commit.time"
     private static final String KEY_GIT_COMMIT_ID_DESCRIBE = "git.commit.id.describe"
+    private static final String KEY_GIT_TAGS = "git.tags"
     private static final String KEY_GIT_DIRTY = "git.dirty"
 
     private static final String[] KEY_ALL = [
@@ -39,7 +40,9 @@ class GitPropertiesPlugin implements Plugin<Project> {
             KEY_GIT_COMMIT_USER_NAME, KEY_GIT_COMMIT_USER_EMAIL,
             KEY_GIT_COMMIT_SHORT_MESSAGE, KEY_GIT_COMMIT_FULL_MESSAGE,
             KEY_GIT_COMMIT_ID_DESCRIBE,
-            KEY_GIT_COMMIT_TIME, KEY_GIT_DIRTY
+            KEY_GIT_COMMIT_TIME,
+            KEY_GIT_TAGS,
+            KEY_GIT_DIRTY
     ]
 
     @Override
@@ -91,6 +94,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
                        , (KEY_GIT_COMMIT_FULL_MESSAGE)  : { repo.head().fullMessage }
                        , (KEY_GIT_COMMIT_TIME)          : new CommitTimeProperty(project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone)
                        , (KEY_GIT_COMMIT_ID_DESCRIBE)   : new CommitIdDescribeProperty()
+                       , (KEY_GIT_TAGS)                 : new TagsProperty()
                        , (KEY_GIT_DIRTY)                : { !repo.status().clean }]
 
             def newMap = new HashMap<String, String>()
