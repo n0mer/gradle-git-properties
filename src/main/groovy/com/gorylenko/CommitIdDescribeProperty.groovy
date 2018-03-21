@@ -13,12 +13,12 @@ class CommitIdDescribeProperty extends Closure<String>{
     }
 
     private String commitIdDescribe(Grgit repo, String dirtyMark) {
-        String describe
-        if (repo.status().clean) {
-            describe = repo.head().abbreviatedId
-        } else {
-            describe = repo.head().abbreviatedId + dirtyMark
+
+        String describe = repo.describe()
+        if (describe && !repo.status().clean) {
+            describe += dirtyMark
         }
+        return describe ?: ''
     }
 
 }
