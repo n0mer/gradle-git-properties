@@ -11,16 +11,12 @@ class BranchProperty extends Closure<String> {
     String doCall(Grgit repo) {
         String branchName = null
         // Try to detect git branch from environment variables if executed by Hudson/Jenkins
-        // See https://github.com/ktoso/maven-git-commit-id-plugin/blob/master/src/main/java/pl/project13/maven/git/GitDataProvider.java#L170
-        Map<String, String> env = System.getenv()
-        if (env.containsKey("HUDSON_URL") || env.containsKey("JENKINS_URL") ||
-                env.containsKey("HUDSON_HOME") || env.containsKey("JENKINS_HOME")) {
-            branchName = env.get("GIT_LOCAL_BRANCH")
-            if (!(branchName?.trim())) {
-                branchName = env.get("GIT_BRANCH")
-            }
+        // See https://wiki.jenkins.io/display/JENKINS/Git+Plugin
+        def env = System.getenv()
+        if (env.containsKey('JOB_NAME')) {
+            branchName = env["GIT_LOCAL_BRANCH"] ?: env["GIT_BRANCH"]
         }
-        if (!(branchName?.trim())) {
+        if (!branchName) {
             branchName = repo.branch.current.name
         }
         return branchName

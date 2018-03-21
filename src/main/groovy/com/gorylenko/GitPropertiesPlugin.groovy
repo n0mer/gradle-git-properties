@@ -101,6 +101,9 @@ class GitPropertiesPlugin implements Plugin<Project> {
             map.subMap(keys).each{ k, v -> newMap.put(k, v.call(repo).toString() ) }
             project.gitProperties.customProperties.each{ k, v -> newMap.put(k, v instanceof Closure ? v.call(repo).toString() : v.toString() ) }
 
+            // Close Grgit to avoid issues with Gradle daemon
+            repo.close()
+
             // Writing to properties file
             boolean written = new PropertiesFileWriter().write(newMap, file, project.gitProperties.force)
             if (written) {
