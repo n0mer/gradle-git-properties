@@ -42,7 +42,6 @@ class CommitIdDescribePropertyTest {
         assertEquals('', new CommitIdDescribeProperty().doCall(repo))
     }
 
-
     @Test
     public void testDoCallOnNoTagAndDirty() {
         new File(projectDir, 'hello2.txt').text = 'Hello 2'
@@ -72,7 +71,6 @@ class CommitIdDescribePropertyTest {
 
         assertEquals("TAGONE-dirty", new CommitIdDescribeProperty().doCall(repo))
     }
-
 
     @Test
     public void testDoCallOneTagOneCommit() {
