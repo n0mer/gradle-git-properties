@@ -37,16 +37,63 @@ class CommitIdDescribePropertyTest {
     }
 
     @Test
-    public void testDoCall() {
+    public void testDoCallNoTag() {
 
-        assertEquals(firstCommit.abbreviatedId, new CommitIdDescribeProperty().doCall(repo))
+        assertEquals('', new CommitIdDescribeProperty().doCall(repo))
     }
 
-
     @Test
-    public void testDoCallOnDirty() {
+    public void testDoCallOnNoTagAndDirty() {
         new File(projectDir, 'hello2.txt').text = 'Hello 2'
 
-        assertEquals(firstCommit.abbreviatedId + '-dirty', new CommitIdDescribeProperty().doCall(repo))
+        assertEquals('', new CommitIdDescribeProperty().doCall(repo))
+    }
+
+    @Test
+    public void testDoCallOneTag() {
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            // add TAGONE to firstCommit (current HEAD)
+            gitRepoBuilder.addTag("TAGONE")
+        })
+
+        assertEquals("TAGONE", new CommitIdDescribeProperty().doCall(repo))
+    }
+
+    @Test
+    public void testDoCallOneTagDirty() {
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            // add TAGONE to firstCommit (current HEAD)
+            gitRepoBuilder.addTag("TAGONE")
+            new File(projectDir, 'hello2.txt').text = 'Hello 2'
+        })
+
+        assertEquals("TAGONE-dirty", new CommitIdDescribeProperty().doCall(repo))
+    }
+
+    @Test
+    public void testDoCallOneTagOneCommit() {
+        Commit secondCommit
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            // add TAGONE to firstCommit (current HEAD)
+            gitRepoBuilder.addTag("TAGONE")
+            secondCommit = gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+
+        assertEquals("TAGONE-1-g" + secondCommit.abbreviatedId, new CommitIdDescribeProperty().doCall(repo))
+    }
+
+    @Test
+    public void testDoCallOneTagOneCommitDirty() {
+        Commit secondCommit
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            // add TAGONE to firstCommit (current HEAD)
+            gitRepoBuilder.addTag("TAGONE")
+            secondCommit = gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+            new File(projectDir, 'hello2.txt').text = 'Hello 2'
+        })
+
+        assertEquals("TAGONE-1-g" + secondCommit.abbreviatedId + "-dirty", new CommitIdDescribeProperty().doCall(repo))
     }
 }
