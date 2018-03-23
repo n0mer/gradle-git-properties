@@ -3,6 +3,7 @@ package com.gorylenko
 import java.text.SimpleDateFormat
 
 import org.ajoberstar.grgit.Grgit
+import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -60,12 +61,22 @@ class GitPropertiesPlugin implements Plugin<Project> {
     }
 
     private static void ensureTaskRunsOnJavaClassesTask(Project project, Task task) {
-        project.plugins.apply JavaPlugin
-        project.getTasks().getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn(task)
+        // if Java plugin is applied, execute this task automatically when "classes" task is executed
+        // see https://guides.gradle.org/implementing-gradle-plugins/#reacting_to_plugins
+        project.getPlugins().withType(JavaPlugin.class, new Action<JavaPlugin>() {
+            public void execute(JavaPlugin javaPlugin) {
+                project.getTasks().getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn(task)
+            }
+        })
     }
 
     static class GenerateGitPropertiesTask extends DefaultTask {
         private final File dotGitDirectory = getDotGitDirectory(project)
+
+        GenerateGitPropertiesTask() {
+            // Description for the task
+            description = 'Generate a git.properties file.'
+        }
 
         @InputFiles
         public FileTree getSource() {
