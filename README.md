@@ -46,7 +46,7 @@ gitProperties {
     keys = ['git.branch','git.commit.id','git.commit.time']
 }
 ```
-All available keys can be found in the [source](https://github.com/n0mer/gradle-git-properties/blob/master/src/main/groovy/com/gorylenko/GitPropertiesPlugin.groovy).
+All available keys can be found in the [source](src/main/groovy/com/gorylenko/GitPropertiesPlugin.groovy).
 
 Custom properties can be added using customProperty method (it supports both expressions and closures):
 ```groovy
