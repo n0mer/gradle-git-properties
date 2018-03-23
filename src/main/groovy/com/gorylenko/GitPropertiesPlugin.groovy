@@ -33,6 +33,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
     private static final String KEY_GIT_COMMIT_ID_DESCRIBE = "git.commit.id.describe"
     private static final String KEY_GIT_REMOTE_ORIGIN_URL = "git.remote.origin.url"
     private static final String KEY_GIT_TAGS = "git.tags"
+    private static final String KEY_GIT_CLOSEST_TAG_NAME = "git.closest.tag.name"
     private static final String KEY_GIT_DIRTY = "git.dirty"
 
     private static final String[] KEY_ALL = [
@@ -44,6 +45,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
             KEY_GIT_COMMIT_TIME,
             KEY_GIT_REMOTE_ORIGIN_URL,
             KEY_GIT_TAGS,
+            KEY_GIT_CLOSEST_TAG_NAME,
             KEY_GIT_DIRTY
     ]
 
@@ -98,6 +100,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
                        , (KEY_GIT_COMMIT_ID_DESCRIBE)   : new CommitIdDescribeProperty()
                        , (KEY_GIT_REMOTE_ORIGIN_URL)    : new RemoteOriginUrlProperty()
                        , (KEY_GIT_TAGS)                 : new TagsProperty()
+                       , (KEY_GIT_CLOSEST_TAG_NAME)     : new ClosestTagNameProperty()
                        , (KEY_GIT_DIRTY)                : { !repo.status().clean }]
 
             def newMap = new HashMap<String, String>()
