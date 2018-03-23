@@ -40,6 +40,7 @@ class GitPropertiesPluginTests {
         assertNotNull(properties.getProperty("git.commit.id.describe"))
         assertNotNull(properties.getProperty("git.remote.origin.url"))
         assertNotNull(properties.getProperty("git.tags"))
+        assertNotNull(properties.getProperty("git.closest.tag.name"))
         assertNotNull(properties.getProperty("git.dirty"))
     }
 
