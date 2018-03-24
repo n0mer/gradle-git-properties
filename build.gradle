@@ -6,10 +6,12 @@ buildscript {
     }
     dependencies {
         classpath "com.gradle.publish:plugin-publish-plugin:0.9.9"
+        classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:1.4.21"
     }
 }
 
 apply plugin: "com.gradle.plugin-publish"
+apply plugin: "com.gorylenko.gradle-git-properties"
 apply plugin: 'maven-publish'
 apply plugin: 'groovy'
 
@@ -27,6 +29,12 @@ dependencies {
 
 version = "1.5.0"
 group = "com.gorylenko.gradle-git-properties"
+
+gitProperties {
+    keys = ['git.branch','git.commit.id','git.commit.time']
+    dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+    dateFormatTimeZone = "PST"
+}
 
 tasks.withType(GroovyCompile) {
     targetCompatibility = JavaVersion.VERSION_1_8
