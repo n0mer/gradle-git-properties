@@ -1,6 +1,7 @@
 package com.gorylenko
 
 import java.text.SimpleDateFormat
+import java.time.Instant
 import org.ajoberstar.grgit.Grgit
 
 class CommitTimeProperty extends Closure<String>{
@@ -14,19 +15,19 @@ class CommitTimeProperty extends Closure<String>{
     }
 
     String doCall(Grgit repo) {
-        return formatDate(repo.head().time, dateFormat, timezone)
+        return formatDate(repo.head().dateTime.toInstant(), dateFormat, timezone)
     }
 
-    private String formatDate(long timestamp, String dateFormat, String timezone) {
+    private String formatDate(Instant instant, String dateFormat, String timezone) {
         String date
         if (dateFormat) {
             def sdf = new SimpleDateFormat(dateFormat)
             if (timezone) {
                 sdf.setTimeZone(TimeZone.getTimeZone(timezone))
             }
-            date = sdf.format(new Date(timestamp * 1000L))
+            date = sdf.format(Date.from(instant))
         } else {
-            date = timestamp.toString()
+            date = instant.epochSecond
         }
     }
 
