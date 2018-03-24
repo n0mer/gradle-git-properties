@@ -39,6 +39,10 @@ class GitRepositoryBuilder implements AutoCloseable {
         grgit.tag.add (name: name)
     }
 
+    void addBranchAndCheckout(String name) {
+        grgit.checkout(branch: name, createBranch: true)
+    }
+
     void setConfigString(final String section, final String subsection, final String name, final String value) {
         grgit.repository.jgit.repository.config.setString(section, subsection, name, value)
         grgit.repository.jgit.repository.config.save()
