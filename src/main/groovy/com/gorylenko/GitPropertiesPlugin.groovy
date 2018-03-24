@@ -39,7 +39,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
     private static final String KEY_GIT_TOTAL_COMMIT_COUNT = "git.total.commit.count"
     private static final String KEY_GIT_DIRTY = "git.dirty"
 
-    private static final String[] KEY_ALL = [
+    public static final String[] KEY_ALL = [
             KEY_GIT_BRANCH,
             KEY_GIT_COMMIT_ID, KEY_GIT_COMMIT_ID_ABBREVIATED,
             KEY_GIT_COMMIT_USER_NAME, KEY_GIT_COMMIT_USER_EMAIL,
@@ -75,7 +75,6 @@ class GitPropertiesPlugin implements Plugin<Project> {
     }
 
     static class GenerateGitPropertiesTask extends DefaultTask {
-        private final File dotGitDirectory = getDotGitDirectory(project)
 
         GenerateGitPropertiesTask() {
             // Description for the task
@@ -84,6 +83,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
 
         @InputFiles
         public FileTree getSource() {
+            File dotGitDirectory = getDotGitDirectory(project)
             return (dotGitDirectory == null) ? project.files().asFileTree : project.files(dotGitDirectory).asFileTree
         }
 
@@ -98,6 +98,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
             def source = getSource()
             if (!project.gitProperties.failOnNoGitDirectory && source.empty)
                 return
+            File dotGitDirectory = getDotGitDirectory(project)
             logger.info "dotGitDirectory = [${dotGitDirectory.absolutePath}]"
             def repo = Grgit.open(dir: dotGitDirectory)
             def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, DEFAULT_OUTPUT_DIR)

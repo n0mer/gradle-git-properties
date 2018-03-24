@@ -2,6 +2,8 @@ package com.gorylenko
 
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 import static org.junit.Assert.assertFalse
@@ -10,15 +12,30 @@ import static org.junit.Assert.assertTrue
 
 class GitPropertiesPluginTests {
 
+    File projectDir
+
+    @Before
+    public void setUp() throws Exception {
+        projectDir = File.createTempDir("gradle-git-properties", ".tmp");
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        projectDir.deleteDir()
+    }
+
     @Test
     public void testGenerate() {
-        def projectDir = new File('.')
+
+        // copy this project dir to temp directory (including git repository folder)
+        new AntBuilder().copy(todir: projectDir) { fileset(dir : ".") }
 
         Project project = ProjectBuilder.builder().withProjectDir(projectDir).build()
         project.pluginManager.apply 'com.gorylenko.gradle-git-properties'
 
         // FIXME: Didn't find any way to change `rootProject`, so just set the property.
-        project.gitProperties.dotGitDirectory = projectDir
+        GitPropertiesPluginExtension ext = project.getExtensions().getByName("gitProperties")
+        ext.dotGitDirectory = new File('.git')
 
         def task = project.tasks.generateGitProperties
         assertTrue(task instanceof GitPropertiesPlugin.GenerateGitPropertiesTask)
@@ -29,34 +46,21 @@ class GitPropertiesPluginTests {
 
         Properties properties = new Properties()
         properties.load(new FileInputStream(gitPropertiesFile))
-        assertNotNull(properties.getProperty("git.branch"))
-        assertNotNull(properties.getProperty("git.commit.id"))
-        assertNotNull(properties.getProperty("git.commit.id.abbrev"))
-        assertNotNull(properties.getProperty("git.commit.user.name"))
-        assertNotNull(properties.getProperty("git.commit.user.email"))
-        assertNotNull(properties.getProperty("git.commit.message.short"))
-        assertNotNull(properties.getProperty("git.commit.message.full"))
-        assertNotNull(properties.getProperty("git.commit.time"))
-        assertNotNull(properties.getProperty("git.commit.id.describe"))
-        assertNotNull(properties.getProperty("git.remote.origin.url"))
-        assertNotNull(properties.getProperty("git.tags"))
-        assertNotNull(properties.getProperty("git.closest.tag.name"))
-        assertNotNull(properties.getProperty("git.closest.tag.commit.count"))
-        assertNotNull(properties.getProperty("git.total.commit.count"))
-        assertNotNull(properties.getProperty("git.dirty"))
+        GitPropertiesPlugin.KEY_ALL.each{
+            assertNotNull(properties.getProperty(it))
+        }
     }
 
     @Test
     public void testGenerateWithMissingGitRepoShouldNotFail() {
-        def projectDir = File.createTempDir("gradle-git-properties", ".tmp");
-        projectDir.deleteOnExit()
 
         Project project = ProjectBuilder.builder().withProjectDir(projectDir).build()
         project.pluginManager.apply 'com.gorylenko.gradle-git-properties'
 
         // FIXME: Didn't find any way to change `rootProject`, so just set the property.
-        project.gitProperties.dotGitDirectory = projectDir
-        project.gitProperties.failOnNoGitDirectory = false;
+        GitPropertiesPluginExtension ext = project.getExtensions().getByName("gitProperties")
+        ext.dotGitDirectory = projectDir
+        ext.failOnNoGitDirectory = false;
 
         def task = project.tasks.generateGitProperties
         assertTrue(task instanceof GitPropertiesPlugin.GenerateGitPropertiesTask)
@@ -69,14 +73,13 @@ class GitPropertiesPluginTests {
 
     @Test
     public void testGenerateWithMissingGitRepoShouldFail() {
-        def projectDir = File.createTempDir("gradle-git-properties", ".tmp");
-        projectDir.deleteOnExit()
 
         Project project = ProjectBuilder.builder().withProjectDir(projectDir).build()
         project.pluginManager.apply 'com.gorylenko.gradle-git-properties'
 
         // FIXME: Didn't find any way to change `rootProject`, so just set the property.
-        project.gitProperties.dotGitDirectory = projectDir
+        GitPropertiesPluginExtension ext = project.getExtensions().getByName("gitProperties")
+        ext.dotGitDirectory = projectDir
         // failOnNoGitDirectory is true by default
 
         def task = project.tasks.generateGitProperties
