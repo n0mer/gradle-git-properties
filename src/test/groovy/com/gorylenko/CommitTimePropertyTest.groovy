@@ -41,7 +41,7 @@ class CommitTimePropertyTest {
     @Test
     public void testDoCall() {
 
-        assertEquals(firstCommit.time.toString(), new CommitTimeProperty(null, null).doCall(repo))
+        assertEquals(firstCommit.dateTime.toInstant().epochSecond.toString(), new CommitTimeProperty(null, null).doCall(repo))
     }
 
     @Test
@@ -49,7 +49,7 @@ class CommitTimePropertyTest {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ")
         sdf.setTimeZone(TimeZone.getTimeZone("PST"))
-        String date = sdf.format(new Date(firstCommit.time * 1000L))
+        String date = sdf.format(Date.from(firstCommit.dateTime.toInstant()))
 
         assertEquals(date, new CommitTimeProperty("yyyy-MM-dd'T'HH:mmZ", "PST").doCall(repo))
     }

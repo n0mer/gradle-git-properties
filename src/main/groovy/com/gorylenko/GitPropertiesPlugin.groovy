@@ -149,7 +149,7 @@ class GitPropertiesPluginExtension {
     File dotGitDirectory
     List keys = GitPropertiesPlugin.KEY_ALL.toList()
     Map<String, Object> customProperties = new HashMap<String, Object>()
-    String dateFormat
+    String dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
     String dateFormatTimeZone
     boolean failOnNoGitDirectory = true
     boolean force
