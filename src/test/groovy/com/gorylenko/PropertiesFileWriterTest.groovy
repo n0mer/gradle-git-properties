@@ -79,4 +79,21 @@ class PropertiesFileWriterTest {
         return props
     }
 
+
+    @Test
+    public void testWriteNormalPropertiesResultMustBeSorted() {
+
+        File file = File.createTempFile("temp",".tmp")
+        writer.write([greeting_3: 'Hello', greeting_1: 'Hello', greeting_2: 'Hello', greeting_4: 'Hello'], file, true)
+
+        String result = file.text
+        int index1 = result.indexOf("greeting_1")
+        int index2 = result.indexOf("greeting_2")
+        int index3 = result.indexOf("greeting_3")
+        int index4 = result.indexOf("greeting_4")
+
+        assertTrue(index1 < index2)
+        assertTrue(index2 < index3)
+        assertTrue(index3 < index4)
+    }
 }

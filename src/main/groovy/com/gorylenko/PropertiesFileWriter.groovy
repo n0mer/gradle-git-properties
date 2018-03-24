@@ -16,6 +16,16 @@ class PropertiesFileWriter {
         }
     }
 
+    private static class SortedProperties extends Properties {
+        private static final long serialVersionUID = 1L
+
+        @Override
+        synchronized Enumeration<Object> keys() {
+            Vector<String> v = new Vector<String>(keySet())
+            Collections.sort(v)
+            return new Vector<Object>(v).elements()
+        }
+    }
 
     private void writeToPropertiesFile(Map<String, String> properties, File propsFile) {
         if (!propsFile.parentFile.exists()) {
@@ -26,7 +36,7 @@ class PropertiesFileWriter {
         }
         propsFile.createNewFile()
         propsFile.withOutputStream {
-            def props = new Properties()
+            def props = new SortedProperties()
             props.putAll(properties)
             props.store(it, null)
         }
