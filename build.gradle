@@ -6,10 +6,12 @@ buildscript {
     }
     dependencies {
         classpath "com.gradle.publish:plugin-publish-plugin:0.9.9"
+        classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:1.4.21"
     }
 }
 
 apply plugin: "com.gradle.plugin-publish"
+apply plugin: "com.gorylenko.gradle-git-properties"
 apply plugin: 'maven-publish'
 apply plugin: 'groovy'
 
@@ -25,7 +27,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-version = "1.4.21"
+version = "1.5.0"
 group = "com.gorylenko.gradle-git-properties"
 
 tasks.withType(GroovyCompile) {
