@@ -35,6 +35,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
     private static final String KEY_GIT_REMOTE_ORIGIN_URL = "git.remote.origin.url"
     private static final String KEY_GIT_TAGS = "git.tags"
     private static final String KEY_GIT_CLOSEST_TAG_NAME = "git.closest.tag.name"
+    private static final String KEY_GIT_CLOSEST_TAG_COMMIT_COUNT = "git.closest.tag.commit.count"
     private static final String KEY_GIT_DIRTY = "git.dirty"
 
     private static final String[] KEY_ALL = [
@@ -47,6 +48,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
             KEY_GIT_REMOTE_ORIGIN_URL,
             KEY_GIT_TAGS,
             KEY_GIT_CLOSEST_TAG_NAME,
+            KEY_GIT_CLOSEST_TAG_COMMIT_COUNT,
             KEY_GIT_DIRTY
     ]
 
@@ -100,19 +102,20 @@ class GitPropertiesPlugin implements Plugin<Project> {
             def file = new File(dir, GIT_PROPERTIES_FILENAME)
             def keys = project.gitProperties.keys
 
-            def map = [(KEY_GIT_BRANCH)                 : new BranchProperty()
-                       , (KEY_GIT_COMMIT_ID)            : { repo.head().id }
-                       , (KEY_GIT_COMMIT_ID_ABBREVIATED): { repo.head().abbreviatedId }
-                       , (KEY_GIT_COMMIT_USER_NAME)     : { repo.head().author.name }
-                       , (KEY_GIT_COMMIT_USER_EMAIL)    : { repo.head().author.email }
-                       , (KEY_GIT_COMMIT_SHORT_MESSAGE) : { repo.head().shortMessage }
-                       , (KEY_GIT_COMMIT_FULL_MESSAGE)  : { repo.head().fullMessage }
-                       , (KEY_GIT_COMMIT_TIME)          : new CommitTimeProperty(project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone)
-                       , (KEY_GIT_COMMIT_ID_DESCRIBE)   : new CommitIdDescribeProperty()
-                       , (KEY_GIT_REMOTE_ORIGIN_URL)    : new RemoteOriginUrlProperty()
-                       , (KEY_GIT_TAGS)                 : new TagsProperty()
-                       , (KEY_GIT_CLOSEST_TAG_NAME)     : new ClosestTagNameProperty()
-                       , (KEY_GIT_DIRTY)                : { !repo.status().clean }]
+            def map = [(KEY_GIT_BRANCH)                     : new BranchProperty()
+                       , (KEY_GIT_COMMIT_ID)                : { repo.head().id }
+                       , (KEY_GIT_COMMIT_ID_ABBREVIATED)    : { repo.head().abbreviatedId }
+                       , (KEY_GIT_COMMIT_USER_NAME)         : { repo.head().author.name }
+                       , (KEY_GIT_COMMIT_USER_EMAIL)        : { repo.head().author.email }
+                       , (KEY_GIT_COMMIT_SHORT_MESSAGE)     : { repo.head().shortMessage }
+                       , (KEY_GIT_COMMIT_FULL_MESSAGE)      : { repo.head().fullMessage }
+                       , (KEY_GIT_COMMIT_TIME)              : new CommitTimeProperty(project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone)
+                       , (KEY_GIT_COMMIT_ID_DESCRIBE)       : new CommitIdDescribeProperty()
+                       , (KEY_GIT_REMOTE_ORIGIN_URL)        : new RemoteOriginUrlProperty()
+                       , (KEY_GIT_TAGS)                     : new TagsProperty()
+                       , (KEY_GIT_CLOSEST_TAG_NAME)         : new ClosestTagNameProperty()
+                       , (KEY_GIT_CLOSEST_TAG_COMMIT_COUNT) : new ClosestTagCommitCountProperty()
+                       , (KEY_GIT_DIRTY)                    : { !repo.status().clean }]
 
             def newMap = new HashMap<String, String>()
             map.subMap(keys).each{ k, v -> newMap.put(k, v.call(repo).toString() ) }
