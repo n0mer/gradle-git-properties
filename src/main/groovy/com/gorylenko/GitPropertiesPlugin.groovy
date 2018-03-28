@@ -1,6 +1,7 @@
 package com.gorylenko
 
 import java.text.SimpleDateFormat
+import java.time.Instant
 
 import org.ajoberstar.grgit.Grgit
 import org.gradle.api.Action
@@ -38,6 +39,11 @@ class GitPropertiesPlugin implements Plugin<Project> {
     private static final String KEY_GIT_CLOSEST_TAG_COMMIT_COUNT = "git.closest.tag.commit.count"
     private static final String KEY_GIT_TOTAL_COMMIT_COUNT = "git.total.commit.count"
     private static final String KEY_GIT_DIRTY = "git.dirty"
+    private static final String KEY_GIT_BUILD_USER_NAME = "git.build.user.name"
+    private static final String KEY_GIT_BUILD_USER_EMAIL = "git.build.user.email"
+    private static final String KEY_GIT_BUILD_TIME = "git.build.time"
+    private static final String KEY_GIT_BUILD_VERSION = "git.build.version"
+    private static final String KEY_GIT_BUILD_HOST = "git.build.host"
 
     public static final String[] KEY_ALL = [
             KEY_GIT_BRANCH,
@@ -51,7 +57,12 @@ class GitPropertiesPlugin implements Plugin<Project> {
             KEY_GIT_CLOSEST_TAG_NAME,
             KEY_GIT_CLOSEST_TAG_COMMIT_COUNT,
             KEY_GIT_TOTAL_COMMIT_COUNT,
-            KEY_GIT_DIRTY
+            KEY_GIT_DIRTY,
+            KEY_GIT_BUILD_USER_NAME,
+            KEY_GIT_BUILD_USER_EMAIL,
+            KEY_GIT_BUILD_TIME,
+            KEY_GIT_BUILD_VERSION,
+            KEY_GIT_BUILD_HOST
     ]
 
     @Override
@@ -96,14 +107,15 @@ class GitPropertiesPlugin implements Plugin<Project> {
         @TaskAction
         void generate() {
             def source = getSource()
-            if (!project.gitProperties.failOnNoGitDirectory && source.empty)
+            GitPropertiesPluginExtension gitProperties = project.gitProperties
+            if (!gitProperties.failOnNoGitDirectory && source.empty)
                 return
             File dotGitDirectory = getDotGitDirectory(project)
             logger.info "dotGitDirectory = [${dotGitDirectory.absolutePath}]"
             def repo = Grgit.open(dir: dotGitDirectory)
-            def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, DEFAULT_OUTPUT_DIR)
+            def dir = gitProperties.gitPropertiesDir ?: new File(project.buildDir, DEFAULT_OUTPUT_DIR)
             def file = new File(dir, GIT_PROPERTIES_FILENAME)
-            def keys = project.gitProperties.keys
+            def keys = gitProperties.keys
 
             def map = [(KEY_GIT_BRANCH)                     : new BranchProperty()
                        , (KEY_GIT_COMMIT_ID)                : { repo.head().id }
@@ -112,24 +124,29 @@ class GitPropertiesPlugin implements Plugin<Project> {
                        , (KEY_GIT_COMMIT_USER_EMAIL)        : { repo.head().author.email }
                        , (KEY_GIT_COMMIT_SHORT_MESSAGE)     : { repo.head().shortMessage }
                        , (KEY_GIT_COMMIT_FULL_MESSAGE)      : { repo.head().fullMessage }
-                       , (KEY_GIT_COMMIT_TIME)              : new CommitTimeProperty(project.gitProperties.dateFormat, project.gitProperties.dateFormatTimeZone)
+                       , (KEY_GIT_COMMIT_TIME)              : new CommitTimeProperty(gitProperties.dateFormat, gitProperties.dateFormatTimeZone)
                        , (KEY_GIT_COMMIT_ID_DESCRIBE)       : new CommitIdDescribeProperty()
                        , (KEY_GIT_REMOTE_ORIGIN_URL)        : new RemoteOriginUrlProperty()
                        , (KEY_GIT_TAGS)                     : new TagsProperty()
                        , (KEY_GIT_CLOSEST_TAG_NAME)         : new ClosestTagNameProperty()
                        , (KEY_GIT_CLOSEST_TAG_COMMIT_COUNT) : new ClosestTagCommitCountProperty()
                        , (KEY_GIT_TOTAL_COMMIT_COUNT)       : new TotalCommitCountProperty()
-                       , (KEY_GIT_DIRTY)                    : { !repo.status().clean }]
+                       , (KEY_GIT_DIRTY)                    : { !repo.status().clean }
+                       , (KEY_GIT_BUILD_USER_NAME)          : new BuildUserNameProperty()
+                       , (KEY_GIT_BUILD_USER_EMAIL)         : new BuildUserEmailProperty()
+                       , (KEY_GIT_BUILD_TIME)               : new BuildTimeProperty(Instant.now(), gitProperties.dateFormat, gitProperties.dateFormatTimeZone)
+                       , (KEY_GIT_BUILD_VERSION)            : new BuildVersionProperty(project.version)
+                       , (KEY_GIT_BUILD_HOST)               : new BuildHostProperty()]
 
             def newMap = new HashMap<String, String>()
             map.subMap(keys).each{ k, v -> newMap.put(k, v.call(repo).toString() ) }
-            project.gitProperties.customProperties.each{ k, v -> newMap.put(k, v instanceof Closure ? v.call(repo).toString() : v.toString() ) }
+            gitProperties.customProperties.each{ k, v -> newMap.put(k, v instanceof Closure ? v.call(repo).toString() : v.toString() ) }
 
             // Close Grgit to avoid issues with Gradle daemon
             repo.close()
 
             // Writing to properties file
-            boolean written = new PropertiesFileWriter().write(newMap, file, project.gitProperties.force)
+            boolean written = new PropertiesFileWriter().write(newMap, file, gitProperties.force)
             if (written) {
                 logger.info("Written to [${file}]...")
             } else {
