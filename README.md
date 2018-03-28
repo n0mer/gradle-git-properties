@@ -14,14 +14,19 @@ plugins {
 }
 ```
 
+This is enough to see git details via `info` endpoint of [spring-boot-actuator](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready).
+
 If needed - override location of `git.properties` file like this:
+
 ```groovy
 gitProperties {
     gitPropertiesDir = new File("${project.rootDir}/your/custom/dir")
 }
 ```
+> Please note that `spring-boot-actuator` expects `git.properties` to be available at certain location.
 
 If needed - use `dateFormat` and `dateFormatTimeZone` to format `git.commit.time` value (See [SimpleDateFormat](http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html) and [TimeZone](http://docs.oracle.com/javase/7/docs/api/java/util/TimeZone.html) for values)
+
 ```groovy
 gitProperties {
     dateFormat = "yyyy-MM-dd'T'HH:mmZ"
@@ -30,17 +35,16 @@ gitProperties {
 ```
 
 If .git directory for the project cannot be found by plugin, it can be specified manually
+
 ```groovy
 gitProperties {
     dotGitDirectory = new File("${project.rootDir}/../../.git")
 }
 ```
 
-> Please note that `spring-boot-actuator` expects `git.properties` to be available at certain location.
-
-This is enough to see git details via `info` endpoint of [spring-boot-actuator](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready).
 
 By default, all available git properties (which are supported by the plugin) will be generated. You can have more fine grained control of the content of 'git.properties':
+
 ```groovy
 gitProperties {
     keys = ['git.branch','git.commit.id','git.commit.time']
@@ -49,6 +53,7 @@ gitProperties {
 All available keys can be found in the [source](src/main/groovy/com/gorylenko/GitPropertiesPlugin.groovy).
 
 Custom properties can be added using customProperty method (it supports both expressions and closures):
+
 ```groovy
 gitProperties {
     customProperty 'greeting', 'Hello' // expression
@@ -68,17 +73,70 @@ Plugin is available from [Gradle Plugins repository](https://plugins.gradle.org/
 
 ## result
 
-This is raw `JSON` from `info` endpoint:
+This is raw `JSON` from `info` endpoint (with management.info.git.mode=simple or not configured):
 
 ```json
 {
-  version: "0.0.1.BUILD-SNAPSHOT",
-  id: "boot-admin-682defcca0d6",
-  git: {
-    branch: "master",
-    commit: {
-      id: "e06c7ec",
-      time: "1442094398"
+  "git": {
+    "commit": {
+      "time": "2018-03-28T05:13:53Z",
+      "id": "32ff212"
+    },
+    "branch": "Fix_issue_68"
+  }
+}
+```
+
+This is raw `JSON` from `info` endpoint (with management.info.git.mode=full):
+
+```json
+{
+  "git": {
+    "build": {
+      "host": "myserver-1",
+      "version": "0.0.1-SNAPSHOT",
+      "time": "2018-03-28T05:34:35Z",
+      "user": {
+        "name": "First Last",
+        "email": "username1@example.com"
+      }
+    },
+    "branch": "Fix_issue_68",
+    "commit": {
+      "message": {
+        "short": "Fix issue #68",
+        "full": "Fix issue #68"
+      },
+      "id": {
+        "describe": "v1.4.21-28-g32ff212-dirty",
+        "abbrev": "32ff212",
+        "full": "32ff212b9e2873fa4672f1b5dd41f67aca6e0731"
+      },
+      "time": "2018-03-28T05:13:53Z",
+      "user": {
+        "email": "username1@example.com",
+        "name": "First Last"
+      }
+    },
+    "closest": {
+      "tag": {
+        "name": "v1.4.21",
+        "commit": {
+          "count": "28"
+        }
+      }
+    },
+    "dirty": "true",
+    "remote": {
+      "origin": {
+        "url": "git@github.com:n0mer/gradle-git-properties.git"
+      }
+    },
+    "tags": "",
+    "total": {
+      "commit": {
+        "count": "93"
+      }
     }
   }
 }
