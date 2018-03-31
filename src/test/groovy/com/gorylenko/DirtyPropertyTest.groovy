@@ -9,7 +9,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-class TotalCommitCountPropertyTest {
+class DirtyPropertyTest {
 
     File projectDir
     Grgit repo
@@ -21,7 +21,7 @@ class TotalCommitCountPropertyTest {
 
         projectDir = File.createTempDir("BranchPropertyTest", ".tmp")
         GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
-            // empty git repo
+            // empty repo
         })
 
         // Set up repo
@@ -36,42 +36,32 @@ class TotalCommitCountPropertyTest {
 
     @Test
     public void testDoCallOnEmptyRepo() {
-
-        assertEquals('0', new TotalCommitCountProperty().doCall(repo))
+        assertEquals('false', new DirtyProperty().doCall(repo))
     }
 
     @Test
-    public void testDoCallOneCommit() {
-
-        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
-            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
-        })
-
-        assertEquals("1", new TotalCommitCountProperty().doCall(repo))
+    public void testDoCallOnEmptyRepoDirty() {
+        new File(projectDir, 'hello2.txt').text = 'Hello 2'
+        assertEquals('true', new DirtyProperty().doCall(repo))
     }
 
     @Test
-    public void testDoCallTwoCommits() {
-
+    public void testDoCallOnOneCommit() {
         GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            // commit once
             gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
-            gitRepoBuilder.commitFile("hello2.txt", "Hello2", "Added hello2.txt")
         })
-
-        assertEquals("2", new TotalCommitCountProperty().doCall(repo))
+        assertEquals('false', new DirtyProperty().doCall(repo))
     }
+
 
     @Test
-    public void testDoCallTwoCommitsNewBranchThenThirdCommit() {
-
+    public void testDoCallOnOneCommitDirty() {
         GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            // commit once
             gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
-            gitRepoBuilder.commitFile("hello2.txt", "Hello2", "Added hello2.txt")
-            gitRepoBuilder.addBranchAndCheckout("my-branch")
-            gitRepoBuilder.commitFile("hello3.txt", "Hello3", "Added hello3.txt")
         })
-
-        assertEquals("3", new TotalCommitCountProperty().doCall(repo))
+        new File(projectDir, 'hello2.txt').text = 'Hello 2'
+        assertEquals('true', new DirtyProperty().doCall(repo))
     }
-
 }

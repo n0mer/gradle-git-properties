@@ -12,7 +12,6 @@ import org.junit.Test
 class CommitIdDescribePropertyTest {
 
     File projectDir
-    Commit firstCommit
     Grgit repo
 
     @Before
@@ -22,8 +21,7 @@ class CommitIdDescribePropertyTest {
 
         projectDir = File.createTempDir("BranchPropertyTest", ".tmp")
         GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
-            // commit 1 new file "hello.txt"
-            firstCommit = gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+            // empty repo
         })
 
         // Set up repo
@@ -36,14 +34,31 @@ class CommitIdDescribePropertyTest {
         projectDir.deleteDir()
     }
 
+
+    @Test
+    public void testDoCallEmptyRepo() {
+        assertEquals('', new CommitIdDescribeProperty().doCall(repo))
+    }
+
     @Test
     public void testDoCallNoTag() {
+        Commit firstCommit
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            // commit 1 new file "hello.txt"
+            firstCommit = gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
 
         assertEquals('', new CommitIdDescribeProperty().doCall(repo))
     }
 
     @Test
     public void testDoCallOnNoTagAndDirty() {
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            // commit 1 new file "hello.txt"
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+
         new File(projectDir, 'hello2.txt').text = 'Hello 2'
 
         assertEquals('', new CommitIdDescribeProperty().doCall(repo))
@@ -53,6 +68,9 @@ class CommitIdDescribePropertyTest {
     public void testDoCallOneTag() {
 
         GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            // commit 1 new file "hello.txt"
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+
             // add TAGONE to firstCommit (current HEAD)
             gitRepoBuilder.addTag("TAGONE")
         })
@@ -64,6 +82,9 @@ class CommitIdDescribePropertyTest {
     public void testDoCallOneTagDirty() {
 
         GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            // commit 1 new file "hello.txt"
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+
             // add TAGONE to firstCommit (current HEAD)
             gitRepoBuilder.addTag("TAGONE")
             new File(projectDir, 'hello2.txt').text = 'Hello 2'
@@ -76,6 +97,9 @@ class CommitIdDescribePropertyTest {
     public void testDoCallOneTagOneCommit() {
         Commit secondCommit
         GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            // commit 1 new file "hello.txt"
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+
             // add TAGONE to firstCommit (current HEAD)
             gitRepoBuilder.addTag("TAGONE")
             secondCommit = gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
@@ -88,6 +112,9 @@ class CommitIdDescribePropertyTest {
     public void testDoCallOneTagOneCommitDirty() {
         Commit secondCommit
         GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            // commit 1 new file "hello.txt"
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+
             // add TAGONE to firstCommit (current HEAD)
             gitRepoBuilder.addTag("TAGONE")
             secondCommit = gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")

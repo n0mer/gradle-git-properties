@@ -22,15 +22,7 @@ class BranchPropertyTest {
         projectDir = File.createTempDir("BranchPropertyTest", ".tmp")
 
         GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
-
-            // commit 1 new file "hello.txt"
-            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
-
-            // create a new branch "branch-1" at current location
-            gitRepoBuilder.addBranch("branch-1")
-
-            // commit 1 new file "hello2.txt"
-            gitRepoBuilder.commitFile("hello2.txt", "Hello2", "Added hello2.txt")
+            // empty repo
         })
 
 
@@ -46,13 +38,43 @@ class BranchPropertyTest {
     }
 
     @Test
+    public void testDoCallOnEmptyRepo() {
+        assertEquals('', new BranchProperty().doCall(repo))
+    }
+
+    @Test
     public void testDoCallOnMasterBranch() {
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+
+            // commit 1 new file "hello.txt"
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+
+            // create a new branch "branch-1" at current location
+            gitRepoBuilder.addBranch("branch-1")
+
+            // commit 1 new file "hello2.txt"
+            gitRepoBuilder.commitFile("hello2.txt", "Hello2", "Added hello2.txt")
+        })
 
         assertEquals("master", new BranchProperty().doCall(repo))
     }
 
     @Test
     public void testDoCallOnBranch1() {
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+
+            // commit 1 new file "hello.txt"
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+
+            // create a new branch "branch-1" at current location
+            gitRepoBuilder.addBranch("branch-1")
+
+            // commit 1 new file "hello2.txt"
+            gitRepoBuilder.commitFile("hello2.txt", "Hello2", "Added hello2.txt")
+        })
+
         repo.checkout (branch : "branch-1")
 
         assertEquals("branch-1", new BranchProperty().doCall(repo))

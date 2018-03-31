@@ -2,11 +2,7 @@ package com.gorylenko
 
 import org.ajoberstar.grgit.Grgit
 
-class BranchProperty extends Closure<String> {
-
-    BranchProperty() {
-        super(null)
-    }
+class BranchProperty extends AbstractGitProperty {
 
     String doCall(Grgit repo) {
         String branchName = null
@@ -16,9 +12,9 @@ class BranchProperty extends Closure<String> {
         if (env.containsKey('JOB_NAME')) {
             branchName = env["GIT_LOCAL_BRANCH"] ?: env["GIT_BRANCH"]
         }
-        if (!branchName) {
-            branchName = repo.branch.current.name
+        if (!branchName && !isEmpty(repo)) {
+            branchName = repo.branch.current().name
         }
-        return branchName
+        return branchName ?: ''
     }
 }

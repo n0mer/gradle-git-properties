@@ -118,12 +118,12 @@ class GitPropertiesPlugin implements Plugin<Project> {
             def keys = gitProperties.keys
 
             def map = [(KEY_GIT_BRANCH)                     : new BranchProperty()
-                       , (KEY_GIT_COMMIT_ID)                : { repo.head().id }
-                       , (KEY_GIT_COMMIT_ID_ABBREVIATED)    : { repo.head().abbreviatedId }
-                       , (KEY_GIT_COMMIT_USER_NAME)         : { repo.head().author.name }
-                       , (KEY_GIT_COMMIT_USER_EMAIL)        : { repo.head().author.email }
-                       , (KEY_GIT_COMMIT_SHORT_MESSAGE)     : { repo.head().shortMessage }
-                       , (KEY_GIT_COMMIT_FULL_MESSAGE)      : { repo.head().fullMessage }
+                       , (KEY_GIT_COMMIT_ID)                : new CommitIdProperty()
+                       , (KEY_GIT_COMMIT_ID_ABBREVIATED)    : new CommitIdAbbrevProperty()
+                       , (KEY_GIT_COMMIT_USER_NAME)         : new CommitUserNameProperty()
+                       , (KEY_GIT_COMMIT_USER_EMAIL)        : new CommitUserEmailProperty()
+                       , (KEY_GIT_COMMIT_SHORT_MESSAGE)     : new CommitMessageShortProperty()
+                       , (KEY_GIT_COMMIT_FULL_MESSAGE)      : new CommitMessageFullProperty()
                        , (KEY_GIT_COMMIT_TIME)              : new CommitTimeProperty(gitProperties.dateFormat, gitProperties.dateFormatTimeZone)
                        , (KEY_GIT_COMMIT_ID_DESCRIBE)       : new CommitIdDescribeProperty()
                        , (KEY_GIT_REMOTE_ORIGIN_URL)        : new RemoteOriginUrlProperty()
@@ -131,7 +131,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
                        , (KEY_GIT_CLOSEST_TAG_NAME)         : new ClosestTagNameProperty()
                        , (KEY_GIT_CLOSEST_TAG_COMMIT_COUNT) : new ClosestTagCommitCountProperty()
                        , (KEY_GIT_TOTAL_COMMIT_COUNT)       : new TotalCommitCountProperty()
-                       , (KEY_GIT_DIRTY)                    : { !repo.status().clean }
+                       , (KEY_GIT_DIRTY)                    : new DirtyProperty()
                        , (KEY_GIT_BUILD_USER_NAME)          : new BuildUserNameProperty()
                        , (KEY_GIT_BUILD_USER_EMAIL)         : new BuildUserEmailProperty()
                        , (KEY_GIT_BUILD_TIME)               : new BuildTimeProperty(Instant.now(), gitProperties.dateFormat, gitProperties.dateFormatTimeZone)

@@ -10,11 +10,7 @@ import org.ajoberstar.grgit.Commit
 import org.ajoberstar.grgit.Grgit
 import org.ajoberstar.grgit.Tag
 
-class RemoteOriginUrlProperty extends Closure<String>{
-
-    RemoteOriginUrlProperty() {
-        super(null)
-    }
+class RemoteOriginUrlProperty extends AbstractGitProperty {
 
     String doCall(Grgit repo) {
         String url = repo.repository.jgit.repository.config.getString("remote", "origin", "url")
