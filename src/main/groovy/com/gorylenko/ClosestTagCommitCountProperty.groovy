@@ -2,13 +2,13 @@ package com.gorylenko
 
 import org.ajoberstar.grgit.Grgit
 
-class ClosestTagCommitCountProperty extends Closure<String>{
-
-    ClosestTagCommitCountProperty() {
-        super(null)
-    }
+class ClosestTagCommitCountProperty extends AbstractGitProperty {
 
     String doCall(Grgit repo) {
+        return isEmpty(repo) ? '' : closestTagCommitCount(repo)
+    }
+
+    String closestTagCommitCount(Grgit repo) {
         String describe = repo.describe(longDescr: true)
         if (describe) {
             // remove commit ID

@@ -12,7 +12,6 @@ import org.junit.Test
 class ClosestTagNamePropertyTest {
 
     File projectDir
-    Commit firstCommit
     Grgit repo
 
     @Before
@@ -22,8 +21,7 @@ class ClosestTagNamePropertyTest {
 
         projectDir = File.createTempDir("BranchPropertyTest", ".tmp")
         GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
-            // commit 1 new file "hello.txt"
-            firstCommit = gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+            // empty repo
         })
 
         // Set up repo
@@ -36,9 +34,19 @@ class ClosestTagNamePropertyTest {
         projectDir.deleteDir()
     }
 
+
+    @Test
+    public void testDoCallOnEmptyRepo() {
+        assertEquals('', new ClosestTagNameProperty().doCall(repo))
+    }
+
+
     @Test
     public void testDoCallNoTag() {
-
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            // commit 1 new file "hello.txt"
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
         assertEquals('', new ClosestTagNameProperty().doCall(repo))
     }
 
@@ -46,6 +54,9 @@ class ClosestTagNamePropertyTest {
     public void testDoCallOneTag() {
 
         GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            // commit 1 new file "hello.txt"
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+
             // add TAGONE to firstCommit (current HEAD)
             gitRepoBuilder.addTag("TAGONE")
         })
@@ -55,11 +66,13 @@ class ClosestTagNamePropertyTest {
 
     @Test
     public void testDoCallOneTagOneCommit() {
-        Commit secondCommit
         GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            // commit 1 new file "hello.txt"
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+
             // add TAGONE to firstCommit (current HEAD)
             gitRepoBuilder.addTag("TAGONE")
-            secondCommit = gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
         })
 
         assertEquals("TAGONE", new ClosestTagNameProperty().doCall(repo))
@@ -67,11 +80,13 @@ class ClosestTagNamePropertyTest {
 
     @Test
     public void testDoCallOneTagOneCommitSecondTag() {
-        Commit secondCommit
         GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            // commit 1 new file "hello.txt"
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+
             // add TAGONE to firstCommit (current HEAD)
             gitRepoBuilder.addTag("TAGONE")
-            secondCommit = gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
             gitRepoBuilder.addTag("TAGTWO")
         })
 

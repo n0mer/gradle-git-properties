@@ -4,18 +4,17 @@ import java.text.SimpleDateFormat
 import java.time.Instant
 import org.ajoberstar.grgit.Grgit
 
-class CommitTimeProperty extends Closure<String>{
+class CommitTimeProperty extends AbstractGitProperty {
     private String dateFormat
     private String timezone
 
     CommitTimeProperty(String dateFormat, String timezone) {
-        super(null)
         this.dateFormat = dateFormat
         this.timezone = timezone
     }
 
     String doCall(Grgit repo) {
-        return formatDate(repo.head().dateTime.toInstant(), dateFormat, timezone)
+        return isEmpty(repo) ? '' : formatDate(repo.head().dateTime.toInstant(), dateFormat, timezone)
     }
 
     private String formatDate(Instant instant, String dateFormat, String timezone) {

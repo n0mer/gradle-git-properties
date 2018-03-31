@@ -6,14 +6,9 @@ import org.ajoberstar.grgit.Commit
 import org.ajoberstar.grgit.Grgit
 import org.ajoberstar.grgit.Tag
 
-class TagsProperty extends Closure<String>{
-
-    TagsProperty() {
-        super(null)
-    }
+class TagsProperty extends AbstractGitProperty {
 
     String doCall(Grgit repo) {
-        Commit head = repo.head()
-        return repo.tag.list().findAll { it.commit == head }.collect {it.name}.join(',')
+        return isEmpty(repo) ? '' : repo.tag.list().findAll { it.commit == repo.head() }.collect {it.name}.join(',')
     }
 }

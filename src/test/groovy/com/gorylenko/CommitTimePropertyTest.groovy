@@ -13,7 +13,6 @@ import org.junit.Test
 class CommitTimePropertyTest {
 
     File projectDir
-    Commit firstCommit
     Grgit repo
 
     @Before
@@ -23,8 +22,7 @@ class CommitTimePropertyTest {
 
         projectDir = File.createTempDir("BranchPropertyTest", ".tmp")
         GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
-            // commit 1 new file "hello.txt"
-            firstCommit = gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+            // empty git repo
         })
 
         // Set up repo
@@ -39,13 +37,30 @@ class CommitTimePropertyTest {
     }
 
     @Test
-    public void testDoCall() {
+    public void testDoCallOnEmptyRepo() {
+        assertEquals('', new CommitTimeProperty(null, null).doCall(repo))
+    }
+
+    @Test
+    public void testDoCallOneCommit() {
+
+        Commit firstCommit
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            // commit 1 new file "hello.txt"
+            firstCommit = gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
 
         assertEquals(firstCommit.dateTime.toInstant().epochSecond.toString(), new CommitTimeProperty(null, null).doCall(repo))
     }
 
     @Test
     public void testDoCallWithFormat() {
+
+        Commit firstCommit
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            // commit 1 new file "hello.txt"
+            firstCommit = gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ")
         sdf.setTimeZone(TimeZone.getTimeZone("PST"))
