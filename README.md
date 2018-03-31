@@ -25,7 +25,7 @@ gitProperties {
 ```
 > Please note that `spring-boot-actuator` expects `git.properties` to be available at certain location.
 
-If needed - use `dateFormat` and `dateFormatTimeZone` to format `git.commit.time` value (See [SimpleDateFormat](http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html) and [TimeZone](http://docs.oracle.com/javase/7/docs/api/java/util/TimeZone.html) for values)
+If needed - use `dateFormat` and `dateFormatTimeZone` to format `git.commit.time` and `git.build.time` properties (See [SimpleDateFormat](http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html) and [TimeZone](http://docs.oracle.com/javase/7/docs/api/java/util/TimeZone.html) for valid values)
 
 ```groovy
 gitProperties {
@@ -34,25 +34,48 @@ gitProperties {
 }
 ```
 
-If .git directory for the project cannot be found by plugin, it can be specified manually
+The `.git` directory for the project should be detected automatically, otherwise it can be specified manually using `dotGitDirectory`:
 
 ```groovy
 gitProperties {
-    dotGitDirectory = new File("${project.rootDir}/../../.git")
+    dotGitDirectory = new File("${project.rootDir}/../somefolder/.git")
 }
 ```
 
 
-By default, all available git properties (which are supported by the plugin) will be generated. You can have more fine grained control of the content of 'git.properties':
+By default, all available git properties (which are supported by the plugin) will be generated:
+
+```
+git.branch
+git.build.host
+git.build.time
+git.build.user.email
+git.build.user.name
+git.build.version
+git.closest.tag.commit.count
+git.closest.tag.name
+git.commit.id
+git.commit.id.abbrev
+git.commit.id.describe
+git.commit.message.full
+git.commit.message.short
+git.commit.time
+git.commit.user.email
+git.commit.user.name
+git.dirty
+git.remote.origin.url
+git.tags
+git.total.commit.count
+```
+You can have more fine grained control of the content of 'git.properties' using `keys`:
 
 ```groovy
 gitProperties {
     keys = ['git.branch','git.commit.id','git.commit.time']
 }
 ```
-All available keys can be found in the [source](src/main/groovy/com/gorylenko/GitPropertiesPlugin.groovy).
 
-Custom properties can be added using customProperty method (it supports both expressions and closures):
+Custom properties can also be added with `customProperty` (supports both expressions and closures):
 
 ```groovy
 gitProperties {
@@ -62,9 +85,10 @@ gitProperties {
 }
 ```
 
-In order to see all attributes, you can set the "management.info.git.mode" property to "full" per [the Spring Boot documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html#production-ready-application-info-git), e.g. in application.properties:
+> By default, the `info` endpoint exposes only `git.branch`, `git.commit.id`, and `git.commit.time` properties (even then there are more in your git.properties).
+> In order to expose all available properties, set the "management.info.git.mode" property to "full" per [the Spring Boot documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html#production-ready-application-info-git), e.g. in application.properties:
 
-`management.info.git.mode=full`
+> `management.info.git.mode=full`
 
 Plugin is available from [Gradle Plugins repository](https://plugins.gradle.org/plugin/com.gorylenko.gradle-git-properties).
 
