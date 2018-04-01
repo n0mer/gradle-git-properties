@@ -20,7 +20,7 @@ If needed - override location of `git.properties` file like this:
 
 ```groovy
 gitProperties {
-    gitPropertiesDir = new File("${project.rootDir}/your/custom/dir")
+    gitPropertiesDir = "${project.rootDir}/your/custom/dir"
 }
 ```
 > Please note that `spring-boot-actuator` expects `git.properties` to be available at certain location.
@@ -38,7 +38,7 @@ The `.git` directory for the project should be detected automatically, otherwise
 
 ```groovy
 gitProperties {
-    dotGitDirectory = new File("${project.rootDir}/../somefolder/.git")
+    dotGitDirectory = "${project.rootDir}/../somefolder/.git"
 }
 ```
 

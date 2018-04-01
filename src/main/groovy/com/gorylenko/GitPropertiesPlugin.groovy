@@ -1,5 +1,6 @@
 package com.gorylenko
 
+import groovy.transform.ToString
 import java.text.SimpleDateFormat
 import java.time.Instant
 
@@ -100,21 +101,57 @@ class GitPropertiesPlugin implements Plugin<Project> {
 
         @OutputFile
         public File getOutput() {
-            def dir = project.gitProperties.gitPropertiesDir ?: new File(project.buildDir, DEFAULT_OUTPUT_DIR)
-            return new File(dir, GIT_PROPERTIES_FILENAME)
+            return getGitPropertiesFile(project)
         }
 
         @TaskAction
         void generate() {
-            def source = getSource()
             GitPropertiesPluginExtension gitProperties = project.gitProperties
-            if (!gitProperties.failOnNoGitDirectory && source.empty)
+
+            if (logger.debugEnabled)
+                logger.debug("gitProperties = ${gitProperties}")
+
+            if (!gitProperties.failOnNoGitDirectory && getSource().empty) {
+                logger.info("Exiting because no Git repository found and failOnNoGitDirectory = true.")
                 return
+            }
+
             File dotGitDirectory = getDotGitDirectory(project)
-            logger.info "dotGitDirectory = [${dotGitDirectory.absolutePath}]"
-            def repo = Grgit.open(dir: dotGitDirectory)
-            def dir = gitProperties.gitPropertiesDir ?: new File(project.buildDir, DEFAULT_OUTPUT_DIR)
-            def file = new File(dir, GIT_PROPERTIES_FILENAME)
+            logger.info "dotGitDirectory = [${dotGitDirectory?.absolutePath}]"
+
+            Map map = getProperties(gitProperties)
+            if (logger.debugEnabled)
+                logger.debug("Git properties to be generated = ${map.keySet()}")
+
+            Map<String, String> newMap = generateProperties(map, dotGitDirectory)
+            if (logger.debugEnabled)
+                logger.debug("Generated Git properties  = ${newMap}")
+
+            // Writing to properties file
+            File file = getGitPropertiesFile(project)
+            logger.info "git.properties location = [${file?.absolutePath}]"
+
+            boolean written = new PropertiesFileWriter().write(newMap, file, gitProperties.force)
+            if (written) {
+                logger.info("Written properties to [${file}]...")
+            } else {
+                logger.info("Skip writing properties to [${file}] as it is up-to-date.")
+            }
+
+        }
+
+        File getDotGitDirectory(Project project) {
+            File dotGitDirectory = project.gitProperties.dotGitDirectory ? project.file(project.gitProperties.dotGitDirectory) : null
+            return new GitDirLocator(project.projectDir).lookupGitDirectory(dotGitDirectory)
+        }
+
+        File getGitPropertiesFile(Project project) {
+            File gitPropertiesDir = project.gitProperties.gitPropertiesDir ? project.file(project.gitProperties.gitPropertiesDir) : new File(project.buildDir, DEFAULT_OUTPUT_DIR)
+            File gitPropertiesFile = new File(gitPropertiesDir, GIT_PROPERTIES_FILENAME)
+            return gitPropertiesFile
+        }
+
+        Map getProperties(GitPropertiesPluginExtension gitProperties) {
             def keys = gitProperties.keys
 
             def map = [(KEY_GIT_BRANCH)                     : new BranchProperty()
@@ -138,33 +175,34 @@ class GitPropertiesPlugin implements Plugin<Project> {
                        , (KEY_GIT_BUILD_VERSION)            : new BuildVersionProperty(project.version)
                        , (KEY_GIT_BUILD_HOST)               : new BuildHostProperty()]
 
+            map = map.subMap(keys)
+
+            if (gitProperties.customProperties)
+                map.putAll(gitProperties.customProperties)
+
+            return map
+        }
+
+        Map<String, String> generateProperties(Map map, File dotGitDirectory) {
             def newMap = new HashMap<String, String>()
-            map.subMap(keys).each{ k, v -> newMap.put(k, v.call(repo).toString() ) }
-            gitProperties.customProperties.each{ k, v -> newMap.put(k, v instanceof Closure ? v.call(repo).toString() : v.toString() ) }
+            def repo = Grgit.open(dir: dotGitDirectory)
 
-            // Close Grgit to avoid issues with Gradle daemon
-            repo.close()
-
-            // Writing to properties file
-            boolean written = new PropertiesFileWriter().write(newMap, file, gitProperties.force)
-            if (written) {
-                logger.info("Written to [${file}]...")
-            } else {
-                logger.info("Skip writing [${file}] as it is up-to-date.")
+            try {
+                map.each{ k, v -> newMap.put(k, v instanceof Closure ? v.call(repo).toString() : v.toString() ) }
+            } finally {
+                // Close Grgit to avoid issues with Gradle daemon
+                repo.close()
             }
 
+            return newMap
         }
-
-        File getDotGitDirectory(Project project) {
-            return new GitDirLocator(project.projectDir).lookupGitDirectory(project.gitProperties.dotGitDirectory)
-        }
-
     }
 }
 
+@ToString(includeNames=true)
 class GitPropertiesPluginExtension {
-    File gitPropertiesDir
-    File dotGitDirectory
+    def gitPropertiesDir
+    def dotGitDirectory
     List keys = GitPropertiesPlugin.KEY_ALL.toList()
     Map<String, Object> customProperties = new HashMap<String, Object>()
     String dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
