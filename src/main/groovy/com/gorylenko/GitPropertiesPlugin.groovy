@@ -17,6 +17,27 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
+import com.gorylenko.properties.BranchProperty
+import com.gorylenko.properties.BuildHostProperty
+import com.gorylenko.properties.BuildTimeProperty
+import com.gorylenko.properties.BuildUserEmailProperty
+import com.gorylenko.properties.BuildUserNameProperty
+import com.gorylenko.properties.BuildVersionProperty
+import com.gorylenko.properties.ClosestTagCommitCountProperty
+import com.gorylenko.properties.ClosestTagNameProperty
+import com.gorylenko.properties.CommitIdAbbrevProperty
+import com.gorylenko.properties.CommitIdDescribeProperty
+import com.gorylenko.properties.CommitIdProperty
+import com.gorylenko.properties.CommitMessageFullProperty
+import com.gorylenko.properties.CommitMessageShortProperty
+import com.gorylenko.properties.CommitTimeProperty
+import com.gorylenko.properties.CommitUserEmailProperty
+import com.gorylenko.properties.CommitUserNameProperty
+import com.gorylenko.properties.DirtyProperty
+import com.gorylenko.properties.RemoteOriginUrlProperty
+import com.gorylenko.properties.TagsProperty
+import com.gorylenko.properties.TotalCommitCountProperty
+
 class GitPropertiesPlugin implements Plugin<Project> {
 
     private static final String EXTENSION_NAME = "gitProperties"

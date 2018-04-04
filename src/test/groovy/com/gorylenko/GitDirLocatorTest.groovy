@@ -8,6 +8,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
+import com.gorylenko.properties.GitRepositoryBuilder
+
 class GitDirLocatorTest {
     File projectDir
 
