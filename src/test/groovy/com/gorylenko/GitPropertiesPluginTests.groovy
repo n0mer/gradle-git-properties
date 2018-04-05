@@ -38,7 +38,7 @@ class GitPropertiesPluginTests {
         ext.dotGitDirectory = new File('.git')
 
         def task = project.tasks.generateGitProperties
-        assertTrue(task instanceof GitPropertiesPlugin.GenerateGitPropertiesTask)
+        assertTrue(task instanceof GenerateGitPropertiesTask)
 
         task.generate()
 
@@ -46,7 +46,7 @@ class GitPropertiesPluginTests {
 
         Properties properties = new Properties()
         properties.load(new FileInputStream(gitPropertiesFile))
-        GitPropertiesPlugin.KEY_ALL.each{
+        GitProperties.standardProperties.each{
             assertNotNull(properties.getProperty(it))
         }
     }
@@ -63,7 +63,7 @@ class GitPropertiesPluginTests {
         ext.failOnNoGitDirectory = false;
 
         def task = project.tasks.generateGitProperties
-        assertTrue(task instanceof GitPropertiesPlugin.GenerateGitPropertiesTask)
+        assertTrue(task instanceof GenerateGitPropertiesTask)
 
         task.generate()
 
@@ -83,7 +83,7 @@ class GitPropertiesPluginTests {
         // failOnNoGitDirectory is true by default
 
         def task = project.tasks.generateGitProperties
-        assertTrue(task instanceof GitPropertiesPlugin.GenerateGitPropertiesTask)
+        assertTrue(task instanceof GenerateGitPropertiesTask)
 
         try {
             task.generate()

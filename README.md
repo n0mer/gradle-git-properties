@@ -85,6 +85,22 @@ gitProperties {
 }
 ```
 
+The generated properties can also be accessed from project.ext by configuring `extProperty`. In the below example, `gitProps` is used as the name of the exposed model
+
+```groovy
+gitProperties {
+    extProperty = 'gitProps'
+}
+generateGitProperties.outputs.upToDateWhen { false }
+
+task printGitProperties(dependsOn: 'generateGitProperties') {
+    doLast {
+        println "git.commit.id.abbrev=" + project.ext.gitProps['git.commit.id.abbrev']
+    }
+}
+```
+
+
 > By default, the `info` endpoint exposes only `git.branch`, `git.commit.id`, and `git.commit.time` properties (even then there are more in your git.properties).
 > In order to expose all available properties, set the "management.info.git.mode" property to "full" per [the Spring Boot documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html#production-ready-application-info-git), e.g. in application.properties:
 
