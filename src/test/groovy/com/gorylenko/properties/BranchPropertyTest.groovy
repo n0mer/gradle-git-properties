@@ -2,6 +2,8 @@ package com.gorylenko.properties
 
 import static org.junit.Assert.*
 
+import java.util.Map
+
 import org.ajoberstar.grgit.Commit
 import org.ajoberstar.grgit.Grgit
 import org.ajoberstar.grgit.Person
@@ -78,5 +80,39 @@ class BranchPropertyTest {
         repo.checkout (branch : "branch-1")
 
         assertEquals("branch-1", new BranchProperty().doCall(repo))
+    }
+
+
+    @Test
+    public void testDoCallOnJenkinsServer() {
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+
+            // commit 1 new file "hello.txt"
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+
+            // create a new branch "branch-1" at current location
+            gitRepoBuilder.addBranch("branch-1")
+
+        })
+
+        repo.checkout (branch : "master")
+
+        BranchProperty prop = new BranchProperty() {
+            @Override
+            Map<String, String> getEnv() {
+                return [JOB_NAME: 'MyJob', GIT_LOCAL_BRANCH: 'local-branch']
+            }
+        }
+        assertEquals("local-branch", prop.doCall(repo))
+
+
+        BranchProperty prop2 = new BranchProperty() {
+            @Override
+            Map<String, String> getEnv() {
+                return [JOB_NAME: 'MyJob', GIT_BRANCH: 'git-branch']
+            }
+        }
+        assertEquals("git-branch", prop2.doCall(repo))
     }
 }

@@ -66,4 +66,14 @@ class RemoteOriginUrlPropertyTest {
         repo1.close()
     }
 
+    @Test
+    public void testDoCallWithRemoteUrlWithoutPassword() {
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.setConfigString("remote", "origin", "url", "https://myprivate.git.host/gitrepo.git")
+        })
+        def repo1 = Grgit.open(dir: projectDir)
+
+        assertEquals('https://myprivate.git.host/gitrepo.git', new RemoteOriginUrlProperty().doCall(repo))
+        repo1.close()
+    }
 }

@@ -42,10 +42,9 @@ class TagsPropertyTest {
 
     @Test
     public void testDoCallOneCommit() {
-        Commit firstCommit
         GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
             // commit 1 new file "hello.txt"
-            firstCommit = gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
         })
         assertEquals('', new TagsProperty().doCall(repo))
     }
