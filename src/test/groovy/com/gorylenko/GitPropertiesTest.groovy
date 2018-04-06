@@ -15,7 +15,6 @@ class GitPropertiesTest {
 
     File projectDir
     File dotGitDirectory
-    Grgit repo
     GitProperties props = new GitProperties()
 
     @Before
@@ -26,19 +25,11 @@ class GitPropertiesTest {
         projectDir = File.createTempDir("BranchPropertyTest", ".tmp")
         dotGitDirectory = new File(projectDir, '.git')
 
-        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
-            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
-        })
-
-        // Set up repo
-        repo = Grgit.open(dir: projectDir)
-
-
+        GitRepositoryBuilder.setupProjectDir(projectDir, { })
     }
 
     @After
     public void tearDown() throws Exception {
-        repo?.close()
         projectDir.deleteDir()
     }
 
@@ -49,8 +40,27 @@ class GitPropertiesTest {
 
 
     @Test
-    public void testGenerateAllProps() {
+    public void testGenerateAllPropsOnEmptyRepo() {
 
+        List<String> keys = GitProperties.standardProperties
+        String dateFormat
+        String dateFormatTimeZone
+        String buildVersion = "1.0"
+        Map<String, Closure> customProperties = [:]
+
+        Map<String, String> generated = props.generate(dotGitDirectory, keys, dateFormat, dateFormatTimeZone, buildVersion, customProperties)
+
+        GitProperties.standardProperties.each {
+            assertNotNull(generated[it])
+        }
+    }
+
+    @Test
+    public void testGenerateAllPropsOnNonEmptyRepo() {
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
 
         List<String> keys = GitProperties.standardProperties
         String dateFormat
@@ -69,6 +79,9 @@ class GitPropertiesTest {
 
     @Test
     public void testGenerateSelectedProps() {
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
 
         List<String> keys = ['git.branch','git.commit.id','git.commit.time']
         String dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
