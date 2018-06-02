@@ -27,6 +27,25 @@ hs_err_pid*
 # IntelliJ
 /out/
 
+# STS
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+/target/
+/bin/
+
+# NetBeans
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
 ## Gradle template
 .gradle
 build/
