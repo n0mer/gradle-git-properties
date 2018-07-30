@@ -1,8 +1,12 @@
 ## about
 
-This repository contains packaged Gradle plugin for `git.properties` file generation.
+This Gradle plugin can be used for generating `git.properties` file generation for Git-based projects (similar to maven git commit id plugin). It can be used for (but not limited to) Spring Boot apps.
+Plugin is available from [Gradle Plugins repository](https://plugins.gradle.org/plugin/com.gorylenko.gradle-git-properties).
 
 Idea - @lievendoclo, originally published in article [Spring Boot's info endpoint, Git and Gradle - InsaneProgramming](http://www.insaneprogramming.be/article/2014/08/15/spring-boot-info-git/).
+
+## notes
+* Plugin requires Java 8+
 
 ## usage
 
@@ -14,7 +18,9 @@ plugins {
 }
 ```
 
-This is enough to see git details via `info` endpoint of [spring-boot-actuator](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready).
+A git.properties file will be generated when building Java-based projects (the plugin will configure any existing `classes` task to depend on `generateGitProperties` task - which is responsible for generated git.properties file). For non-Java projects, `generateGitProperties` task must be executed explicitly to generate git.properties file. The git repository for the project will be used.
+
+Spring Boot specific info: This is enough to see git details via `info` endpoint of [spring-boot-actuator](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready).
 
 If needed - override location of `git.properties` file like this:
 
@@ -34,16 +40,9 @@ gitProperties {
 }
 ```
 
-The `.git` directory for the project should be detected automatically, otherwise it can be specified manually using `dotGitDirectory`:
-
-```groovy
-gitProperties {
-    dotGitDirectory = "${project.rootDir}/../somefolder/.git"
-}
-```
 
 
-By default, all available git properties (which are supported by the plugin) will be generated:
+By default, all git properties which are supported by the plugin will be generated:
 
 ```
 git.branch
@@ -75,7 +74,7 @@ gitProperties {
 }
 ```
 
-Custom properties can also be added with `customProperty` (supports both expressions and closures):
+Custom properties can be added with `customProperty` (supports both expressions and closures):
 
 ```groovy
 gitProperties {
@@ -85,35 +84,25 @@ gitProperties {
 }
 ```
 
-The generated properties can also be accessed from project.ext by configuring `extProperty`. In the below example, `gitProps` is used as the name of the exposed model
 
-```groovy
-gitProperties {
-    extProperty = 'gitProps'
-}
-generateGitProperties.outputs.upToDateWhen { false }
-
-task printGitProperties(dependsOn: 'generateGitProperties') {
-    doLast {
-        println "git.commit.id.abbrev=" + project.ext.gitProps['git.commit.id.abbrev']
-    }
-}
-```
-
-
-> By default, the `info` endpoint exposes only `git.branch`, `git.commit.id`, and `git.commit.time` properties (even then there are more in your git.properties).
+> Spring Boot specific info: By default, the `info` endpoint exposes only `git.branch`, `git.commit.id`, and `git.commit.time` properties (even then there are more in your git.properties).
 > In order to expose all available properties, set the "management.info.git.mode" property to "full" per [the Spring Boot documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html#production-ready-application-info-git), e.g. in application.properties:
 
 > `management.info.git.mode=full`
 
-Plugin is available from [Gradle Plugins repository](https://plugins.gradle.org/plugin/com.gorylenko.gradle-git-properties).
 
-## notes
-* Plugin requires Java 8+
+The `.git` directory for the project should be detected automatically, otherwise it can be specified manually using `dotGitDirectory`:
 
-## result
+```groovy
+gitProperties {
+    dotGitDirectory = "${project.rootDir}/../somefolder/.git"
+}
+```
 
-This is raw `JSON` from `info` endpoint (with management.info.git.mode=simple or not configured):
+
+## result from `info` endpoint (if used with Spring Boot apps)
+
+When using with Spring Boot: This is raw `JSON` from `info` endpoint (with management.info.git.mode=simple or not configured):
 
 ```json
 {
@@ -178,6 +167,42 @@ This is raw `JSON` from `info` endpoint (with management.info.git.mode=full):
         "count": "93"
       }
     }
+  }
+}
+```
+
+### other usages
+
+Although this plugin is used mostly for generating git.properties files, the generated git properties could also be used for other purposes (by configuring `extProperty` to keep generated properties and accessing the properties from `project.ext`). Note that the git.properties file is always generated and currently these is no option to disable it. Also please make sure that the `generateGitProperties` task is executed before accessing the generated properties.
+
+In the below example, `printGitProperties` will print `git.commit.id.abbrev` property when it is executed:
+
+```groovy
+gitProperties {
+    extProperty = 'gitProps' // git properties will be put in a map at project.ext.gitProps
+}
+generateGitProperties.outputs.upToDateWhen { false } // make sure the generateGitProperties task always executes (even when git.properties is not changed)
+
+task printGitProperties(dependsOn: 'generateGitProperties') { // make sure generateGitProperties task to execute before accessing generated properties
+    doLast {
+        println "git.commit.id.abbrev=" + project.ext.gitProps['git.commit.id.abbrev']
+    }
+}
+```
+
+Below is another example about using generated properties for MANIFEST.MF of a Spring Boot webapp (similar can be done for non Spring apps). Note the usage of GString lazy evaluation to delay evaluating `project.ext.gitProps['git.commit.id.abbrev']` until MANIFEST.MF is created. Because `generateGitProperties` task will always execute automatically before any `classes` task (in Java projects), no `dependOn` is needed for `bootJar` task.
+
+```groovy
+gitProperties {
+    extProperty = 'gitProps' // git properties will be put in a map at project.ext.gitProps
+}
+generateGitProperties.outputs.upToDateWhen { false } // make sure the generateGitProperties task always executes (even when git.properties is not changed)
+
+bootJar {
+  manifest {
+    attributes(
+        'Build-Revision': "${-> project.ext.gitProps['git.commit.id.abbrev']}"  // Use GString lazy evaluation to delay until git properties are populated
+    )
   }
 }
 ```
