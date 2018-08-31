@@ -3,6 +3,8 @@ package com.gorylenko.properties
 import static org.junit.Assert.*
 
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import org.ajoberstar.grgit.Commit
 import org.ajoberstar.grgit.Grgit
 import org.junit.After
@@ -93,4 +95,29 @@ class ClosestTagNamePropertyTest {
         assertEquals("TAGTWO", new ClosestTagNameProperty().doCall(repo))
     }
 
+    @Test
+    public void testDoCallOneTagOneCommitShallowClone() {
+
+        File tmpDir = File.createTempDir("BranchPropertyTestShallowClone", ".tmp")
+        Grgit repo1 = null
+
+        try {
+            InputStream is = ClosestTagNamePropertyTest.class.getResourceAsStream('/shallowclone3.zip')
+
+            is.withStream { Files.copy(it, new File(tmpDir, "shallowclone3.zip").toPath(), StandardCopyOption.REPLACE_EXISTING) }
+
+            AntBuilder ant  = new AntBuilder();
+
+            ant.unzip(src: new File(tmpDir, "shallowclone3.zip") ,dest: tmpDir, overwrite:"true" )
+
+            repo1 = Grgit.open(dir: new File(tmpDir, "shallowclone3"))
+
+            assertEquals("", new ClosestTagNameProperty().doCall(repo1))
+
+        } finally {
+            repo1?.close()
+            tmpDir.deleteDir()
+        }
+
+    }
 }

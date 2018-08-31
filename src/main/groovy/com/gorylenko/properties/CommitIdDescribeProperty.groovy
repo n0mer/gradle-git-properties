@@ -9,7 +9,19 @@ class CommitIdDescribeProperty extends AbstractGitProperty {
     }
 
     private String commitIdDescribe(Grgit repo, String dirtyMark) {
-        String describe = repo.describe()
+
+        String describe
+        try {
+            describe = repo.describe()
+        } catch (org.eclipse.jgit.api.errors.JGitInternalException e) {
+            if (e.getCause() instanceof org.eclipse.jgit.errors.MissingObjectException) {
+                // shallow clone, use the fallback value "<commit id>"
+                describe = repo.head().abbreviatedId
+            } else {
+                throw e;
+            }
+        }
+
         if (describe && !repo.status().clean) {
             describe += dirtyMark
         }
