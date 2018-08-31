@@ -9,12 +9,23 @@ class ClosestTagCommitCountProperty extends AbstractGitProperty {
     }
 
     String closestTagCommitCount(Grgit repo) {
-        String describe = repo.describe(longDescr: true)
-        if (describe) {
-            // remove commit ID
-            describe = describe.substring(0, describe.lastIndexOf('-'))
-            describe = describe.substring(describe.lastIndexOf('-') + 1)
+        try {
+
+            String describe = repo.describe(longDescr: true)
+            if (describe) {
+                // remove commit ID
+                describe = describe.substring(0, describe.lastIndexOf('-'))
+                describe = describe.substring(describe.lastIndexOf('-') + 1)
+            }
+            return describe ?: ''
+
+        } catch (org.eclipse.jgit.api.errors.JGitInternalException e) {
+            if (e.getCause() instanceof org.eclipse.jgit.errors.MissingObjectException) {
+                // shallow clone, use value ""
+                return ''
+            } else {
+                throw e;
+            }
         }
-        return describe ?: ''
     }
 }

@@ -9,13 +9,24 @@ class ClosestTagNameProperty extends AbstractGitProperty {
     }
 
     String closestTagName(Grgit repo) {
-        String describe = repo.describe(longDescr: true)
-        if (describe) {
-            // remove commit ID
-            describe = describe.substring(0, describe.lastIndexOf('-'))
-            // remove commit number
-            describe = describe.substring(0, describe.lastIndexOf('-'))
+        try {
+
+            String describe = repo.describe(longDescr: true)
+            if (describe) {
+                // remove commit ID
+                describe = describe.substring(0, describe.lastIndexOf('-'))
+                // remove commit number
+                describe = describe.substring(0, describe.lastIndexOf('-'))
+            }
+            return describe ?: ''
+
+        } catch (org.eclipse.jgit.api.errors.JGitInternalException e) {
+            if (e.getCause() instanceof org.eclipse.jgit.errors.MissingObjectException) {
+                // shallow clone, use value ""
+                return ''
+            } else {
+                throw e;
+            }
         }
-        return describe ?: ''
     }
 }

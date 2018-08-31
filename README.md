@@ -14,7 +14,7 @@ Declare this in your `build.gradle`
 
 ```groovy
 plugins {
-  id "com.gorylenko.gradle-git-properties" version "1.5.1"
+  id "com.gorylenko.gradle-git-properties" version "1.5.2"
 }
 ```
 
