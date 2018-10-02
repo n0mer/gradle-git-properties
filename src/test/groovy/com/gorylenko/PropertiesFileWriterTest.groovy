@@ -1,9 +1,11 @@
 package com.gorylenko
 
 import org.junit.Before
-import static org.junit.Assert.*
-
 import org.junit.Test
+
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNotEquals
+import static org.junit.Assert.assertTrue
 
 class PropertiesFileWriterTest {
 
@@ -93,5 +95,24 @@ class PropertiesFileWriterTest {
         assertTrue(index1 < index2)
         assertTrue(index2 < index3)
         assertTrue(index3 < index4)
+    }
+
+    @Test
+    public void shouldNotContainComments() {
+        // given:
+        def map = [greeting_3: 'Hello', greeting_1: 'Hello', greeting_2: 'Hello']
+        File file = File.createTempFile("temp", ".tmp")
+
+        // when:
+        writer.write(map, file, true)
+        def lines = file.text.readLines()
+        def nonEmptyLines = lines.findAll { it.length() > 0 }
+        def hasComments = lines.findAll({ it.startsWith("#") })
+                               .isEmpty()
+
+        // then:
+        assertTrue("git.properties should not contain comments", hasComments)
+        assertEquals(map.size(), lines.size())
+        assertEquals(map.size(), nonEmptyLines.size())
     }
 }
