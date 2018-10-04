@@ -37,7 +37,8 @@ class PropertiesFileWriter {
 
             // remove comments, and join as multi-line string again
             def value = new ByteArrayInputStream(baos.toByteArray()).readLines()
-                                                                    .findAll { !it.startsWith("#") }.join("\n")
+                                                                    .findAll { !it.startsWith("#") }
+                                                                    .join(String.format("%n"))
 
             // write to the actual writer
             writer.append(value)
