@@ -65,8 +65,6 @@ class PropertiesFileWriterTest {
         // Try to write to same file with different content
         writer.write([greeting: 'Hello2'], file, false)
 
-        // Make sure the file lastModified changed
-        assertNotEquals(lastModified, file.lastModified())
         // Make sure content is updated
         assertEquals(loadProperties(file), [greeting: 'Hello2'])
     }
