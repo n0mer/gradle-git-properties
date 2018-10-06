@@ -25,11 +25,12 @@ class PropertiesFileWriter {
             Collections.sort(v)
             return new Vector<Object>(v).elements()
         }
-
+/*
         @Override
         Set<Map.Entry<Object, Object>> entrySet() {
             keys().collect { new AbstractMap.SimpleImmutableEntry(it, get(it)) } as LinkedHashSet
         }
+*/        
     }
 
     private void writeToPropertiesFile(Map<String, String> properties, File propsFile) {
