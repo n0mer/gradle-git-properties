@@ -18,8 +18,12 @@ class BranchProperty extends AbstractGitProperty {
         'BAMBOO_BUILDKEY' : ['BAMBOO_PLANREPOSITORY_BRANCH'] //https://confluence.atlassian.com/bamboo/bamboo-variables-289277087.html
 
         ]
-    BranchProperty(String branch = null) {
+    BranchProperty(String branch) {
         this.branch = branch
+    }
+
+    BranchProperty() {
+        this.branch = null
     }
 
     String doCall(Grgit repo) {

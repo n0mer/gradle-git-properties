@@ -41,7 +41,7 @@ class BranchPropertyTest {
 
     @Test
     public void testDoCallOnEmptyRepo() {
-        assertEquals('', new BranchProperty().doCall(repo))
+        assertEquals('', new BranchProperty(null).doCall(repo))
     }
 
     @Test
@@ -59,7 +59,7 @@ class BranchPropertyTest {
             gitRepoBuilder.commitFile("hello2.txt", "Hello2", "Added hello2.txt")
         })
 
-        assertEquals("master", new BranchProperty().doCall(repo))
+        assertEquals("master", new BranchProperty(null).doCall(repo))
     }
 
     @Test
@@ -79,7 +79,7 @@ class BranchPropertyTest {
 
         repo.checkout (branch : "branch-1")
 
-        assertEquals("branch-1", new BranchProperty().doCall(repo))
+        assertEquals("branch-1", new BranchProperty(null).doCall(repo))
     }
 
 
