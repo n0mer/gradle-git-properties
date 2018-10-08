@@ -4,6 +4,7 @@ import org.ajoberstar.grgit.Grgit
 
 class BranchProperty extends AbstractGitProperty {
     String branch
+    Map<String, String> env
 
     def branchEnvs = [
 
@@ -20,10 +21,6 @@ class BranchProperty extends AbstractGitProperty {
         ]
     BranchProperty(String branch) {
         this.branch = branch
-    }
-
-    BranchProperty() {
-        this.branch = null
     }
 
     String doCall(Grgit repo) {
@@ -60,6 +57,10 @@ class BranchProperty extends AbstractGitProperty {
     }
 
     Map<String, String> getEnv() {
-        return System.getenv()
+        return env ?: System.getenv()
     }
+
+	void setEnv(env) {
+		this.env = env
+	}
 }

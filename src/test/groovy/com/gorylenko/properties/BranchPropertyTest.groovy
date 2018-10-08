@@ -39,9 +39,23 @@ class BranchPropertyTest {
         projectDir.deleteDir()
     }
 
+    // Must always override getEnv() for object under test otherwise the tests will fail on CI servers because of environment variables
+    BranchProperty getTestObject(String branch, Map<String, String> env) {
+        BranchProperty instance = new BranchProperty(branch)
+        instance.setEnv(env)
+        return instance
+    }
+
     @Test
     public void testDoCallOnEmptyRepo() {
-        assertEquals('', new BranchProperty(null).doCall(repo))
+        BranchProperty prop = getTestObject(null, [:])
+        assertEquals('', prop.doCall(repo))
+    }
+
+    @Test
+    public void testDoCallOnEmptyRepoWithUserDefinedBranch() {
+        BranchProperty prop = getTestObject("mybranch", [:])
+        assertEquals('mybranch', prop.doCall(repo))
     }
 
     @Test
@@ -59,7 +73,8 @@ class BranchPropertyTest {
             gitRepoBuilder.commitFile("hello2.txt", "Hello2", "Added hello2.txt")
         })
 
-        assertEquals("master", new BranchProperty(null).doCall(repo))
+        BranchProperty prop = getTestObject(null, [:])
+        assertEquals("master", prop.doCall(repo))
     }
 
     @Test
@@ -79,9 +94,33 @@ class BranchPropertyTest {
 
         repo.checkout (branch : "branch-1")
 
-        assertEquals("branch-1", new BranchProperty(null).doCall(repo))
+        BranchProperty prop = getTestObject(null, [:])
+        assertEquals("branch-1", prop.doCall(repo))
     }
 
+    @Test
+    public void testDoCallWithUserDefinedBranch() {
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+
+            // commit 1 new file "hello.txt"
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+
+            // create a new branch "branch-1" at current location
+            gitRepoBuilder.addBranch("branch-1")
+
+            // commit 1 new file "hello2.txt"
+            gitRepoBuilder.commitFile("hello2.txt", "Hello2", "Added hello2.txt")
+        })
+
+        assertEquals("mybranch", getTestObject("mybranch", [:]).doCall(repo))
+        assertEquals("mybranch", getTestObject("mybranch", [JOB_NAME: 'MyJob', GIT_LOCAL_BRANCH: 'local-branch']).doCall(repo))
+        assertEquals("mybranch", getTestObject("mybranch", [JOB_NAME: 'MyJob', GIT_BRANCH: 'git-branch']).doCall(repo))
+        assertEquals("mybranch", getTestObject("mybranch", [TRAVIS: 'true', TRAVIS_BRANCH: 'local-branch']).doCall(repo))
+        assertEquals("mybranch", getTestObject("mybranch", [TEAMCITY_VERSION: '1', 'teamcity.build.branch': 'local-branch']).doCall(repo))
+        assertEquals("mybranch", getTestObject("mybranch", [GITLAB_CI: 'true', 'CI_COMMIT_REF_NAME': 'local-branch']).doCall(repo))
+        assertEquals("mybranch", getTestObject("mybranch", [BAMBOO_BUILDKEY: 'true', 'BAMBOO_PLANREPOSITORY_BRANCH': 'local-branch']).doCall(repo))
+    }
 
     @Test
     public void testDoCallOnJenkinsServer() {
@@ -98,21 +137,11 @@ class BranchPropertyTest {
 
         repo.checkout (branch : "master")
 
-        BranchProperty prop = new BranchProperty() {
-            @Override
-            Map<String, String> getEnv() {
-                return [JOB_NAME: 'MyJob', GIT_LOCAL_BRANCH: 'local-branch']
-            }
-        }
+        BranchProperty prop = getTestObject(null, [JOB_NAME: 'MyJob', GIT_LOCAL_BRANCH: 'local-branch'])
         assertEquals("local-branch", prop.doCall(repo))
 
 
-        BranchProperty prop2 = new BranchProperty() {
-            @Override
-            Map<String, String> getEnv() {
-                return [JOB_NAME: 'MyJob', GIT_BRANCH: 'git-branch']
-            }
-        }
+        BranchProperty prop2 = getTestObject(null, [JOB_NAME: 'MyJob', GIT_BRANCH: 'git-branch'])
         assertEquals("git-branch", prop2.doCall(repo))
     }
 
@@ -131,12 +160,7 @@ class BranchPropertyTest {
 
         repo.checkout (branch : "master")
 
-        BranchProperty prop = new BranchProperty() {
-            @Override
-            Map<String, String> getEnv() {
-                return [TRAVIS: 'true', TRAVIS_BRANCH: 'local-branch']
-            }
-        }
+        BranchProperty prop = getTestObject(null, [TRAVIS: 'true', TRAVIS_BRANCH: 'local-branch'])
         assertEquals("local-branch", prop.doCall(repo))
 
 
@@ -157,12 +181,7 @@ class BranchPropertyTest {
 
         repo.checkout (branch : "master")
 
-        BranchProperty prop = new BranchProperty() {
-            @Override
-            Map<String, String> getEnv() {
-                return [TEAMCITY_VERSION: '1', 'teamcity.build.branch': 'local-branch']
-            }
-        }
+        BranchProperty prop = getTestObject(null, [TEAMCITY_VERSION: '1', 'teamcity.build.branch': 'local-branch'])
         assertEquals("local-branch", prop.doCall(repo))
 
 
@@ -183,12 +202,7 @@ class BranchPropertyTest {
 
         repo.checkout (branch : "master")
 
-        BranchProperty prop = new BranchProperty() {
-            @Override
-            Map<String, String> getEnv() {
-                return [GITLAB_CI: 'true', 'CI_COMMIT_REF_NAME': 'local-branch']
-            }
-        }
+        BranchProperty prop = getTestObject(null, [GITLAB_CI: 'true', 'CI_COMMIT_REF_NAME': 'local-branch'])
         assertEquals("local-branch", prop.doCall(repo))
     }
 
@@ -207,12 +221,7 @@ class BranchPropertyTest {
 
         repo.checkout (branch : "master")
 
-        BranchProperty prop = new BranchProperty() {
-            @Override
-            Map<String, String> getEnv() {
-                return [BAMBOO_BUILDKEY: 'true', 'BAMBOO_PLANREPOSITORY_BRANCH': 'local-branch']
-            }
-        }
+        BranchProperty prop = getTestObject(null, [BAMBOO_BUILDKEY: 'true', 'BAMBOO_PLANREPOSITORY_BRANCH': 'local-branch'])
         assertEquals("local-branch", prop.doCall(repo))
     }
 
