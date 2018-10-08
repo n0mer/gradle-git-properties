@@ -39,7 +39,12 @@ gitProperties {
 tasks.withType(GroovyCompile) {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
-
+test {
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+}
 publishing {
 
     publications {
