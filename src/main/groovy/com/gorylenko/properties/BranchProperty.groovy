@@ -57,7 +57,7 @@ class BranchProperty extends AbstractGitProperty {
     }
 
     Map<String, String> getEnv() {
-        return env ?: System.getenv()
+        return env != null ? env : System.getenv()
     }
 
 	void setEnv(env) {
