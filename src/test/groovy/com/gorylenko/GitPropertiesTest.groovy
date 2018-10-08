@@ -46,10 +46,11 @@ class GitPropertiesTest {
         List<String> keys = GitProperties.standardProperties
         String dateFormat
         String dateFormatTimeZone
+        String branch
         String buildVersion = "1.0"
         Map<String, Closure> customProperties = [:]
 
-        Map<String, String> generated = props.generate(dotGitDirectory, keys, dateFormat, dateFormatTimeZone, buildVersion, customProperties)
+        Map<String, String> generated = props.generate(dotGitDirectory, keys, dateFormat, dateFormatTimeZone, branch, buildVersion, customProperties)
 
         GitProperties.standardProperties.each {
             assertNotNull(generated[it])
@@ -66,10 +67,11 @@ class GitPropertiesTest {
         List<String> keys = GitProperties.standardProperties
         String dateFormat
         String dateFormatTimeZone
+        String branch
         String buildVersion = "1.0"
         Map<String, Closure> customProperties = ['test' : { return 10 }]
 
-        Map<String, String> generated = props.generate(dotGitDirectory, keys, dateFormat, dateFormatTimeZone, buildVersion, customProperties)
+        Map<String, String> generated = props.generate(dotGitDirectory, keys, dateFormat, dateFormatTimeZone, branch, buildVersion, customProperties)
 
         GitProperties.standardProperties.each {
             assertNotNull(generated[it])
@@ -77,6 +79,28 @@ class GitPropertiesTest {
         assertEquals('10', generated['test'])
     }
 
+
+    @Test
+    public void testGenerateSelectedWithUserDefinedBranchProps() {
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+            // add TAGONE to firstCommit (current HEAD)
+            gitRepoBuilder.addTag("TAGONE")
+        })
+
+        List<String> keys = ['git.branch','git.commit.id.describe']
+        String dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        String dateFormatTimeZone = "PST"
+        String branch = "mybranch"
+        String buildVersion = "1.0"
+        Map<String, Closure> customProperties = [:]
+
+        Map<String, String> generated = props.generate(dotGitDirectory, keys, dateFormat, dateFormatTimeZone, branch, buildVersion, customProperties)
+
+        assertEquals(2, generated.size())
+        assertEquals('mybranch', generated['git.branch'])
+        assertEquals("TAGONE", generated['git.commit.id.describe'])
+    }
 
     @Test
     public void testGenerateSelectedProps() {
@@ -87,17 +111,17 @@ class GitPropertiesTest {
         List<String> keys = ['git.branch','git.commit.id','git.commit.time']
         String dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
         String dateFormatTimeZone = "PST"
+        String branch
         String buildVersion = "1.0"
         Map<String, Closure> customProperties = [:]
 
-        Map<String, String> generated = props.generate(dotGitDirectory, keys, dateFormat, dateFormatTimeZone, buildVersion, customProperties)
+        Map<String, String> generated = props.generate(dotGitDirectory, keys, dateFormat, dateFormatTimeZone, branch, buildVersion, customProperties)
 
         assertEquals(3, generated.size())
         assertEquals('master', generated['git.branch'])
-        assertNotNull('master', generated['git.commit.id'])
-        assertNotNull('master', generated['git.commit.time'])
+        assertNotNull(generated['git.commit.id'])
+        assertNotNull(generated['git.commit.time'])
     }
-
 
     @Test
     public void testGenerateAllPropsOnShalowClonedRepo() {
@@ -106,6 +130,7 @@ class GitPropertiesTest {
         List<String> keys = GitProperties.standardProperties
         String dateFormat
         String dateFormatTimeZone
+        String branch
         String buildVersion = "1.0"
         Map<String, Closure> customProperties = ['test' : { return 10 }]
 
@@ -124,7 +149,7 @@ class GitPropertiesTest {
 
             repo1 = Grgit.open(dir: new File(tmpDir, "shallowclone3"))
 
-            Map<String, String> generated = props.generate(dotGitDirectory, keys, dateFormat, dateFormatTimeZone, buildVersion, customProperties)
+            Map<String, String> generated = props.generate(dotGitDirectory, keys, dateFormat, dateFormatTimeZone, branch, buildVersion, customProperties)
 
             GitProperties.standardProperties.each {
                 assertNotNull(generated[it])

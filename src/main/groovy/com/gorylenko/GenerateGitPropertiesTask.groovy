@@ -52,7 +52,7 @@ class GenerateGitPropertiesTask extends DefaultTask {
 
         GitProperties builder = new GitProperties()
         Map<String, String> newMap = builder.generate(dotGitDirectory,
-            gitProperties.keys, gitProperties.dateFormat, gitProperties.dateFormatTimeZone,
+            gitProperties.keys, gitProperties.dateFormat, gitProperties.dateFormatTimeZone, gitProperties.branch,
             project.version, gitProperties.customProperties)
 
         if (logger.debugEnabled) {

@@ -42,6 +42,13 @@ gitProperties {
 }
 ```
 
+If needed - use `branch` to override git branch name (when it cannot be detected correctly from environment variables/working directory)
+
+```groovy
+gitProperties {
+    branch = System.getenv('GIT_BRANCH')
+}
+```
 
 
 By default, all git properties which are supported by the plugin will be generated:
