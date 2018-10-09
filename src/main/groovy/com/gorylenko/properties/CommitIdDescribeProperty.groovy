@@ -13,8 +13,13 @@ class CommitIdDescribeProperty extends AbstractGitProperty {
         String describe
         try {
             describe = repo.describe()
+            if (describe == null && isShallowClone(repo)) {
+                // jgit 5 will return null while jgit 4 will throw exception on shallow clone
+                // shallow clone, use the fallback value "<commit id>"
+                describe = repo.head().abbreviatedId
+            }
         } catch (org.eclipse.jgit.api.errors.JGitInternalException e) {
-            if (e.getCause() instanceof org.eclipse.jgit.errors.MissingObjectException) {
+            if (isShallowClone(repo)) {
                 // shallow clone, use the fallback value "<commit id>"
                 describe = repo.head().abbreviatedId
             } else {
@@ -26,6 +31,11 @@ class CommitIdDescribeProperty extends AbstractGitProperty {
             describe += dirtyMark
         }
         return describe ?: ''
+    }
+
+    boolean isShallowClone(Grgit repo) {
+        File shallow =  new File(repo.repository.rootDir, ".git/shallow")
+        return shallow.exists()
     }
 
 }
