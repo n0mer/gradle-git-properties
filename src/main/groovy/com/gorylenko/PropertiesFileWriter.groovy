@@ -1,8 +1,5 @@
 package com.gorylenko
 
-import java.io.File
-import java.util.Map
-
 class PropertiesFileWriter {
 
     boolean write(Map<String, String> properties, File file, boolean force) {
