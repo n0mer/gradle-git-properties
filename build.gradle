@@ -22,7 +22,7 @@ repositories {
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    compile 'org.ajoberstar:grgit:2.2.1'
+    compile 'org.ajoberstar:grgit:2.3.0'
 
     testCompile 'junit:junit:4.12'
 }
@@ -39,7 +39,12 @@ gitProperties {
 tasks.withType(GroovyCompile) {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
-
+test {
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+}
 publishing {
 
     publications {

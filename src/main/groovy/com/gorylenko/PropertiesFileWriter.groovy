@@ -24,25 +24,8 @@ class PropertiesFileWriter {
         }
 
         @Override
-        void store(OutputStream out, String comments) throws IOException {
-            store(new BufferedWriter(new OutputStreamWriter(out, "8859_1")), comments)
-        }
-
-        @Override
-        void store(Writer writer, String comments) throws IOException {
-            // write to our writer first, so that we can remove comments
-            def baos = new ByteArrayOutputStream()
-            def pw = new PrintWriter(baos)
-            super.store(pw, comments)
-
-            // remove comments, and join as multi-line string again
-            def value = new ByteArrayInputStream(baos.toByteArray()).readLines()
-                                                                    .findAll { !it.startsWith("#") }
-                                                                    .join(String.format("%n"))
-
-            // write to the actual writer
-            writer.append(value)
-            writer.flush()
+        Set<Map.Entry<Object, Object>> entrySet() {
+            keys().collect { new AbstractMap.SimpleImmutableEntry(it, get(it)) } as LinkedHashSet
         }
     }
 

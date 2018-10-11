@@ -21,12 +21,17 @@ class ClosestTagNameProperty extends AbstractGitProperty {
             return describe ?: ''
 
         } catch (org.eclipse.jgit.api.errors.JGitInternalException e) {
-            if (e.getCause() instanceof org.eclipse.jgit.errors.MissingObjectException) {
+            if (isShallowClone(repo)) {
                 // shallow clone, use value ""
                 return ''
             } else {
                 throw e;
             }
         }
+    }
+
+    boolean isShallowClone(Grgit repo) {
+        File shallow =  new File(repo.repository.rootDir, ".git/shallow")
+        return shallow.exists()
     }
 }

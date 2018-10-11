@@ -5,6 +5,8 @@ Plugin is available from [Gradle Plugins repository](https://plugins.gradle.org/
 
 Idea - @lievendoclo, originally published in article [Spring Boot's info endpoint, Git and Gradle - InsaneProgramming](http://www.insaneprogramming.be/article/2014/08/15/spring-boot-info-git/).
 
+[![Build Status](https://travis-ci.org/n0mer/gradle-git-properties.svg?branch=master)](https://travis-ci.org/n0mer/gradle-git-properties)
+
 ## notes
 * Plugin requires Java 8+
 
@@ -40,6 +42,13 @@ gitProperties {
 }
 ```
 
+If needed - use `branch` to override git branch name (when it cannot be detected correctly from environment variables/working directory)
+
+```groovy
+gitProperties {
+    branch = System.getenv('GIT_BRANCH')
+}
+```
 
 
 By default, all git properties which are supported by the plugin will be generated:

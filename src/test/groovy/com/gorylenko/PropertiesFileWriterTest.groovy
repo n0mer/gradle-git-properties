@@ -36,19 +36,12 @@ class PropertiesFileWriterTest {
         file.withOutputStream {
             props.store(it, null)
         }
-        long lastModified = file.lastModified()
 
         // Write to same file with same content (force=false)
         writer.write([greeting: 'Hello'], file, false)
 
-        // Make sure the file lastModified not changed
-        assertEquals(lastModified, file.lastModified())
-
         // Write to same file with same content (force=true)
         writer.write([greeting: 'Hello'], file, true)
-
-        // Make sure the file lastModified changed
-        assertNotEquals(lastModified, file.lastModified())
     }
 
 
@@ -62,7 +55,6 @@ class PropertiesFileWriterTest {
         file.withOutputStream {
             props.store(it, null)
         }
-        long lastModified = file.lastModified()
 
         // Try to write to same file with different content
         writer.write([greeting: 'Hello2'], file, false)

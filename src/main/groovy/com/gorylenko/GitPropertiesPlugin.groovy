@@ -50,6 +50,7 @@ class GitPropertiesPluginExtension {
     Map<String, Object> customProperties = [:]
     String dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
     String dateFormatTimeZone
+    String branch
     String extProperty
     boolean failOnNoGitDirectory = true
     boolean force

@@ -54,12 +54,12 @@ class GitProperties {
     private static final String KEY_GIT_BUILD_VERSION = "git.build.version"
     private static final String KEY_GIT_BUILD_HOST = "git.build.host"
 
-    public Map<String, String> generate(File dotGitDirectory, List<String> keys, String dateFormat, String dateFormatTimeZone,
+    public Map<String, String> generate(File dotGitDirectory, List<String> keys, String dateFormat, String dateFormatTimeZone, String branch,
         Object buildVersion, Map<String, Object> customProperties) {
 
         // Find standard properties and custom properties to be generated
 
-        Map properties = getStandardPropertiesMap(dateFormat, dateFormatTimeZone, buildVersion).subMap(keys)
+        Map properties = getStandardPropertiesMap(dateFormat, dateFormatTimeZone, branch, buildVersion).subMap(keys)
         if (customProperties) {
             properties.putAll(customProperties)
         }
@@ -78,12 +78,12 @@ class GitProperties {
     }
 
     public static List getStandardProperties() {
-        return getStandardPropertiesMap(null, null, null).keySet() as List
+        return getStandardPropertiesMap(null, null, null, null).keySet() as List
     }
 
-    private static Map getStandardPropertiesMap(String dateFormat, String dateFormatTimeZone, Object buildVersion) {
+    private static Map getStandardPropertiesMap(String dateFormat, String dateFormatTimeZone, String branch, Object buildVersion) {
 
-        def map = [(KEY_GIT_BRANCH)                     : new BranchProperty()
+        def map = [(KEY_GIT_BRANCH)                     : new BranchProperty(branch)
                    , (KEY_GIT_COMMIT_ID)                : new CommitIdProperty()
                    , (KEY_GIT_COMMIT_ID_ABBREVIATED)    : new CommitIdAbbrevProperty()
                    , (KEY_GIT_COMMIT_USER_NAME)         : new CommitUserNameProperty()
