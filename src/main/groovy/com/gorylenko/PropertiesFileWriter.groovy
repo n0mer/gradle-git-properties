@@ -1,5 +1,8 @@
 package com.gorylenko
 
+import com.gorylenko.writer.NormalizeEOLOutputStream
+import com.gorylenko.writer.SkipPropertiesCommentsOutputStream
+
 class PropertiesFileWriter {
 
     boolean write(Map<String, String> properties, File file, boolean force) {
@@ -26,6 +29,16 @@ class PropertiesFileWriter {
         @Override
         Set<Map.Entry<Object, Object>> entrySet() {
             keys().collect { new AbstractMap.SimpleImmutableEntry(it, get(it)) } as LinkedHashSet
+        }
+
+        @Override
+        void store(OutputStream out, String comments) throws IOException {
+            super.store(new NormalizeEOLOutputStream(new SkipPropertiesCommentsOutputStream(out)), comments);
+        }
+
+        @Override
+        public void store(Writer writer, String comments) throws IOException {
+            throw new UnsupportedOperationException();
         }
     }
 
