@@ -30,16 +30,6 @@ class PropertiesFileWriter {
         Set<Map.Entry<Object, Object>> entrySet() {
             keys().collect { new AbstractMap.SimpleImmutableEntry(it, get(it)) } as LinkedHashSet
         }
-
-        @Override
-        void store(OutputStream out, String comments) throws IOException {
-            super.store(new NormalizeEOLOutputStream(new SkipPropertiesCommentsOutputStream(out)), comments);
-        }
-
-        @Override
-        public void store(Writer writer, String comments) throws IOException {
-            throw new UnsupportedOperationException();
-        }
     }
 
     private void writeToPropertiesFile(Map<String, String> properties, File propsFile) {
@@ -53,7 +43,7 @@ class PropertiesFileWriter {
         propsFile.withOutputStream {
             def props = new SortedProperties()
             props.putAll(properties)
-            props.store(it, null)
+            props.store(new NormalizeEOLOutputStream(new SkipPropertiesCommentsOutputStream(it)), null)
         }
     }
 
