@@ -24,8 +24,8 @@ class GenerateGitPropertiesTask extends DefaultTask {
         description = 'Generate a git.properties file.'
 
         outputs.upToDateWhen {
-            // when customProperties or extProperty  is configured (or failOnNoGitDirectory=false) always execute the task
-            return !gitProperties.customProperties && !gitProperties.extProperty && gitProperties.failOnNoGitDirectory
+            // when extProperty is configured or failOnNoGitDirectory=false always execute the task
+            return !gitProperties.extProperty && gitProperties.failOnNoGitDirectory
         }
     }
 
