@@ -7,10 +7,13 @@ import java.util.Map
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.FileTree
+import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
+@CacheableTask
 class GenerateGitPropertiesTask extends DefaultTask {
 
     private static final String GIT_PROPERTIES_FILENAME = "git.properties"
@@ -19,6 +22,17 @@ class GenerateGitPropertiesTask extends DefaultTask {
     GenerateGitPropertiesTask() {
         // Description for the task
         description = 'Generate a git.properties file.'
+
+        outputs.upToDateWhen {
+            // when customProperties or extProperty  is configured (or failOnNoGitDirectory=false) always execute the task
+            return !gitProperties.customProperties && !gitProperties.extProperty && gitProperties.failOnNoGitDirectory
+        }
+    }
+
+    private Map<String, String> generatedProperties
+
+    public GitPropertiesPluginExtension getGitProperties() {
+        return project.gitProperties
     }
 
     @InputFiles
@@ -32,9 +46,13 @@ class GenerateGitPropertiesTask extends DefaultTask {
         return getGitPropertiesFile(project)
     }
 
-    @TaskAction
-    void generate() {
-        GitPropertiesPluginExtension gitProperties = project.gitProperties
+    /**
+     * To support cacheable task and UP-TO-DATE check
+     */
+    @Input
+    public Map<String, String> getGeneratedProperties() {
+
+        if (this.generatedProperties != null) return this.generatedProperties
 
         if (logger.debugEnabled) {
             logger.debug("gitProperties = ${gitProperties}")
@@ -42,22 +60,38 @@ class GenerateGitPropertiesTask extends DefaultTask {
 
         if (!gitProperties.failOnNoGitDirectory && getSource().empty) {
             logger.info("Exiting because no Git repository found and failOnNoGitDirectory = true.")
-            return
+            return [:]
         }
 
         File dotGitDirectory = getDotGitDirectory(project)
         logger.info("dotGitDirectory = [${dotGitDirectory?.absolutePath}]")
 
+
         // Generate properties
 
         GitProperties builder = new GitProperties()
         Map<String, String> newMap = builder.generate(dotGitDirectory,
-            gitProperties.keys, gitProperties.dateFormat, gitProperties.dateFormatTimeZone, gitProperties.branch,
-            project.version, gitProperties.customProperties)
+                gitProperties.keys, gitProperties.dateFormat, gitProperties.dateFormatTimeZone, gitProperties.branch,
+                project.version, gitProperties.customProperties)
 
         if (logger.debugEnabled) {
             logger.debug("Generated Git properties  = ${newMap}")
         }
+        generatedProperties = newMap
+
+        return this.generatedProperties
+    }
+
+
+    @TaskAction
+    void generate() {
+
+        if (!gitProperties.failOnNoGitDirectory && getSource().empty) {
+            logger.info("Exiting because no Git repository found and failOnNoGitDirectory = true.")
+            return
+        }
+
+        Map<String, String> newMap = getGeneratedProperties()
 
         // Expose generated properties to project.ext[gitProperties.extProperty] if configured
 
