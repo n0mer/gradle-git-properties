@@ -20,6 +20,14 @@ plugins {
 }
 ```
 
+Or use 2.0.0-beta1 (beta version, with Build Cache support, see https://docs.gradle.org/current/userguide/build_cache.html)
+
+```groovy
+plugins {
+  id "com.gorylenko.gradle-git-properties" version "2.0.0-beta1"
+}
+```
+
 A git.properties file will be generated when building Java-based projects (the plugin will configure any existing `classes` task to depend on `generateGitProperties` task - which is responsible for generated git.properties file). For non-Java projects, `generateGitProperties` task must be executed explicitly to generate git.properties file. The git repository for the project will be used.
 
 Spring Boot specific info: This is enough to see git details via `info` endpoint of [spring-boot-actuator](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready).
