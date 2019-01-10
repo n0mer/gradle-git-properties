@@ -16,15 +16,7 @@ Declare this in your `build.gradle`
 
 ```groovy
 plugins {
-  id "com.gorylenko.gradle-git-properties" version "1.5.2"
-}
-```
-
-Or use 2.0.0-beta1 (beta version, with Build Cache support, see https://docs.gradle.org/current/userguide/build_cache.html)
-
-```groovy
-plugins {
-  id "com.gorylenko.gradle-git-properties" version "2.0.0-beta1"
+  id "com.gorylenko.gradle-git-properties" version "2.0.0"
 }
 ```
 

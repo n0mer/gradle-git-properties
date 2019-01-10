@@ -22,12 +22,12 @@ repositories {
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    compile 'org.ajoberstar.grgit:grgit-core:3.0.0-rc.2'
+    compile 'org.ajoberstar.grgit:grgit-core:3.0.0'
 
     testCompile 'junit:junit:4.12'
 }
 
-version = "2.0.0-beta1"
+version = "2.0.0"
 group = "com.gorylenko.gradle-git-properties"
 
 gitProperties {
