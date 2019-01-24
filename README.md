@@ -93,6 +93,17 @@ gitProperties {
 }
 ```
 
+You can also replace standard properties using `customProperty`. In the below example, the logic "it.describe(tags: true)" will replace plugin's logic which using describe(tags: false)
+
+```groovy
+gitProperties {
+    // using any tags (not limited to annotated tags) for "git.commit.id.describe" property
+    // see http://ajoberstar.org/grgit/grgit-describe.html for more info about the describe method and available parameters
+    // 'it' is an instance of org.ajoberstar.grgit.Grgit
+    customProperty 'git.commit.id.describe', { it.describe(tags: true) } 
+}
+```
+
 
 > Spring Boot specific info: By default, the `info` endpoint exposes only `git.branch`, `git.commit.id`, and `git.commit.time` properties (even then there are more in your git.properties).
 > In order to expose all available properties, set the "management.info.git.mode" property to "full" per [the Spring Boot documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html#production-ready-application-info-git), e.g. in application.properties:
