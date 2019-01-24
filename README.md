@@ -93,7 +93,7 @@ gitProperties {
 }
 ```
 
-You can also replace standard properties using `customProperty`. In the below example, the logic "it.describe(tags: true)" will replace plugin's logic which using describe(tags: false)
+You can also replace standard properties using `customProperty`. In the below example, the logic `it.describe(tags: true)` will replace plugin's logic which using `describe(tags: false)`
 
 ```groovy
 gitProperties {
@@ -210,7 +210,7 @@ task printGitProperties(dependsOn: 'generateGitProperties') { // make sure gener
 }
 ```
 
-Below is another example about using generated properties for MANIFEST.MF of a Spring Boot webapp (similar can be done for non Spring apps). Note the usage of GString lazy evaluation to delay evaluating `project.ext.gitProps['git.commit.id.abbrev']` until MANIFEST.MF is created. Because `generateGitProperties` task will always execute automatically before any `classes` task (in Java projects), no `dependOn` is needed for `bootJar` task.
+Below is another example about using generated properties for MANIFEST.MF of a Spring Boot webapp (similar can be done for non Spring apps). Note the usage of GString lazy evaluation to delay evaluating `project.ext.gitProps['git.commit.id.abbrev']` until MANIFEST.MF is created. Because `generateGitProperties` task will always execute automatically before any `classes` task (in Java projects), no `dependsOn` is needed for `bootJar` task.
 
 ```groovy
 gitProperties {
