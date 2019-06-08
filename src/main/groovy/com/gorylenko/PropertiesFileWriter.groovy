@@ -33,6 +33,10 @@ class PropertiesFileWriter {
     }
 
     private void writeToPropertiesFile(Map<String, String> properties, File propsFile) {
+
+		def props = new SortedProperties()
+        props.putAll(properties)
+
         if (!propsFile.parentFile.exists()) {
             propsFile.parentFile.mkdirs()
         }
@@ -40,11 +44,10 @@ class PropertiesFileWriter {
             propsFile.delete()
         }
         propsFile.createNewFile()
-        propsFile.withOutputStream {
-            def props = new SortedProperties()
-            props.putAll(properties)
-            props.store(new NormalizeEOLOutputStream(new SkipPropertiesCommentsOutputStream(it)), null)
-        }
+
+		new NormalizeEOLOutputStream(new SkipPropertiesCommentsOutputStream(new FileOutputStream(propsFile))).withStream { os ->
+			props.store(os, null)
+		}
     }
 
     private boolean hasSameContent(File propsFile, Map<String, String> properties) {
