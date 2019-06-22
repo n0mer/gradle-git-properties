@@ -6,7 +6,7 @@ buildscript {
     }
     dependencies {
         classpath "com.gradle.publish:plugin-publish-plugin:0.9.9"
-        classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:1.5.2"
+        classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.0.0"
     }
 }
 
@@ -31,7 +31,7 @@ repositories {
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    compile 'org.ajoberstar.grgit:grgit-core:3.0.0'
+    compile 'org.ajoberstar.grgit:grgit-core:3.1.1'
 
     testCompile 'junit:junit:4.12'
 }
@@ -89,8 +89,4 @@ pluginBundle {
             displayName = 'Gradle Git Properties plugin'
         }
     }
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.6'
 }
