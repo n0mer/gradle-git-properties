@@ -9,6 +9,7 @@ Idea - @lievendoclo, originally published in article [Spring Boot's info endpoin
 
 ## notes
 * Plugin requires Java 8+
+* There are known issues with gradle 5.1.x and 5.2.x (but not on other versions)
 
 ## usage
 
