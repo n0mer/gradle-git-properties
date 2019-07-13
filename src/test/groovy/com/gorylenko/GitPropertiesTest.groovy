@@ -36,7 +36,7 @@ class GitPropertiesTest {
 
     @Test
     public void getStandardProperties() {
-        assertTrue(GitProperties.standardProperties.size() >= 20)
+        assertTrue(GitProperties.standardProperties.size() >= 19)
     }
 
 

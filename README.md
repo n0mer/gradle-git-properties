@@ -34,7 +34,7 @@ gitProperties {
 ```
 > Please note that `spring-boot-actuator` expects `git.properties` to be available at certain location.
 
-If needed - use `dateFormat` and `dateFormatTimeZone` to format `git.commit.time` and `git.build.time` properties (See [SimpleDateFormat](http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html) and [TimeZone](http://docs.oracle.com/javase/7/docs/api/java/util/TimeZone.html) for valid values)
+If needed - use `dateFormat` and `dateFormatTimeZone` to format `git.commit.time` property (See [SimpleDateFormat](http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html) and [TimeZone](http://docs.oracle.com/javase/7/docs/api/java/util/TimeZone.html) for valid values)
 
 ```groovy
 gitProperties {
@@ -57,7 +57,6 @@ By default, all git properties which are supported by the plugin will be generat
 ```
 git.branch
 git.build.host
-git.build.time
 git.build.user.email
 git.build.user.name
 git.build.version
@@ -145,7 +144,6 @@ This is raw `JSON` from `info` endpoint (with management.info.git.mode=full):
     "build": {
       "host": "myserver-1",
       "version": "0.0.1-SNAPSHOT",
-      "time": "2018-03-28T05:34:35Z",
       "user": {
         "name": "First Last",
         "email": "username1@example.com"

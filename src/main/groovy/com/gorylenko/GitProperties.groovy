@@ -7,7 +7,6 @@ import org.ajoberstar.grgit.Grgit
 
 import com.gorylenko.properties.BranchProperty
 import com.gorylenko.properties.BuildHostProperty
-import com.gorylenko.properties.BuildTimeProperty
 import com.gorylenko.properties.BuildUserEmailProperty
 import com.gorylenko.properties.BuildUserNameProperty
 import com.gorylenko.properties.BuildVersionProperty
@@ -50,7 +49,6 @@ class GitProperties {
     private static final String KEY_GIT_DIRTY = "git.dirty"
     private static final String KEY_GIT_BUILD_USER_NAME = "git.build.user.name"
     private static final String KEY_GIT_BUILD_USER_EMAIL = "git.build.user.email"
-    private static final String KEY_GIT_BUILD_TIME = "git.build.time"
     private static final String KEY_GIT_BUILD_VERSION = "git.build.version"
     private static final String KEY_GIT_BUILD_HOST = "git.build.host"
 
@@ -100,7 +98,6 @@ class GitProperties {
                    , (KEY_GIT_DIRTY)                    : new DirtyProperty()
                    , (KEY_GIT_BUILD_USER_NAME)          : new BuildUserNameProperty()
                    , (KEY_GIT_BUILD_USER_EMAIL)         : new BuildUserEmailProperty()
-                   , (KEY_GIT_BUILD_TIME)               : new BuildTimeProperty(dateFormat, dateFormatTimeZone)
                    , (KEY_GIT_BUILD_VERSION)            : new BuildVersionProperty(buildVersion)
                    , (KEY_GIT_BUILD_HOST)               : new BuildHostProperty()]
 
