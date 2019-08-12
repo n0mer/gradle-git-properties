@@ -9,7 +9,7 @@ Idea - @lievendoclo, originally published in article [Spring Boot's info endpoin
 
 ## notes
 * Plugin requires Java 8+
-* There are known issues with gradle 5.1.x and 5.2.x (but not on other versions)
+* There are known issues with gradle 5.1.x and 5.2.x (but not on other versions). See [Issue 128](https://github.com/n0mer/gradle-git-properties/issues/128)
 
 ## usage
 
@@ -17,7 +17,7 @@ Declare this in your `build.gradle`
 
 ```groovy
 plugins {
-  id "com.gorylenko.gradle-git-properties" version "2.0.0"
+  id "com.gorylenko.gradle-git-properties" version "2.1.0"
 }
 ```
 
