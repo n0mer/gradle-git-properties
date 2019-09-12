@@ -10,6 +10,7 @@ Idea - @lievendoclo, originally published in article [Spring Boot's info endpoin
 ## notes
 * Plugin requires Java 8+
 * There are known issues with gradle 5.1.x and 5.2.x (but not on other versions). See [Issue 128](https://github.com/n0mer/gradle-git-properties/issues/128)
+* Since gradle-git-properties v2.x, we requires jgit 5.x, this might cause some issues if you have other gradle plugin which uses jgit 1.4.x. In that case, you can use gradle-git-properties v1.5.x (instead of 2.x) which uses jgit 1.4.x. See issue https://github.com/n0mer/gradle-git-properties/issues/133 for more info about this plugin's dependencies
 
 ## usage
 
