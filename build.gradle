@@ -26,17 +26,25 @@ apply plugin: 'groovy'
 
 repositories {
     jcenter()
+    // for debugging
+    //maven {
+    //    url 'https://repo.gradle.org/gradle/libs-releases-local/'
+    //}
 }
 
 dependencies {
     compile gradleApi()
     compile localGroovy()
     compile 'org.ajoberstar.grgit:grgit-core:3.1.1'
+    // for debugging
+    //compile 'org.gradle:gradle-language-jvm:5.6.2'
+    //compile 'org.gradle:gradle-language-java:5.6.2'
+
 
     testCompile 'junit:junit:4.12'
 }
 
-version = "2.1.0"
+version = "2.2.0"
 group = "com.gorylenko.gradle-git-properties"
 
 gitProperties {
@@ -70,6 +78,10 @@ publishing {
             }
         }
     }
+    // for testing: ./gradlew clean publishToMavenLocal
+    //repositories {
+    //    mavenLocal()
+    //}
 }
 
 task sourceJar(type: Jar, dependsOn: classes) {

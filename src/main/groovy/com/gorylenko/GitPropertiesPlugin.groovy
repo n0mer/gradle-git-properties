@@ -18,14 +18,13 @@ import org.gradle.api.tasks.TaskAction
 class GitPropertiesPlugin implements Plugin<Project> {
 
     private static final String EXTENSION_NAME = "gitProperties"
-    private static final String TASK_NAME = "generateGitProperties"
 
 
     @Override
     void apply(Project project) {
 
         project.extensions.create(EXTENSION_NAME, GitPropertiesPluginExtension)
-        def task = project.tasks.create(TASK_NAME, GenerateGitPropertiesTask)
+        def task = project.tasks.create(GenerateGitPropertiesTask.TASK_NAME, GenerateGitPropertiesTask)
 
         task.setGroup(BasePlugin.BUILD_GROUP)
         ensureTaskRunsOnJavaClassesTask(project, task)
@@ -37,6 +36,9 @@ class GitPropertiesPlugin implements Plugin<Project> {
         project.getPlugins().withType(JavaPlugin.class, new Action<JavaPlugin>() {
             public void execute(JavaPlugin javaPlugin) {
                 project.getTasks().getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn(task)
+                project.gradle.projectsEvaluated { // Defer to end of the step to make sure extension config values are set
+                    task.onJavaPluginAvailable()
+                }
             }
         })
     }
@@ -45,6 +47,8 @@ class GitPropertiesPlugin implements Plugin<Project> {
 @ToString(includeNames=true)
 class GitPropertiesPluginExtension {
     def gitPropertiesDir
+    def gitPropertiesResourceDir
+    String gitPropertiesName = "git.properties"
     def dotGitDirectory
     List keys = GitProperties.standardProperties
     Map<String, Object> customProperties = [:]

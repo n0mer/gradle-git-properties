@@ -18,7 +18,7 @@ Declare this in your `build.gradle`
 
 ```groovy
 plugins {
-  id "com.gorylenko.gradle-git-properties" version "2.1.0"
+  id "com.gorylenko.gradle-git-properties" version "2.2.0"
 }
 ```
 
@@ -26,10 +26,21 @@ A git.properties file will be generated when building Java-based projects (the p
 
 Spring Boot specific info: This is enough to see git details via `info` endpoint of [spring-boot-actuator](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready).
 
-If needed - override location of `git.properties` file like this:
+If needed - override folder and file name of the generated file using `gitPropertiesName` and `gitPropertiesResourceDir` config keys.
+(NOTE: By default, the file will be generated at `build/resources/main/git.properties`)
 
 ```groovy
 gitProperties {
+    // Customize file name (could be a file name or a relative file path below gitPropertiesResourceDir dir)
+    gitPropertiesName = "my-git-file.properties"
+
+    // Customize directory using gitPropertiesResourceDir config
+    // The directory in this config key is also added as a classpath entry
+    // (so the git.properties file will be included in the final JAR file)
+    gitPropertiesResourceDir = "${project.rootDir}/my/generated-resources-dir"
+
+    // (Deprecated, for compatibility only)
+    // Customize directory using gitPropertiesDir config
     gitPropertiesDir = "${project.rootDir}/your/custom/dir"
 }
 ```

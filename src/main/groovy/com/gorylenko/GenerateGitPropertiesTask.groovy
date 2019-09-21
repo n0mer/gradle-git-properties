@@ -15,8 +15,8 @@ import org.gradle.api.tasks.TaskAction
 
 @CacheableTask
 class GenerateGitPropertiesTask extends DefaultTask {
+    public static final String TASK_NAME = "generateGitProperties"
 
-    private static final String GIT_PROPERTIES_FILENAME = "git.properties"
     private static final String DEFAULT_OUTPUT_DIR = "resources/main"
 
     GenerateGitPropertiesTask() {
@@ -102,6 +102,10 @@ class GenerateGitPropertiesTask extends DefaultTask {
 
         // Write to git.properties file
 
+        logger.debug("gitProperties.gitPropertiesResourceDir=" + gitProperties.gitPropertiesResourceDir)
+        logger.debug("gitProperties.gitPropertiesDir=" + gitProperties.gitPropertiesDir)
+        logger.debug("gitProperties.gitPropertiesName=" + gitProperties.gitPropertiesName)
+
         File file = getGitPropertiesFile(project)
         logger.info "git.properties location = [${file?.absolutePath}]"
 
@@ -120,11 +124,38 @@ class GenerateGitPropertiesTask extends DefaultTask {
         return new GitDirLocator(project.projectDir).lookupGitDirectory(dotGitDirectory)
     }
 
-    private static File getGitPropertiesFile(Project project) {
+
+    public void onJavaPluginAvailable() {
+        // if Java plugin is used, this method will be called to register gitPropertiesResourceDir to classpath
+        // at the end of evaluation phase (to make sure extension values are set)
+        logger.debug "GenerateGitPropertiesTask: found Java plugin"
+        if (gitProperties.gitPropertiesResourceDir) {
+            logger.debug ("gitProperties.gitPropertiesResourceDir=" + gitProperties.gitPropertiesResourceDir)
+            String gitPropertiesDir = getGitPropertiesDir(project).absolutePath
+            project.sourceSets.main.resources.srcDir gitPropertiesDir
+            logger.info "GenerateGitPropertiesTask: added classpath entry(gitPropertiesResourceDir): ${gitPropertiesDir}"
+        }
+    }
+
+    private File getGitPropertiesDir(Project project) {
         GitPropertiesPluginExtension gitProperties = project.gitProperties
 
-        File gitPropertiesDir = gitProperties.gitPropertiesDir ? project.file(gitProperties.gitPropertiesDir) : new File(project.buildDir, DEFAULT_OUTPUT_DIR)
-        File gitPropertiesFile = new File(gitPropertiesDir, GIT_PROPERTIES_FILENAME)
+        File gitPropertiesDir
+        if (gitProperties.gitPropertiesResourceDir) {
+            gitPropertiesDir = project.file(gitProperties.gitPropertiesResourceDir)
+        } else if (gitProperties.gitPropertiesDir) {
+            gitPropertiesDir = project.file(gitProperties.gitPropertiesDir)
+        } else {
+            gitPropertiesDir = new File(project.buildDir, DEFAULT_OUTPUT_DIR)
+        }
+
+        return gitPropertiesDir
+    }
+
+    private File getGitPropertiesFile(Project project) {
+        GitPropertiesPluginExtension gitProperties = project.gitProperties
+        File gitPropertiesDir = getGitPropertiesDir(project)
+        File gitPropertiesFile = new File(gitPropertiesDir, gitProperties.gitPropertiesName)
         return gitPropertiesFile
     }
 }
