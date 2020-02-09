@@ -1,8 +1,8 @@
 package com.gorylenko
 
-import java.io.File
-import java.util.List
-import java.util.Map
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -31,11 +31,13 @@ class GenerateGitPropertiesTask extends DefaultTask {
 
     private Map<String, String> generatedProperties
 
+    @Internal
     public GitPropertiesPluginExtension getGitProperties() {
         return project.gitProperties
     }
 
     @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
     public FileTree getSource() {
         File dotGitDirectory = getDotGitDirectory(project)
         return (dotGitDirectory == null) ? project.files().asFileTree : project.files(dotGitDirectory).asFileTree
