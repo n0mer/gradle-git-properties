@@ -6,7 +6,7 @@ buildscript {
     }
     dependencies {
         classpath "com.gradle.publish:plugin-publish-plugin:0.9.9"
-        classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.0.0"
+        classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.2.0"
     }
 }
 
@@ -44,7 +44,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-version = "2.2.0"
+version = "2.2.1"
 group = "com.gorylenko.gradle-git-properties"
 
 gitProperties {
