@@ -1,12 +1,7 @@
 package com.gorylenko
 
-import java.io.BufferedReader
 import java.io.File
-import java.io.FileNotFoundException
-import java.io.FileReader
-import java.io.IOException
 import org.ajoberstar.grgit.Grgit
-import org.gradle.api.Project
 
 /**
  * Encapsulates logic to locate a valid .git directory.
@@ -43,6 +38,10 @@ class GitDirLocator {
 
         if (grgit != null) {
             dotGitDir = grgit.repository.rootDir
+            // Workaround to avoid Gradle bug on Java 11 regarding changing working directory unsuccessfully causing issues regarding relative file paths
+            if (dotGitDir.exists() && !dotGitDir.absoluteFile.exists()) {
+                dotGitDir = new File(projectBasedir, dotGitDir.getPath())
+            }
             grgit.close()
         } else {
             dotGitDir = null

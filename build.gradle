@@ -44,7 +44,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-version = "2.2.1"
+version = "2.2.2"
 group = "com.gorylenko.gradle-git-properties"
 
 gitProperties {
