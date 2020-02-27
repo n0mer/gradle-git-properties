@@ -61,7 +61,7 @@ class GenerateGitPropertiesTask extends DefaultTask {
         }
 
         if (!gitProperties.failOnNoGitDirectory && getSource().empty) {
-            logger.info("Exiting because no Git repository found and failOnNoGitDirectory = true.")
+            logger.info("Exiting because no Git repository found and failOnNoGitDirectory = false.")
             return [:]
         }
 
@@ -89,7 +89,7 @@ class GenerateGitPropertiesTask extends DefaultTask {
     void generate() {
 
         if (!gitProperties.failOnNoGitDirectory && getSource().empty) {
-            logger.info("Exiting because no Git repository found and failOnNoGitDirectory = true.")
+            logger.info("Exiting because no Git repository found and failOnNoGitDirectory = false.")
             return
         }
 
