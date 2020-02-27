@@ -131,6 +131,13 @@ gitProperties {
 }
 ```
 
+If for some reason, the `.git` directory for the project doesn't exist and you don't want the task to fail in that case, use `failOnNoGitDirectory=false`:
+
+```groovy
+gitProperties {
+    failOnNoGitDirectory = false
+}
+```
 
 ## result from `info` endpoint (if used with Spring Boot apps)
 
