@@ -55,6 +55,11 @@ gitProperties {
 }
 ```
 
+Note: Kotlin DSL syntax
+```kotlin
+configure<com.gorylenko.GitPropertiesPluginExtension> { dateFormat = "yyyy-MM-dd'T'HH:mmZ" }
+```
+
 If needed - use `branch` to override git branch name (when it cannot be detected correctly from environment variables/working directory)
 
 ```groovy
@@ -244,7 +249,14 @@ bootJar {
   }
 }
 ```
-
+Note: Kotlin DSL syntax (similar to above GString example)
+```kotlin
+...
+put("Implementation-Version", object {
+  override fun toString():String = (project.extra["gitProps"] as Map<String, String>)["git.commit.id"]!!
+})
+...
+```
 ## license
 
 `gradle-git-properties` is Open Source software released under the [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0.html)
