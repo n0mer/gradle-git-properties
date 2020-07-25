@@ -28,6 +28,10 @@ class TotalCommitCountPropertyTest {
         repo = Grgit.open(dir: projectDir)
     }
 
+    private TotalCommitCountProperty createTarget() {
+        new TotalCommitCountProperty(new CacheSupport())
+    }
+
     @After
     public void tearDown() throws Exception {
         repo?.close()
@@ -37,7 +41,7 @@ class TotalCommitCountPropertyTest {
     @Test
     public void testDoCallOnEmptyRepo() {
 
-        assertEquals('0', new TotalCommitCountProperty().doCall(repo))
+        assertEquals('0', createTarget().doCall(repo))
     }
 
     @Test
@@ -47,7 +51,7 @@ class TotalCommitCountPropertyTest {
             gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
         })
 
-        assertEquals("1", new TotalCommitCountProperty().doCall(repo))
+        assertEquals("1", createTarget().doCall(repo))
     }
 
     @Test
@@ -58,7 +62,7 @@ class TotalCommitCountPropertyTest {
             gitRepoBuilder.commitFile("hello2.txt", "Hello2", "Added hello2.txt")
         })
 
-        assertEquals("2", new TotalCommitCountProperty().doCall(repo))
+        assertEquals("2", createTarget().doCall(repo))
     }
 
     @Test
@@ -71,7 +75,7 @@ class TotalCommitCountPropertyTest {
             gitRepoBuilder.commitFile("hello3.txt", "Hello3", "Added hello3.txt")
         })
 
-        assertEquals("3", new TotalCommitCountProperty().doCall(repo))
+        assertEquals("3", createTarget().doCall(repo))
     }
 
 }
