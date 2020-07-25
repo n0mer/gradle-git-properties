@@ -30,6 +30,10 @@ class ClosestTagNamePropertyTest {
         repo = Grgit.open(dir: projectDir)
     }
 
+    private ClosestTagNameProperty createTarget() {
+        new ClosestTagNameProperty(new CacheSupport())
+    }
+
     @After
     public void tearDown() throws Exception {
         repo?.close()
@@ -39,7 +43,7 @@ class ClosestTagNamePropertyTest {
 
     @Test
     public void testDoCallOnEmptyRepo() {
-        assertEquals('', new ClosestTagNameProperty().doCall(repo))
+        assertEquals('', createTarget().doCall(repo))
     }
 
 
@@ -49,7 +53,7 @@ class ClosestTagNamePropertyTest {
             // commit 1 new file "hello.txt"
             gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
         })
-        assertEquals('', new ClosestTagNameProperty().doCall(repo))
+        assertEquals('', createTarget().doCall(repo))
     }
 
     @Test
@@ -63,7 +67,7 @@ class ClosestTagNamePropertyTest {
             gitRepoBuilder.addTag("TAGONE")
         })
 
-        assertEquals("TAGONE", new ClosestTagNameProperty().doCall(repo))
+        assertEquals("TAGONE", createTarget().doCall(repo))
     }
 
     @Test
@@ -77,7 +81,7 @@ class ClosestTagNamePropertyTest {
             gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
         })
 
-        assertEquals("TAGONE", new ClosestTagNameProperty().doCall(repo))
+        assertEquals("TAGONE", createTarget().doCall(repo))
     }
 
     @Test
@@ -92,7 +96,7 @@ class ClosestTagNamePropertyTest {
             gitRepoBuilder.addTag("TAGTWO")
         })
 
-        assertEquals("TAGTWO", new ClosestTagNameProperty().doCall(repo))
+        assertEquals("TAGTWO", createTarget().doCall(repo))
     }
 
     @Test
@@ -112,7 +116,7 @@ class ClosestTagNamePropertyTest {
 
             repo1 = Grgit.open(dir: new File(tmpDir, "shallowclone3"))
 
-            assertEquals("", new ClosestTagNameProperty().doCall(repo1))
+            assertEquals("", createTarget().doCall(repo1))
 
         } finally {
             repo1?.close()

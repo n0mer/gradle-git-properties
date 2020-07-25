@@ -1,5 +1,6 @@
 package com.gorylenko
 
+import com.gorylenko.properties.CacheSupport
 
 import java.text.SimpleDateFormat
 
@@ -80,6 +81,7 @@ class GitProperties {
     }
 
     private static Map getStandardPropertiesMap(String dateFormat, String dateFormatTimeZone, String branch, Object buildVersion) {
+        def cacheSupport = new CacheSupport()
 
         def map = [(KEY_GIT_BRANCH)                     : new BranchProperty(branch)
                    , (KEY_GIT_COMMIT_ID)                : new CommitIdProperty()
@@ -92,9 +94,9 @@ class GitProperties {
                    , (KEY_GIT_COMMIT_ID_DESCRIBE)       : new CommitIdDescribeProperty()
                    , (KEY_GIT_REMOTE_ORIGIN_URL)        : new RemoteOriginUrlProperty()
                    , (KEY_GIT_TAGS)                     : new TagsProperty()
-                   , (KEY_GIT_CLOSEST_TAG_NAME)         : new ClosestTagNameProperty()
-                   , (KEY_GIT_CLOSEST_TAG_COMMIT_COUNT) : new ClosestTagCommitCountProperty()
-                   , (KEY_GIT_TOTAL_COMMIT_COUNT)       : new TotalCommitCountProperty()
+                   , (KEY_GIT_CLOSEST_TAG_NAME)         : new ClosestTagNameProperty(cacheSupport)
+                   , (KEY_GIT_CLOSEST_TAG_COMMIT_COUNT) : new ClosestTagCommitCountProperty(cacheSupport)
+                   , (KEY_GIT_TOTAL_COMMIT_COUNT)       : new TotalCommitCountProperty(cacheSupport)
                    , (KEY_GIT_DIRTY)                    : new DirtyProperty()
                    , (KEY_GIT_BUILD_USER_NAME)          : new BuildUserNameProperty()
                    , (KEY_GIT_BUILD_USER_EMAIL)         : new BuildUserEmailProperty()

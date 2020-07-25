@@ -30,6 +30,10 @@ class ClosestTagCommitCountPropertyTest {
         repo = Grgit.open(dir: projectDir)
     }
 
+    private ClosestTagCommitCountProperty createTarget() {
+        new ClosestTagCommitCountProperty(new CacheSupport())
+    }
+
     @After
     public void tearDown() throws Exception {
         repo?.close()
@@ -39,7 +43,7 @@ class ClosestTagCommitCountPropertyTest {
 
     @Test
     public void testDoCallOnEmptyRepo() {
-        assertEquals('', new ClosestTagCommitCountProperty().doCall(repo))
+        assertEquals('', createTarget().doCall(repo))
     }
 
     @Test
@@ -48,7 +52,7 @@ class ClosestTagCommitCountPropertyTest {
             // commit 1 new file "hello.txt"
             gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
         })
-        assertEquals('', new ClosestTagCommitCountProperty().doCall(repo))
+        assertEquals('', createTarget().doCall(repo))
     }
 
     @Test
@@ -61,7 +65,7 @@ class ClosestTagCommitCountPropertyTest {
             gitRepoBuilder.addTag("TAGONE")
         })
 
-        assertEquals("0", new ClosestTagCommitCountProperty().doCall(repo))
+        assertEquals("0", createTarget().doCall(repo))
     }
 
     @Test
@@ -74,7 +78,7 @@ class ClosestTagCommitCountPropertyTest {
             gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
         })
 
-        assertEquals("1", new ClosestTagCommitCountProperty().doCall(repo))
+        assertEquals("1", createTarget().doCall(repo))
     }
 
     @Test
@@ -88,7 +92,7 @@ class ClosestTagCommitCountPropertyTest {
             gitRepoBuilder.addTag("TAGTWO")
         })
 
-        assertEquals("0", new ClosestTagCommitCountProperty().doCall(repo))
+        assertEquals("0", createTarget().doCall(repo))
     }
 
     @Test
@@ -108,7 +112,7 @@ class ClosestTagCommitCountPropertyTest {
 
             repo1 = Grgit.open(dir: new File(tmpDir, "shallowclone3"))
 
-            assertEquals("", new ClosestTagCommitCountProperty().doCall(repo1))
+            assertEquals("", createTarget().doCall(repo1))
 
         } finally {
             repo1?.close()
