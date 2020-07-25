@@ -5,8 +5,8 @@ buildscript {
         }
     }
     dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.9.9"
-        classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.2.0"
+        classpath "com.gradle.publish:plugin-publish-plugin:0.12.0"
+        classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.2.2"
     }
 }
 
