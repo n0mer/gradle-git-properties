@@ -3,6 +3,10 @@ package com.gorylenko.properties
 import org.ajoberstar.grgit.Grgit
 
 class ClosestTagCommitCountProperty extends AbstractGitProperty {
+    CacheSupport cacheSupport
+    ClosestTagCommitCountProperty(CacheSupport cacheSupport) {
+        this.cacheSupport = cacheSupport
+    }
 
     String doCall(Grgit repo) {
         return isEmpty(repo) ? '' : closestTagCommitCount(repo)
@@ -11,7 +15,7 @@ class ClosestTagCommitCountProperty extends AbstractGitProperty {
     String closestTagCommitCount(Grgit repo) {
         try {
 
-            String describe = repo.describe(longDescr: true)
+            String describe = this.cacheSupport.describe(repo, true)
             if (describe) {
                 // remove commit ID
                 describe = describe.substring(0, describe.lastIndexOf('-'))
