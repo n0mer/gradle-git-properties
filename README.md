@@ -144,6 +144,12 @@ gitProperties {
 }
 ```
 
+To skip plugin execution completely, configure task's `enabled` property:
+
+```groovy
+tasks.withType(com.gorylenko.GenerateGitPropertiesTask).all { enabled = false }
+```
+
 ## result from `info` endpoint (if used with Spring Boot apps)
 
 When using with Spring Boot: This is raw `JSON` from `info` endpoint (with management.info.git.mode=simple or not configured):
@@ -216,7 +222,7 @@ This is raw `JSON` from `info` endpoint (with management.info.git.mode=full):
 
 ### other usages
 
-Although this plugin is used mostly for generating git.properties files, the generated git properties could also be used for other purposes (by configuring `extProperty` to keep generated properties and accessing the properties from `project.ext`). Note that the git.properties file is always generated and currently these is no option to disable it. Also please make sure that the `generateGitProperties` task is executed before accessing the generated properties.
+This plugin can also be used for other purposes (by configuring `extProperty` to keep generated properties and accessing the properties from `project.ext`). Note that the git.properties file is always generated and currently there is no option to disable it. Also please make sure that the `generateGitProperties` task is executed before accessing the generated properties.
 
 In the below example, `printGitProperties` will print `git.commit.id.abbrev` property when it is executed:
 
