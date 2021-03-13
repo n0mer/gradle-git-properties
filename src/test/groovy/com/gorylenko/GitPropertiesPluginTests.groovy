@@ -38,7 +38,7 @@ class GitPropertiesPluginTests {
 
         // FIXME: Didn't find any way to change `rootProject`, so just set the property.
         GitPropertiesPluginExtension ext = project.getExtensions().getByName("gitProperties")
-        ext.dotGitDirectory = new File(projectDir, '.git')
+        ext.dotGitDirectory.set(new File(projectDir, '.git'))
 
         def task = project.tasks.generateGitProperties
         assertTrue(task instanceof GenerateGitPropertiesTask)
@@ -62,7 +62,7 @@ class GitPropertiesPluginTests {
 
         // FIXME: Didn't find any way to change `rootProject`, so just set the property.
         GitPropertiesPluginExtension ext = project.getExtensions().getByName("gitProperties")
-        ext.dotGitDirectory = projectDir
+        ext.dotGitDirectory.set(projectDir)
         ext.failOnNoGitDirectory = false;
 
         def task = project.tasks.generateGitProperties
@@ -82,10 +82,10 @@ class GitPropertiesPluginTests {
 
         // FIXME: Didn't find any way to change `rootProject`, so just set the property.
         GitPropertiesPluginExtension ext = project.getExtensions().getByName("gitProperties")
-        ext.dotGitDirectory = projectDir
+        ext.dotGitDirectory.set(projectDir)
         // failOnNoGitDirectory is true by default
 
-        def task = project.tasks.generateGitProperties
+        def task = project.tasks.getByName("generateGitProperties")
         assertTrue(task instanceof GenerateGitPropertiesTask)
 
         try {

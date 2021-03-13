@@ -1,52 +1,62 @@
 package com.gorylenko
 
-import org.gradle.api.GradleException
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
-
 import org.gradle.api.DefaultTask
-import org.gradle.api.Project
+import org.gradle.api.GradleException
+import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileTree
+import org.gradle.api.file.ProjectLayout
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 
+import javax.inject.Inject
+
 @CacheableTask
-class GenerateGitPropertiesTask extends DefaultTask {
+abstract class GenerateGitPropertiesTask extends DefaultTask {
     public static final String TASK_NAME = "generateGitProperties"
 
     private static final String DEFAULT_OUTPUT_DIR = "resources/main"
+
+    private final GitPropertiesPluginExtension gitProperties
 
     GenerateGitPropertiesTask() {
         // Description for the task
         description = 'Generate a git.properties file.'
 
-        outputs.upToDateWhen {
+        this.gitProperties = project.extensions.getByType(GitPropertiesPluginExtension)
+
+        outputs.upToDateWhen { GenerateGitPropertiesTask task ->
             // when extProperty is configured or failOnNoGitDirectory=false always execute the task
-            return !gitProperties.extProperty && gitProperties.failOnNoGitDirectory
+            return !task.getGitProperties().extProperty && task.getGitProperties().failOnNoGitDirectory
         }
     }
 
     private Map<String, String> generatedProperties
 
-    @Internal
-    public GitPropertiesPluginExtension getGitProperties() {
-        return project.gitProperties
-    }
+    @Inject
+    abstract ObjectFactory getObjectFactory()
+
+    @Inject
+    abstract ProjectLayout getLayout()
 
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
     public FileTree getSource() {
-        File dotGitDirectory = getDotGitDirectory(project)
-        return (dotGitDirectory == null) ? project.files().asFileTree : project.files(dotGitDirectory).asFileTree
+        File dotGitDirectory = getDotGitDirectory()
+        return (dotGitDirectory == null) ? layout.files().asFileTree : layout.files(dotGitDirectory).asFileTree
     }
 
     @OutputFile
-    public File getOutput() {
-        return getGitPropertiesFile(project)
+    public RegularFileProperty getOutput() {
+        return getGitPropertiesFile()
     }
 
     /**
@@ -66,7 +76,7 @@ class GenerateGitPropertiesTask extends DefaultTask {
             return [:]
         }
 
-        File dotGitDirectory = getDotGitDirectory(project)
+        File dotGitDirectory = getDotGitDirectory()
 
         if (dotGitDirectory == null) {
             throw new GradleException("No Git repository found.")
@@ -90,6 +100,10 @@ class GenerateGitPropertiesTask extends DefaultTask {
         return this.generatedProperties
     }
 
+    @Internal
+    GitPropertiesPluginExtension getGitProperties() {
+        return gitProperties
+    }
 
     @TaskAction
     void generate() {
@@ -110,14 +124,14 @@ class GenerateGitPropertiesTask extends DefaultTask {
 
         // Write to git.properties file
 
-        logger.debug("gitProperties.gitPropertiesResourceDir=" + gitProperties.gitPropertiesResourceDir)
-        logger.debug("gitProperties.gitPropertiesDir=" + gitProperties.gitPropertiesDir)
-        logger.debug("gitProperties.gitPropertiesName=" + gitProperties.gitPropertiesName)
+        logger.debug("gitProperties.gitPropertiesResourceDir=${gitProperties.gitPropertiesResourceDir}")
+        logger.debug("gitProperties.gitPropertiesDir=${gitProperties.gitPropertiesDir}")
+        logger.debug("gitProperties.gitPropertiesName=${gitProperties.gitPropertiesName}")
 
-        File file = getGitPropertiesFile(project)
-        logger.info "git.properties location = [${file?.absolutePath}]"
+        RegularFileProperty file = getGitPropertiesFile()
+        logger.info "git.properties location = [${file.asFile.map { it.absolutePath }}]"
 
-        boolean written = new PropertiesFileWriter().write(newMap, file, gitProperties.force)
+        boolean written = new PropertiesFileWriter().write(newMap, file.asFile.get(), gitProperties.force)
         if (written) {
             logger.info("Written properties to [${file}]...")
         } else {
@@ -126,10 +140,9 @@ class GenerateGitPropertiesTask extends DefaultTask {
 
     }
 
-    private static File getDotGitDirectory(Project project) {
-        GitPropertiesPluginExtension gitProperties = project.gitProperties
-        File dotGitDirectory = gitProperties.dotGitDirectory ? project.file(gitProperties.dotGitDirectory) : null
-        return new GitDirLocator(project.projectDir).lookupGitDirectory(dotGitDirectory)
+    private File getDotGitDirectory() {
+        DirectoryProperty dotGitDirectory = gitProperties.dotGitDirectory
+        return new GitDirLocator(layout.projectDirectory.asFile).lookupGitDirectory(dotGitDirectory.asFile.get())
     }
 
 
@@ -138,32 +151,23 @@ class GenerateGitPropertiesTask extends DefaultTask {
         // at the end of evaluation phase (to make sure extension values are set)
         logger.debug "GenerateGitPropertiesTask: found Java plugin"
         if (gitProperties.gitPropertiesResourceDir) {
-            logger.debug ("gitProperties.gitPropertiesResourceDir=" + gitProperties.gitPropertiesResourceDir)
-            String gitPropertiesDir = getGitPropertiesDir(project).absolutePath
+            logger.debug("gitProperties.gitPropertiesResourceDir=${gitProperties.gitPropertiesResourceDir}")
+            String gitPropertiesDir = getGitPropertiesDir().asFile.absolutePath
             project.sourceSets.main.resources.srcDir gitPropertiesDir
             logger.info "GenerateGitPropertiesTask: added classpath entry(gitPropertiesResourceDir): ${gitPropertiesDir}"
         }
     }
 
-    private File getGitPropertiesDir(Project project) {
-        GitPropertiesPluginExtension gitProperties = project.gitProperties
-
-        File gitPropertiesDir
-        if (gitProperties.gitPropertiesResourceDir) {
-            gitPropertiesDir = project.file(gitProperties.gitPropertiesResourceDir)
-        } else if (gitProperties.gitPropertiesDir) {
-            gitPropertiesDir = project.file(gitProperties.gitPropertiesDir)
-        } else {
-            gitPropertiesDir = new File(project.buildDir, DEFAULT_OUTPUT_DIR)
-        }
-
-        return gitPropertiesDir
+    private Directory getGitPropertiesDir() {
+        return gitProperties.gitPropertiesResourceDir
+                .orElse(gitProperties.gitPropertiesDir)
+                .orElse(layout.buildDirectory.dir(DEFAULT_OUTPUT_DIR))
+                .get()
     }
 
-    private File getGitPropertiesFile(Project project) {
-        GitPropertiesPluginExtension gitProperties = project.gitProperties
-        File gitPropertiesDir = getGitPropertiesDir(project)
-        File gitPropertiesFile = new File(gitPropertiesDir, gitProperties.gitPropertiesName)
-        return gitPropertiesFile
+    private RegularFileProperty getGitPropertiesFile() {
+        def fileProperty = objectFactory.fileProperty()
+        fileProperty.set(getGitPropertiesDir().file(gitProperties.gitPropertiesName))
+        return fileProperty
     }
 }
