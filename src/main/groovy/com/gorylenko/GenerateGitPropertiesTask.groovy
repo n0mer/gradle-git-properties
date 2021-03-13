@@ -1,5 +1,6 @@
 package com.gorylenko
 
+import org.gradle.api.GradleException
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -66,6 +67,11 @@ class GenerateGitPropertiesTask extends DefaultTask {
         }
 
         File dotGitDirectory = getDotGitDirectory(project)
+
+        if (dotGitDirectory == null) {
+            throw new GradleException("No Git repository found.")
+        }
+
         logger.info("dotGitDirectory = [${dotGitDirectory?.absolutePath}]")
 
 
