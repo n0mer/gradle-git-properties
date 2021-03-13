@@ -1,17 +1,8 @@
-buildscript {
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.12.0"
-        classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.2.3"
-    }
-}
-
 plugins {
-    id 'com.gradle.build-scan' version '1.16'
+    id 'groovy'
+    id 'maven-publish'
+    id "com.gradle.plugin-publish" version "0.13.0"
+    id "com.gorylenko.gradle-git-properties" version "2.2.4"
 }
 
 buildScan {
@@ -20,9 +11,6 @@ buildScan {
 }
 
 apply plugin: "com.gradle.plugin-publish"
-apply plugin: "com.gorylenko.gradle-git-properties"
-apply plugin: 'maven-publish'
-apply plugin: 'groovy'
 
 repositories {
     jcenter()
@@ -33,15 +21,15 @@ repositories {
 }
 
 dependencies {
-    compile gradleApi()
-    compile localGroovy()
-    compile 'org.ajoberstar.grgit:grgit-core:4.1.0'
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation 'org.ajoberstar.grgit:grgit-core:4.1.0'
     // for debugging
-    //compile 'org.gradle:gradle-language-jvm:5.6.2'
-    //compile 'org.gradle:gradle-language-java:5.6.2'
+    //implementation 'org.gradle:gradle-language-jvm:5.6.2'
+    //implementation 'org.gradle:gradle-language-java:5.6.2'
 
 
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
 }
 
 version = "2.2.4"
@@ -62,31 +50,29 @@ test {
         exceptionFormat "full"
     }
 }
+
+tasks.register("sourceJar", Jar) {
+    classifier = "sources"
+    from sourceSets.main.resources, sourceSets.main.groovy
+
+    dependsOn tasks.named("classes")
+}
+
 publishing {
 
     publications {
 
         pluginJar(MavenPublication) {
 
-            groupId project.group
-            artifactId jar.baseName
-
             from components.java
 
-            artifact sourceJar {
-                classifier "sources"
-            }
+            artifact sourceJar
         }
     }
     // for testing: ./gradlew clean publishToMavenLocal
-    //repositories {
-    //    mavenLocal()
-    //}
-}
-
-task sourceJar(type: Jar, dependsOn: classes) {
-    classifier = "sources"
-    from sourceSets.main.resources, sourceSets.main.groovy
+    repositories {
+        mavenLocal()
+    }
 }
 
 pluginBundle {
