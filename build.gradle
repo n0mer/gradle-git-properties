@@ -1,6 +1,7 @@
 plugins {
     id 'groovy'
     id 'maven-publish'
+    id 'java-gradle-plugin'
     id "com.gradle.plugin-publish" version "0.13.0"
     id "com.gorylenko.gradle-git-properties" version "2.2.4"
 }
@@ -34,6 +35,7 @@ dependencies {
 
 
     testImplementation 'junit:junit:4.12'
+    testImplementation gradleTestKit()
 }
 
 version = "2.2.4"
