@@ -39,9 +39,13 @@ class GitPropertiesPlugin implements Plugin<Project> {
         // see https://guides.gradle.org/implementing-gradle-plugins/#reacting_to_plugins
         project.getPlugins().withType(JavaPlugin.class, new Action<JavaPlugin>() {
             public void execute(JavaPlugin javaPlugin) {
-                project.getTasks().getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn(task)
-                project.gradle.projectsEvaluated { // Defer to end of the step to make sure extension config values are set
-                    task.get().onJavaPluginAvailable()
+                project.tasks.named(JavaPlugin.CLASSES_TASK_NAME).configure {
+                    dependsOn(task)
+
+                    project.gradle.projectsEvaluated {
+                        // Defer to end of the step to make sure extension config values are set
+                        task.get().onJavaPluginAvailable()
+                    }
                 }
             }
         })
