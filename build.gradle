@@ -13,7 +13,11 @@ buildScan {
 apply plugin: "com.gradle.plugin-publish"
 
 repositories {
-    jcenter()
+    mavenCentral()
+    maven {
+        name = 'ajoberstar-backup'
+        url = 'https://ajoberstar.github.io/bintray-backup/'
+    }
     // for debugging
     //maven {
     //    url 'https://repo.gradle.org/gradle/libs-releases-local/'
