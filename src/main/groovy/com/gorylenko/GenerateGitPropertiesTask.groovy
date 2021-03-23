@@ -2,6 +2,7 @@ package com.gorylenko
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.Transformer
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileTree
@@ -20,7 +21,7 @@ import org.gradle.api.tasks.TaskAction
 import javax.inject.Inject
 
 @CacheableTask
-abstract class GenerateGitPropertiesTask extends DefaultTask {
+public class GenerateGitPropertiesTask extends DefaultTask {
     public static final String TASK_NAME = "generateGitProperties"
 
     private static final String DEFAULT_OUTPUT_DIR = "resources/main"
@@ -42,10 +43,14 @@ abstract class GenerateGitPropertiesTask extends DefaultTask {
     private Map<String, String> generatedProperties
 
     @Inject
-    abstract ObjectFactory getObjectFactory()
+    ObjectFactory getObjectFactory() {
+        throw new UnsupportedOperationException()
+    }
 
     @Inject
-    abstract ProjectLayout getLayout()
+    ProjectLayout getLayout() {
+        throw new UnsupportedOperationException()
+    }
 
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
@@ -129,7 +134,13 @@ abstract class GenerateGitPropertiesTask extends DefaultTask {
         logger.debug("gitProperties.gitPropertiesName=${gitProperties.gitPropertiesName}")
 
         RegularFileProperty file = getGitPropertiesFile()
-        logger.info "git.properties location = [${file.asFile.map { it.absolutePath }}]"
+        def absolutePath = file.asFile.map(new Transformer<String, File>() {
+            @Override
+            String transform(File f) {
+                f.absolutePath
+            }
+        }).getOrElse("unknown")
+        logger.info "git.properties location = [${absolutePath}]"
 
         boolean written = new PropertiesFileWriter().write(newMap, file.asFile.get(), gitProperties.force)
         if (written) {
@@ -159,10 +170,13 @@ abstract class GenerateGitPropertiesTask extends DefaultTask {
     }
 
     private Directory getGitPropertiesDir() {
-        return gitProperties.gitPropertiesResourceDir
-                .orElse(gitProperties.gitPropertiesDir)
-                .orElse(layout.buildDirectory.dir(DEFAULT_OUTPUT_DIR))
-                .get()
+        if (gitProperties.gitPropertiesResourceDir.present) {
+            return gitProperties.gitPropertiesResourceDir.get()
+        } else if (gitProperties.gitPropertiesDir.present) {
+            return gitProperties.gitPropertiesDir.get()
+        } else {
+            return layout.buildDirectory.dir(DEFAULT_OUTPUT_DIR).get()
+        }
     }
 
     private RegularFileProperty getGitPropertiesFile() {
