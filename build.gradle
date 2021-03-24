@@ -38,7 +38,7 @@ dependencies {
     testImplementation gradleTestKit()
 }
 
-version = "2.2.4"
+version = "2.3.0"
 group = "com.gorylenko.gradle-git-properties"
 
 gitProperties {
