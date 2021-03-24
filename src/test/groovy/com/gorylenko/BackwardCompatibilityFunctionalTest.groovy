@@ -3,6 +3,7 @@ package com.gorylenko
 import com.gorylenko.properties.GitRepositoryBuilder
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
+import org.junit.Assume
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -19,34 +20,38 @@ public class BackwardCompatibilityFunctionalTest {
     @Parameterized.Parameters(name = "Gradle {0}")
     static List<Object[]> data() {
         return [
-                ["7.0-rc-1", ["generateGitProperties", "--configuration-cache", "--build-cache"]],
-                ["6.8.3", ["generateGitProperties", "--configuration-cache", "--build-cache"]],
-                ["6.7.1", ["generateGitProperties", "--configuration-cache", "--build-cache"]],
-                ["6.6.1", ["generateGitProperties", "--configuration-cache", "--build-cache"]],
-                ["6.5.1", ["generateGitProperties"]],
-                ["6.4.1", ["generateGitProperties"]],
-                // ["6.3", ["generateGitProperties"]], // StackOverflowError: https://github.com/gradle/gradle/issues/11466
-                // ["6.2.2", ["generateGitProperties"]], // StackOverflowError: https://github.com/gradle/gradle/issues/11466
-                // ["6.1.1", ["generateGitProperties"]], // StackOverflowError: https://github.com/gradle/gradle/issues/11466
-                // ["6.0.1", ["generateGitProperties"]], // StackOverflowError: https://github.com/gradle/gradle/issues/11466
-                ["5.6.4", ["generateGitProperties"]],
-                ["5.5.1", ["generateGitProperties"]],
-                ["5.1", ["generateGitProperties"]],
-                // ["5.0", ["generateGitProperties"]], // Doesn't support conventions: https://docs.gradle.org/5.1/release-notes.html#specify-a-convention-for-a-property
-                // ["4.10.3", ["generateGitProperties"]]
+                ["7.0-rc-1", ["generateGitProperties", "--configuration-cache", "--build-cache"], "16"],
+                ["6.8.3", ["generateGitProperties", "--configuration-cache", "--build-cache"], "15"],
+                ["6.7.1", ["generateGitProperties", "--configuration-cache", "--build-cache"], "15"],
+                ["6.6.1", ["generateGitProperties", "--configuration-cache", "--build-cache"], "15"],
+                ["6.5.1", ["generateGitProperties"], "15"],
+                ["6.4.1", ["generateGitProperties"], "15"],
+                // ["6.3", ["generateGitProperties"], "15"], // StackOverflowError: https://github.com/gradle/gradle/issues/11466
+                // ["6.2.2", ["generateGitProperties"], "15"], // StackOverflowError: https://github.com/gradle/gradle/issues/11466
+                // ["6.1.1", ["generateGitProperties"], "15"], // StackOverflowError: https://github.com/gradle/gradle/issues/11466
+                // ["6.0.1", ["generateGitProperties"], "15"], // StackOverflowError: https://github.com/gradle/gradle/issues/11466
+                ["5.6.4", ["generateGitProperties"], "12"],
+                ["5.5.1", ["generateGitProperties"], "12"],
+                ["5.1", ["generateGitProperties"], "12"],
+                // ["5.0", ["generateGitProperties"], "12"], // Doesn't support conventions: https://docs.gradle.org/5.1/release-notes.html#specify-a-convention-for-a-property
         ]*.toArray()
     }
 
     private final String gradleVersion;
     private final List<String> arguments;
+    private final String maxJavaVersion;
 
-    BackwardCompatibilityFunctionalTest(String gradleVersion, List<String> arguments) {
+    BackwardCompatibilityFunctionalTest(String gradleVersion, List<String> arguments, String maxJavaVersion) {
         this.gradleVersion = gradleVersion
         this.arguments = arguments
+        this.maxJavaVersion = maxJavaVersion
     }
 
     @Test
     public void testPluginSupportsConfigurationCache() {
+        def javaVersion = System.getProperty("java.version", "99");
+        Assume.assumeTrue("Skipping test on Java ${javaVersion}", javaVersion <= maxJavaVersion);
+
         def projectDir = temporaryFolder.newFolder()
 
         GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
