@@ -7,10 +7,19 @@ Idea - @lievendoclo, originally published in article [Spring Boot's info endpoin
 
 [![Build Status](https://travis-ci.org/n0mer/gradle-git-properties.svg?branch=master)](https://travis-ci.org/n0mer/gradle-git-properties)
 
+## compatibility matrix
+
+This Gradle plugin is compatible with the following versions of Gradle:
+
+| Plugin version | Min. Gradle version |
+| -------------- | ------------------- |
+| 2.3.0          | 5.1                 |
+| 2.2.4          | 4.x                 |
+
 ## notes
 * Plugin requires Java 8+
-* If git.properties is missing on gradle 5.1.x and 5.2.x [Issue 128](https://github.com/n0mer/gradle-git-properties/issues/128), use gitPropertiesResourceDir to config a diffrent output directory 
-* Since gradle-git-properties v2.x, we requires jgit 5.x, this might cause some issues if you have other gradle plugin which uses jgit 1.4.x. In that case, you can use gradle-git-properties v1.5.x (instead of 2.x) which uses jgit 1.4.x. See [Issue 133](https://github.com/n0mer/gradle-git-properties/issues/133) for more info about this plugin's dependencies
+* If `git.properties` is missing on Gradle 5.1.x and 5.2.x [Issue 128](https://github.com/n0mer/gradle-git-properties/issues/128), use `gitPropertiesResourceDir` to config a different output directory 
+* Since gradle-git-properties v2.x, we require JGit 5.x, this might cause some issues if you have other gradle plugin which uses JGit 1.4.x. In that case, you can use gradle-git-properties v1.5.x (instead of 2.x) which uses JGit 1.4.x. See [Issue 133](https://github.com/n0mer/gradle-git-properties/issues/133) for more info about this plugin's dependencies
 
 ## usage
 
@@ -22,7 +31,7 @@ plugins {
 }
 ```
 
-A git.properties file will be generated when building Java-based projects (the plugin will configure any existing `classes` task to depend on `generateGitProperties` task - which is responsible for generated git.properties file). For non-Java projects, `generateGitProperties` task must be executed explicitly to generate git.properties file. The git repository for the project will be used.
+A `git.properties file will be generated when building Java-based projects (the plugin will configure any existing `classes` task to depend on `generateGitProperties` task - which is responsible for generated `git.properties` file). For non-Java projects, `generateGitProperties` task must be executed explicitly to generate `git.properties` file. The git repository for the project will be used.
 
 Spring Boot specific info: This is enough to see git details via `info` endpoint of [spring-boot-actuator](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready).
 
@@ -60,7 +69,7 @@ Note: Kotlin DSL syntax
 configure<com.gorylenko.GitPropertiesPluginExtension> { dateFormat = "yyyy-MM-dd'T'HH:mmZ" }
 ```
 
-If needed - use `branch` to override git branch name (when it cannot be detected correctly from environment variables/working directory)
+If needed - `use `branch` to override git branch name (when it cannot be detected correctly from environment variables/working directory)
 
 ```groovy
 gitProperties {
@@ -92,7 +101,7 @@ git.remote.origin.url
 git.tags
 git.total.commit.count
 ```
-You can have more fine grained control of the content of 'git.properties' using `keys`:
+You can have more fine-grained control of the content of `git.properties using `keys`:
 
 ```groovy
 gitProperties {
@@ -110,7 +119,7 @@ gitProperties {
 }
 ```
 
-You can also replace standard properties using `customProperty`. In the below example, the logic `it.describe(tags: true)` will replace plugin's logic which using `describe(tags: false)`
+You can also replace standard properties using `customProperty`. In the below example, the logic `it.describe(tags: true)` will replace the plugin's logic which using `describe(tags: false)`
 
 ```groovy
 gitProperties {
@@ -122,10 +131,11 @@ gitProperties {
 ```
 
 
-> Spring Boot specific info: By default, the `info` endpoint exposes only `git.branch`, `git.commit.id`, and `git.commit.time` properties (even then there are more in your git.properties).
+> Spring Boot specific info: By default, the `info` endpoint exposes only `git.branch`, `git.commit.id`, and `git.commit.time` properties (even then there are more in your `git.properties`).
 > In order to expose all available properties, set the "management.info.git.mode" property to "full" per [the Spring Boot documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html#production-ready-application-info-git), e.g. in application.properties:
-
-> `management.info.git.mode=full`
+> ```
+> management.info.git.mode=full
+> ```
 
 
 The `.git` directory for the project should be detected automatically, otherwise it can be specified manually using `dotGitDirectory`:
@@ -144,7 +154,7 @@ gitProperties {
 }
 ```
 
-To skip plugin execution completely, configure task's `enabled` property:
+To skip plugin execution completely, configure the `enabled` property:
 
 ```groovy
 tasks.withType(com.gorylenko.GenerateGitPropertiesTask).all { enabled = false }
@@ -152,7 +162,7 @@ tasks.withType(com.gorylenko.GenerateGitPropertiesTask).all { enabled = false }
 
 ## result from `info` endpoint (if used with Spring Boot apps)
 
-When using with Spring Boot: This is raw `JSON` from `info` endpoint (with management.info.git.mode=simple or not configured):
+When using with Spring Boot: This is raw `JSON` from `info` endpoint (with `management.info.git.mode=simple` or not configured):
 
 ```json
 {
@@ -166,7 +176,7 @@ When using with Spring Boot: This is raw `JSON` from `info` endpoint (with manag
 }
 ```
 
-This is raw `JSON` from `info` endpoint (with management.info.git.mode=full):
+This is raw `JSON` from `info` endpoint (with `management.info.git.mode=full`):
 
 ```json
 {
@@ -222,7 +232,10 @@ This is raw `JSON` from `info` endpoint (with management.info.git.mode=full):
 
 ### other usages
 
-This plugin can also be used for other purposes (by configuring `extProperty` to keep generated properties and accessing the properties from `project.ext`). Note that the git.properties file is always generated and currently there is no option to disable it. Also please make sure that the `generateGitProperties` task is executed before accessing the generated properties.
+This plugin can also be used for other purposes (by configuring `extProperty` to keep generated properties and accessing the properties from `project.ext`).
+
+Note that the `git.properties` file is always generated and currently there is no option to disable it.
+Please also make sure that the `generateGitProperties` task is executed before accessing the generated properties.
 
 In the below example, `printGitProperties` will print `git.commit.id.abbrev` property when it is executed:
 
@@ -239,7 +252,7 @@ task printGitProperties(dependsOn: 'generateGitProperties') { // make sure gener
 }
 ```
 
-Below is another example about using generated properties for MANIFEST.MF of a Spring Boot webapp (similar can be done for non Spring apps). Note the usage of GString lazy evaluation to delay evaluating `project.ext.gitProps['git.commit.id.abbrev']` until MANIFEST.MF is created. Because `generateGitProperties` task will always execute automatically before any `classes` task (in Java projects), no `dependsOn` is needed for `bootJar` task.
+Below is another example about using generated properties for `MANIFEST.MF of a Spring Boot webapp (similar can be done for non Spring apps). Note the usage of ``GString lazy evaluation to delay evaluating `project.ext.gitProps['git.commit.id.abbrev']` until ``MANIFEST.MF is created. Because `generateGitProperties` task will always execute automatically before any `classes` task (in Java projects), no `dependsOn` is needed for `bootJar` task.
 
 ```groovy
 gitProperties {
@@ -255,13 +268,14 @@ bootJar {
   }
 }
 ```
-Note: Kotlin DSL syntax (similar to above GString example)
+
+Note: Kotlin DSL syntax (similar to above `GString` example)
 ```kotlin
-...
+// [...]
 put("Implementation-Version", object {
   override fun toString():String = (project.extra["gitProps"] as Map<String, String>)["git.commit.id"]!!
 })
-...
+// [...]
 ```
 ## license
 
