@@ -31,7 +31,7 @@ plugins {
 }
 ```
 
-A `git.properties file will be generated when building Java-based projects (the plugin will configure any existing `classes` task to depend on `generateGitProperties` task - which is responsible for generated `git.properties` file). For non-Java projects, `generateGitProperties` task must be executed explicitly to generate `git.properties` file. The git repository for the project will be used.
+A `git.properties` file will be generated when building Java-based projects (the plugin will configure any existing `classes` task to depend on `generateGitProperties` task - which is responsible for generated `git.properties` file). For non-Java projects, `generateGitProperties` task must be executed explicitly to generate `git.properties` file. The git repository for the project will be used.
 
 Spring Boot specific info: This is enough to see git details via `info` endpoint of [spring-boot-actuator](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready).
 
@@ -69,7 +69,7 @@ Note: Kotlin DSL syntax
 configure<com.gorylenko.GitPropertiesPluginExtension> { dateFormat = "yyyy-MM-dd'T'HH:mmZ" }
 ```
 
-If needed - `use `branch` to override git branch name (when it cannot be detected correctly from environment variables/working directory)
+If needed - use `branch` to override git branch name (when it cannot be detected correctly from environment variables/working directory)
 
 ```groovy
 gitProperties {
@@ -252,7 +252,7 @@ task printGitProperties(dependsOn: 'generateGitProperties') { // make sure gener
 }
 ```
 
-Below is another example about using generated properties for `MANIFEST.MF of a Spring Boot webapp (similar can be done for non Spring apps). Note the usage of ``GString lazy evaluation to delay evaluating `project.ext.gitProps['git.commit.id.abbrev']` until ``MANIFEST.MF is created. Because `generateGitProperties` task will always execute automatically before any `classes` task (in Java projects), no `dependsOn` is needed for `bootJar` task.
+Below is another example about using generated properties for `MANIFEST.MF` of a Spring Boot webapp (similar can be done for non Spring apps). Note the usage of `GString` lazy evaluation to delay evaluating `project.ext.gitProps['git.commit.id.abbrev']` until `MANIFEST.MF` is created. Because `generateGitProperties` task will always execute automatically before any `classes` task (in Java projects), no `dependsOn` is needed for `bootJar` task.
 
 ```groovy
 gitProperties {
