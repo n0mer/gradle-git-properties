@@ -101,7 +101,7 @@ git.remote.origin.url
 git.tags
 git.total.commit.count
 ```
-You can have more fine-grained control of the content of `git.properties using `keys`:
+You can have more fine-grained control of the content of `git.properties` using `keys`:
 
 ```groovy
 gitProperties {
