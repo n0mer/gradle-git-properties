@@ -1,54 +1,57 @@
 package com.gorylenko
 
 import groovy.transform.ToString
-
-import org.gradle.api.Action
-import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.Task
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.FileTree
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.plugins.BasePlugin
+import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.TaskProvider
-
+import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.SourceSetContainer
 
 class GitPropertiesPlugin implements Plugin<Project> {
 
     private static final String EXTENSION_NAME = "gitProperties"
-
+    private static final String DEFAULT_OUTPUT_DIR = "resources/main"
 
     @Override
     void apply(Project project) {
-
-        project.extensions.create(EXTENSION_NAME, GitPropertiesPluginExtension, project)
+        def extension = project.extensions.create(EXTENSION_NAME, GitPropertiesPluginExtension, project)
         def task = project.tasks.register(GenerateGitPropertiesTask.TASK_NAME, GenerateGitPropertiesTask) {
-            it.setGroup(BasePlugin.BUILD_GROUP)
+            group = BasePlugin.BUILD_GROUP
         }
 
-        ensureTaskRunsOnJavaClassesTask(project, task)
-    }
-
-    private static void ensureTaskRunsOnJavaClassesTask(Project project, TaskProvider<GenerateGitPropertiesTask> task) {
         // if Java plugin is applied, execute this task automatically when "classes" task is executed
         // see https://guides.gradle.org/implementing-gradle-plugins/#reacting_to_plugins
-        project.getPlugins().withType(JavaPlugin.class, new Action<JavaPlugin>() {
-            public void execute(JavaPlugin javaPlugin) {
-                project.tasks.named(JavaPlugin.CLASSES_TASK_NAME).configure {
-                    dependsOn(task)
+        project.plugins.withType(JavaBasePlugin) {
+            project.tasks.named(JavaPlugin.CLASSES_TASK_NAME).configure {
+                dependsOn(task)
 
-                    project.gradle.projectsEvaluated {
-                        // Defer to end of the step to make sure extension config values are set
-                        task.get().onJavaPluginAvailable()
+                // if Java plugin is used, this method will be called to register gitPropertiesResourceDir to classpath
+                // at the end of evaluation phase (to make sure extension values are set)
+                if (extension.gitPropertiesResourceDir.present) {
+                    String gitPropertiesDir = getGitPropertiesDir(extension, project.layout).asFile.absolutePath
+                    def sourceSets = project.extensions.getByType(SourceSetContainer)
+                    sourceSets.named(SourceSet.MAIN_SOURCE_SET_NAME).configure {
+                        it.resources.srcDir(gitPropertiesDir)
                     }
                 }
             }
-        })
+        }
+    }
+
+    private static Directory getGitPropertiesDir(GitPropertiesPluginExtension extension, ProjectLayout layout) {
+        if (extension.gitPropertiesResourceDir.present) {
+            return extension.gitPropertiesResourceDir.get()
+        } else if (extension.gitPropertiesDir.present) {
+            return extension.gitPropertiesDir.get()
+        } else {
+            return layout.buildDirectory.dir(DEFAULT_OUTPUT_DIR).get()
+        }
     }
 }
 

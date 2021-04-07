@@ -148,25 +148,11 @@ public class GenerateGitPropertiesTask extends DefaultTask {
         } else {
             logger.info("Skip writing properties to [${file}] as it is up-to-date.")
         }
-
     }
 
     private File getDotGitDirectory() {
         DirectoryProperty dotGitDirectory = gitProperties.dotGitDirectory
         return new GitDirLocator(layout.projectDirectory.asFile).lookupGitDirectory(dotGitDirectory.asFile.get())
-    }
-
-
-    public void onJavaPluginAvailable() {
-        // if Java plugin is used, this method will be called to register gitPropertiesResourceDir to classpath
-        // at the end of evaluation phase (to make sure extension values are set)
-        logger.debug "GenerateGitPropertiesTask: found Java plugin"
-        if (gitProperties.gitPropertiesResourceDir) {
-            logger.debug("gitProperties.gitPropertiesResourceDir=${gitProperties.gitPropertiesResourceDir}")
-            String gitPropertiesDir = getGitPropertiesDir().asFile.absolutePath
-            project.sourceSets.main.resources.srcDir gitPropertiesDir
-            logger.info "GenerateGitPropertiesTask: added classpath entry(gitPropertiesResourceDir): ${gitPropertiesDir}"
-        }
     }
 
     private Directory getGitPropertiesDir() {

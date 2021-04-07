@@ -20,7 +20,7 @@ public class BackwardCompatibilityFunctionalTest {
     @Parameterized.Parameters(name = "Gradle {0}")
     static List<Object[]> data() {
         return [
-                ["7.0-rc-1", ["generateGitProperties", "--configuration-cache", "--build-cache"], "16"],
+                ["7.0-rc-2", ["generateGitProperties", "--configuration-cache", "--build-cache"], "16"],
                 ["6.8.3", ["generateGitProperties", "--configuration-cache", "--build-cache"], "15"],
                 ["6.7.1", ["generateGitProperties", "--configuration-cache", "--build-cache"], "15"],
                 ["6.6.1", ["generateGitProperties", "--configuration-cache", "--build-cache"], "15"],
