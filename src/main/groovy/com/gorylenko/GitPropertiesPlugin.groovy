@@ -7,7 +7,6 @@ import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.plugins.BasePlugin
-import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.SourceSet
@@ -27,7 +26,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
 
         // if Java plugin is applied, execute this task automatically when "classes" task is executed
         // see https://guides.gradle.org/implementing-gradle-plugins/#reacting_to_plugins
-        project.plugins.withType(JavaBasePlugin) {
+        project.plugins.withType(JavaPlugin) {
             project.tasks.named(JavaPlugin.CLASSES_TASK_NAME).configure {
                 dependsOn(task)
 

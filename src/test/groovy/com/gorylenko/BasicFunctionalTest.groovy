@@ -83,4 +83,58 @@ public class BasicFunctionalTest {
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":generateGitProperties").outcome)
     }
+
+    @Test
+    public void testPluginSucceedsWithJavaBasePlugin() {
+        def projectDir = temporaryFolder.newFolder()
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            // commit 1 new file "hello.txt"
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+
+        new File(projectDir, "settings.gradle") << ""
+        new File(projectDir, "build.gradle") << """
+            plugins {
+                id('java-base')
+                id('com.gorylenko.gradle-git-properties')
+            }
+        """.stripIndent()
+
+        def runner = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments("generateGitProperties")
+                .withProjectDir(projectDir)
+
+        def result = runner.build()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":generateGitProperties").outcome)
+    }
+
+    @Test
+    public void testPluginSucceedsWithJavaPlugin() {
+        def projectDir = temporaryFolder.newFolder()
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            // commit 1 new file "hello.txt"
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+
+        new File(projectDir, "settings.gradle") << ""
+        new File(projectDir, "build.gradle") << """
+            plugins {
+                id('java')
+                id('com.gorylenko.gradle-git-properties')
+            }
+        """.stripIndent()
+
+        def runner = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments("classes")
+                .withProjectDir(projectDir)
+
+        def result = runner.build()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":generateGitProperties").outcome)
+    }
 }
