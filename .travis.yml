@@ -8,12 +8,7 @@ jdk:
   - openjdk13
   - openjdk14
   - openjdk15
-# Gradle currently doesn't support Java 16 or higher.
-# See also: https://github.com/gradle/gradle/issues/13629
-# See also: https://github.com/gradle/gradle/issues/13481
-#
-#  - openjdk16
-#  - openjdk-ea
+  - openjdk16
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
