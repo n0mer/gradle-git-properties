@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
     id 'java-gradle-plugin'
     id "com.gradle.plugin-publish" version "0.14.0"
-    id "com.gorylenko.gradle-git-properties" version "2.3.1-rc3"
+    id "com.gorylenko.gradle-git-properties" version "2.3.2"
 }
 
 buildScan {
