@@ -13,7 +13,7 @@ This Gradle plugin is compatible with the following versions of Gradle:
 
 | Plugin version | Min. Gradle version |
 | -------------- | ------------------- |
-| 2.3.1-rc3          | 5.1                 |
+| 2.3.2          | 5.1                 |
 | 2.2.4          | 4.x                 |
 
 ## notes
@@ -27,7 +27,7 @@ Declare this in your `build.gradle`
 
 ```groovy
 plugins {
-  id "com.gorylenko.gradle-git-properties" version "2.2.4"
+  id "com.gorylenko.gradle-git-properties" version "2.3.2"
 }
 ```
 
