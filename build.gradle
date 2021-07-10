@@ -43,6 +43,7 @@ dependencies {
 
 task relocateShadowJar(type: ConfigureShadowRelocation) {
     target = tasks.shadowJar
+    prefix = "gradlegitproperties"
 }
 
 tasks.shadowJar.dependsOn tasks.relocateShadowJar
@@ -53,7 +54,7 @@ shadowJar {
 
 tasks.shadowJar.dependsOn tasks.jar
 
-version = "2.3.2"
+version = "2.3.1"
 group = "com.gorylenko.gradle-git-properties"
 
 gitProperties {
