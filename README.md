@@ -277,6 +277,29 @@ put("Implementation-Version", object {
 })
 // [...]
 ```
+## more notes
+
+If you need to use a specific JGit version (e.g. because of version conflict), check the below example:
+
+```groovy
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath ("com.gorylenko.gradle-git-properties:gradle-git-properties:2.3.1") {
+        exclude group: 'org.eclipse.jgit', module: 'org.eclipse.jgit' // remove plugin's jgit dependency
+    }
+    classpath 'org.eclipse.jgit:org.eclipse.jgit:5.5.0.201909110433-r' // use the specified jgit dependency
+  }
+}
+
+apply plugin: "com.gorylenko.gradle-git-properties"
+
+apply plugin: 'java'
+```
 ## license
 
 `gradle-git-properties` is Open Source software released under the [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0.html)
