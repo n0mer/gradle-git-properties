@@ -84,9 +84,9 @@ publishing {
 
     publications {
 
-        pluginJar(MavenPublication) {
+        pluginJar(MavenPublication) {  publication ->
 
-            from components.java
+            from project.shadow.component(publication)
 
             artifact sourceJar
         }
