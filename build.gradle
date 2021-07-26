@@ -54,6 +54,10 @@ shadowJar {
 
 tasks.shadowJar.dependsOn tasks.jar
 
+components.java.withVariantsFromConfiguration(configurations.runtimeElements) {
+    skip()
+}
+
 version = "2.3.1"
 group = "com.gorylenko.gradle-git-properties"
 
