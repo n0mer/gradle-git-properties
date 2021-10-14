@@ -146,6 +146,13 @@ gitProperties {
 }
 ```
 
+Note: Kotlin DSL syntax
+```kotlin
+configure<com.gorylenko.GitPropertiesPluginExtension> {
+    (dotGitDirectory as DirectoryProperty).set("${project.rootDir}/../somefolder/.git")
+}
+```
+
 If for some reason, the `.git` directory for the project doesn't exist and you don't want the task to fail in that case, use `failOnNoGitDirectory=false`:
 
 ```groovy
