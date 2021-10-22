@@ -6,7 +6,7 @@ plugins {
     id 'java-gradle-plugin'
     id "com.gradle.plugin-publish" version "0.14.0"
     id "com.github.johnrengelman.shadow" version "7.0.0"
-    id "com.gorylenko.gradle-git-properties" version "2.3.1-rc3"
+    id "com.gorylenko.gradle-git-properties" version "2.4.1"
 }
 
 buildScan {
@@ -58,7 +58,7 @@ components.java.withVariantsFromConfiguration(configurations.runtimeElements) {
     skip()
 }
 
-version = "2.3.1"
+version = "2.4.0-rc1"
 group = "com.gorylenko.gradle-git-properties"
 
 gitProperties {
