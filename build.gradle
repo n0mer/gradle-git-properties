@@ -1,8 +1,11 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
+
 plugins {
     id 'groovy'
     id 'maven-publish'
     id 'java-gradle-plugin'
     id "com.gradle.plugin-publish" version "0.14.0"
+    id "com.github.johnrengelman.shadow" version "7.0.0"
     id "com.gorylenko.gradle-git-properties" version "2.3.1-rc3"
 }
 
@@ -26,8 +29,8 @@ repositories {
 }
 
 dependencies {
-    implementation gradleApi()
-    implementation localGroovy()
+    shadow gradleApi()
+    shadow localGroovy()
     implementation 'org.ajoberstar.grgit:grgit-core:4.1.0'
     // for debugging
     //implementation 'org.gradle:gradle-language-jvm:5.6.2'
@@ -36,6 +39,23 @@ dependencies {
 
     testImplementation 'junit:junit:4.12'
     testImplementation gradleTestKit()
+}
+
+task relocateShadowJar(type: ConfigureShadowRelocation) {
+    target = tasks.shadowJar
+    prefix = "gradlegitproperties"
+}
+
+tasks.shadowJar.dependsOn tasks.relocateShadowJar
+
+shadowJar {
+    archiveClassifier.set('')
+}
+
+tasks.shadowJar.dependsOn tasks.jar
+
+components.java.withVariantsFromConfiguration(configurations.runtimeElements) {
+    skip()
 }
 
 version = "2.3.1"
@@ -68,9 +88,9 @@ publishing {
 
     publications {
 
-        pluginJar(MavenPublication) {
+        pluginJar(MavenPublication) {  publication ->
 
-            from components.java
+            from project.shadow.component(publication)
 
             artifact sourceJar
         }
