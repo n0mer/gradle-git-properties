@@ -54,7 +54,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
     }
 }
 
-@ToString(includeNames=true)
+@ToString(includeNames = true, excludes = ["gitPropertiesDir", "gitPropertiesResourceDir", "dotGitDirectory"])
 class GitPropertiesPluginExtension {
     @InputDirectory
     final DirectoryProperty gitPropertiesDir
