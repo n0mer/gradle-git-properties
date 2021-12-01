@@ -20,6 +20,7 @@ This Gradle plugin is compatible with the following versions of Gradle:
 * Plugin requires Java 8+
 * If `git.properties` is missing on Gradle 5.1.x and 5.2.x [Issue 128](https://github.com/n0mer/gradle-git-properties/issues/128), use `gitPropertiesResourceDir` to config a different output directory 
 * Since gradle-git-properties v2.x, we require JGit 5.x, this might cause some issues if you have other gradle plugin which uses JGit 1.4.x. In that case, you can use gradle-git-properties v1.5.x (instead of 2.x) which uses JGit 1.4.x. See [Issue 133](https://github.com/n0mer/gradle-git-properties/issues/133) for more info about this plugin's dependencies
+* With gradle-git-properties v2.2.4, v2.3.0, and v2.3.1, grgit v4.1.0 always requires the latest JGit which can be 6+, this cause build fails if you run Gradle with Java under 11. See [Issue 195](https://github.com/n0mer/gradle-git-properties/issues/195) for more info about this issue
 
 ## usage
 
