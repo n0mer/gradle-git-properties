@@ -1,12 +1,20 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
-
+buildscript {
+    dependencies {
+        classpath ('org.eclipse.jgit:org.eclipse.jgit:') {
+            version {
+                strictly '5.13.0.202109080827-r'
+            }
+        }
+    }
+}
 plugins {
     id 'groovy'
     id 'maven-publish'
     id 'java-gradle-plugin'
     id "com.gradle.plugin-publish" version "0.14.0"
     id "com.github.johnrengelman.shadow" version "7.0.0"
-    id "com.gorylenko.gradle-git-properties" version "2.3.1"
+    id "com.gorylenko.gradle-git-properties" version "2.3.2"
 }
 
 buildScan {
@@ -58,7 +66,7 @@ components.java.withVariantsFromConfiguration(configurations.runtimeElements) {
     skip()
 }
 
-version = "2.4.0-rc1"
+version = "2.4.0-rc2"
 group = "com.gorylenko.gradle-git-properties"
 
 gitProperties {
