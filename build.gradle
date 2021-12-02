@@ -1,11 +1,19 @@
+buildscript {
+    dependencies {
+        classpath ('org.eclipse.jgit:org.eclipse.jgit:') {
+            version {
+                strictly '5.13.0.202109080827-r'
+            }
+        }
+    }
+}
 plugins {
     id 'groovy'
     id 'maven-publish'
     id 'java-gradle-plugin'
     id "com.gradle.plugin-publish" version "0.14.0"
-    id "com.gorylenko.gradle-git-properties" version "2.3.1-rc3"
+    id "com.gorylenko.gradle-git-properties" version "2.3.1"
 }
-
 buildScan {
     termsOfServiceUrl = 'https://gradle.com/terms-of-service'
     termsOfServiceAgree = 'yes'
@@ -38,7 +46,7 @@ dependencies {
     testImplementation gradleTestKit()
 }
 
-version = "2.3.1"
+version = "2.3.2"
 group = "com.gorylenko.gradle-git-properties"
 
 gitProperties {
