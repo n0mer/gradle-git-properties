@@ -36,10 +36,14 @@ repositories {
     //}
 }
 
+def integrationTest = sourceSets.create("integrationTest")
+
 dependencies {
     shadow gradleApi()
     shadow localGroovy()
-    implementation 'org.ajoberstar.grgit:grgit-core:4.1.1'
+    implementation('org.ajoberstar.grgit:grgit-core:4.1.1') {
+        exclude(group: 'org.slf4j')
+    }
     // for debugging
     //implementation 'org.gradle:gradle-language-jvm:5.6.2'
     //implementation 'org.gradle:gradle-language-java:5.6.2'
@@ -47,6 +51,11 @@ dependencies {
 
     testImplementation 'junit:junit:4.12'
     testImplementation gradleTestKit()
+
+    integrationTestImplementation 'junit:junit:4.12'
+    integrationTestImplementation gradleTestKit()
+    integrationTestImplementation project
+    integrationTestImplementation sourceSets.test.output // Include test files for git project utils
 }
 
 task relocateShadowJar(type: ConfigureShadowRelocation) {
@@ -83,6 +92,16 @@ test {
         events "passed", "skipped", "failed"
         exceptionFormat "full"
     }
+}
+
+tasks.register("integrationTest", Test) {
+    dependsOn tasks.shadowJar
+
+    description = 'Runs the integration tests.'
+    group = "verification"
+    testClassesDirs = integrationTest.output.classesDirs
+    classpath = integrationTest.runtimeClasspath
+    it.systemProperty "integration.plugin.path", tasks.shadowJar.outputs.getFiles().asPath // Pass java system property indicating integration plugin path
 }
 
 tasks.register("sourceJar", Jar) {
