@@ -28,7 +28,7 @@ Declare this in your `build.gradle`
 
 ```groovy
 plugins {
-  id "com.gorylenko.gradle-git-properties" version "2.4.0"
+  id "com.gorylenko.gradle-git-properties" version "2.4.1"
 }
 ```
 
@@ -297,7 +297,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath ("com.gorylenko.gradle-git-properties:gradle-git-properties:2.4.0") {
+    classpath ("com.gorylenko.gradle-git-properties:gradle-git-properties:2.4.1") {
         exclude group: 'org.eclipse.jgit', module: 'org.eclipse.jgit' // remove plugin's jgit dependency
     }
     classpath 'org.eclipse.jgit:org.eclipse.jgit:5.5.0.201909110433-r' // use the specified jgit dependency
