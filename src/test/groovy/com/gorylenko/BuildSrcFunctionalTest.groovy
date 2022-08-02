@@ -1,6 +1,7 @@
 package com.gorylenko
 
 import com.gorylenko.properties.GitRepositoryBuilder
+import groovy.json.JsonOutput
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.Rule
@@ -19,16 +20,13 @@ public class BuildSrcFunctionalTest {
         def projectDir = temporaryFolder.newFolder()
         def runner = GradleRunner.create()
                 .withPluginClasspath()
-                .withArguments("check")
                 .withProjectDir(projectDir)
-
-        def classpathString = runner.pluginClasspath
-                .collect { "'$it'" }
-                .join(", ")
+        runner.withArguments('check', "-Dcom.gorylenko.gradle-git-properties.unit-test-classpath=${JsonOutput.toJson(runner.pluginClasspath*.path)}")
 
         def buildSrcDir = new File(projectDir, "buildSrc")
         buildSrcDir.mkdirs()
         new File(buildSrcDir, "build.gradle") << """\
+            import groovy.json.JsonSlurper
             plugins {
                 id("groovy-gradle-plugin")
             }
@@ -36,7 +34,7 @@ public class BuildSrcFunctionalTest {
                 gradlePluginPortal()
             }
             dependencies {
-                runtimeClasspath files($classpathString)
+                runtimeClasspath files(new JsonSlurper().parseText(System.getProperty('com.gorylenko.gradle-git-properties.unit-test-classpath')))
             }
         """
         def pluginSourceDir = buildSrcDir.toPath().resolve("src").resolve("main").resolve("groovy").toFile()
@@ -77,16 +75,14 @@ public class BuildSrcFunctionalTest {
                 .withPluginClasspath()
                 .withArguments("check")
                 .withProjectDir(projectDir)
-
-        def classpathString = runner.pluginClasspath
-                .collect { "'$it'" }
-                .join(", ")
+        runner.withArguments('check', "-Dcom.gorylenko.gradle-git-properties.unit-test-classpath=${JsonOutput.toJson(runner.pluginClasspath*.path)}")
 
         def buildSrcDir = new File(projectDir, "buildSrc")
         buildSrcDir.mkdirs()
         def gitPropDir = new File(projectDir, "gitProp")
         gitPropDir.mkdirs()
         new File(buildSrcDir, "build.gradle") << """\
+            import groovy.json.JsonSlurper
             plugins {
                 id("groovy-gradle-plugin")
             }
@@ -94,7 +90,7 @@ public class BuildSrcFunctionalTest {
                 gradlePluginPortal()
             }
             dependencies {
-                runtimeClasspath files($classpathString)
+                runtimeClasspath files(new JsonSlurper().parseText(System.getProperty('com.gorylenko.gradle-git-properties.unit-test-classpath')))
             }
         """
         def pluginSourceDir = buildSrcDir.toPath().resolve("src").resolve("main").resolve("groovy").toFile()
