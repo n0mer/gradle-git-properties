@@ -20,6 +20,8 @@ public class BackwardCompatibilityFunctionalTest {
     @Parameterized.Parameters(name = "Gradle {0}")
     static List<Object[]> data() {
         return [
+                // https://docs.gradle.org/current/userguide/compatibility.html
+                ["7.5", ["generateGitProperties", "--configuration-cache", "--build-cache"], "18"],
                 ["7.0", ["generateGitProperties", "--configuration-cache", "--build-cache"], "17"],
                 ["6.8.3", ["generateGitProperties", "--configuration-cache", "--build-cache"], "15"],
                 ["6.7.1", ["generateGitProperties", "--configuration-cache", "--build-cache"], "15"],
