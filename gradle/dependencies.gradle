@@ -1,0 +1,14 @@
+// this script is used for dogfooding purpose, to apply the same set of core dependencies between the minimalist bootstrap build (buildSrc) and the final build (root build)
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'ajoberstar-backup'
+        url = 'https://ajoberstar.org/bintray-backup/'
+    }
+}
+dependencies {
+    implementation('org.ajoberstar.grgit:grgit-core:4.1.1') {
+        exclude(group: 'org.slf4j')
+    }
+}

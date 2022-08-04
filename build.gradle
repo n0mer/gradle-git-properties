@@ -14,7 +14,7 @@ plugins {
     id 'java-gradle-plugin'
     id "com.gradle.plugin-publish" version "0.14.0"
     id "com.github.johnrengelman.shadow" version "7.0.0"
-    id "com.gorylenko.gradle-git-properties" version "2.3.2"
+    id "com.gorylenko.gradle-git-properties"
 }
 
 buildScan {
@@ -24,12 +24,9 @@ buildScan {
 
 apply plugin: "com.gradle.plugin-publish"
 
+apply from: 'gradle/dependencies.gradle'
+
 repositories {
-    mavenCentral()
-    maven {
-        name = 'ajoberstar-backup'
-        url = 'https://ajoberstar.org/bintray-backup/'
-    }
     // for debugging
     //maven {
     //    url 'https://repo.gradle.org/gradle/libs-releases-local/'
@@ -41,9 +38,6 @@ def integrationTest = sourceSets.create("integrationTest")
 dependencies {
     shadow gradleApi()
     shadow localGroovy()
-    implementation('org.ajoberstar.grgit:grgit-core:4.1.1') {
-        exclude(group: 'org.slf4j')
-    }
     // for debugging
     //implementation 'org.gradle:gradle-language-jvm:5.6.2'
     //implementation 'org.gradle:gradle-language-java:5.6.2'
