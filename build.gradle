@@ -3,7 +3,7 @@ buildscript {
     dependencies {
         classpath ('org.eclipse.jgit:org.eclipse.jgit:') {
             version {
-                strictly '5.13.0.202109080827-r'
+                strictly '5.13.3.202401111512-r'
             }
         }
     }
