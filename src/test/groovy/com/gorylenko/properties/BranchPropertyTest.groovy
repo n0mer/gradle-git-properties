@@ -24,6 +24,7 @@ class BranchPropertyTest {
         projectDir = File.createTempDir("BranchPropertyTest", ".tmp")
 
         GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder
             // empty repo
         })
 
