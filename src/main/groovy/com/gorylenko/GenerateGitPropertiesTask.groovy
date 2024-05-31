@@ -9,8 +9,10 @@ import org.gradle.api.file.FileTree
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
@@ -26,13 +28,27 @@ public class GenerateGitPropertiesTask extends DefaultTask {
 
     private static final String DEFAULT_OUTPUT_DIR = "resources/main"
 
+    private final ObjectFactory objectFactory;
+    private final ProjectLayout layout;
+    private final RegularFileProperty outputFileProperty
+    private final DirectoryProperty dotGitDirectoryProperty
     private final GitPropertiesPluginExtension gitProperties
+    private final Property<String> versionProperty;
 
-    GenerateGitPropertiesTask() {
+    @Inject
+    GenerateGitPropertiesTask(ObjectFactory objectFactory, ProjectLayout projectLayout) {
         // Description for the task
         description = 'Generate a git.properties file.'
 
+        this.objectFactory = objectFactory
+        this.layout = projectLayout
         this.gitProperties = project.extensions.getByType(GitPropertiesPluginExtension)
+        this.outputFileProperty = getGitPropertiesFile();
+        this.versionProperty = objectFactory.property(String.class);
+        versionProperty.set(getProject().getVersion().toString());
+
+        dotGitDirectoryProperty = objectFactory.directoryProperty()
+
 
         outputs.upToDateWhen { GenerateGitPropertiesTask task ->
             // when extProperty is configured or failOnNoGitDirectory=false always execute the task
@@ -42,26 +58,9 @@ public class GenerateGitPropertiesTask extends DefaultTask {
 
     private Map<String, String> generatedProperties
 
-    @Inject
-    ObjectFactory getObjectFactory() {
-        throw new UnsupportedOperationException()
-    }
-
-    @Inject
-    ProjectLayout getLayout() {
-        throw new UnsupportedOperationException()
-    }
-
-    @InputFiles
-    @PathSensitive(PathSensitivity.RELATIVE)
-    public FileTree getSource() {
-        File dotGitDirectory = getDotGitDirectory()
-        return (dotGitDirectory == null) ? layout.files().asFileTree : layout.files(dotGitDirectory).asFileTree
-    }
-
     @OutputFile
     public RegularFileProperty getOutput() {
-        return getGitPropertiesFile()
+        return this.outputFileProperty
     }
 
     /**
@@ -75,13 +74,14 @@ public class GenerateGitPropertiesTask extends DefaultTask {
         if (logger.debugEnabled) {
             logger.debug("gitProperties = ${gitProperties}")
         }
+        dotGitDirectoryProperty.set(new GitDirLocator(layout.projectDirectory.asFile).lookupGitDirectory(this.gitProperties.dotGitDirectory.asFile.get()))
 
-        if (!gitProperties.failOnNoGitDirectory && getSource().empty) {
+        if (!gitProperties.failOnNoGitDirectory && !dotGitDirectoryProperty.present) {
             logger.info("Exiting because no Git repository found and failOnNoGitDirectory = false.")
             return [:]
         }
 
-        File dotGitDirectory = getDotGitDirectory()
+        File dotGitDirectory = this.dotGitDirectoryProperty.getAsFile().getOrNull()
 
         if (dotGitDirectory == null) {
             throw new GradleException("No Git repository found.")
@@ -95,7 +95,7 @@ public class GenerateGitPropertiesTask extends DefaultTask {
         GitProperties builder = new GitProperties()
         Map<String, String> newMap = builder.generate(dotGitDirectory,
                 gitProperties.keys, gitProperties.dateFormat, gitProperties.dateFormatTimeZone, gitProperties.branch,
-                project.version, gitProperties.customProperties)
+                versionProperty.get(), gitProperties.customProperties)
 
         if (logger.debugEnabled) {
             logger.debug("Generated Git properties  = ${newMap}")
@@ -112,34 +112,14 @@ public class GenerateGitPropertiesTask extends DefaultTask {
 
     @TaskAction
     void generate() {
-
-        if (!gitProperties.failOnNoGitDirectory && getSource().empty) {
-            logger.info("Exiting because no Git repository found and failOnNoGitDirectory = false.")
-            return
-        }
-
         Map<String, String> newMap = getGeneratedProperties()
-
-        // Expose generated properties to project.ext[gitProperties.extProperty] if configured
-
-        if (gitProperties.extProperty) {
-            logger.debug("Exposing git properties model to project.ext[${gitProperties.extProperty}]")
-            project.ext[gitProperties.extProperty] = new HashMap(newMap)
-        }
-
         // Write to git.properties file
 
         logger.debug("gitProperties.gitPropertiesResourceDir=${gitProperties.gitPropertiesResourceDir}")
         logger.debug("gitProperties.gitPropertiesDir=${gitProperties.gitPropertiesDir}")
         logger.debug("gitProperties.gitPropertiesName=${gitProperties.gitPropertiesName}")
-
-        RegularFileProperty file = getGitPropertiesFile()
-        def absolutePath = file.asFile.map(new Transformer<String, File>() {
-            @Override
-            String transform(File f) {
-                f.absolutePath
-            }
-        }).getOrElse("unknown")
+        def file = outputFileProperty
+        def absolutePath = outputFileProperty.get().asFile.absolutePath
         logger.info "git.properties location = [${absolutePath}]"
 
         boolean written = new PropertiesFileWriter().write(newMap, file.asFile.get(), gitProperties.force)
@@ -148,11 +128,6 @@ public class GenerateGitPropertiesTask extends DefaultTask {
         } else {
             logger.info("Skip writing properties to [${file}] as it is up-to-date.")
         }
-    }
-
-    private File getDotGitDirectory() {
-        DirectoryProperty dotGitDirectory = gitProperties.dotGitDirectory
-        return new GitDirLocator(layout.projectDirectory.asFile).lookupGitDirectory(dotGitDirectory.asFile.get())
     }
 
     private Directory getGitPropertiesDir() {
