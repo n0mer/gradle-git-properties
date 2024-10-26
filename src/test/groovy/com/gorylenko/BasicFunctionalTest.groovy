@@ -7,8 +7,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
+import static org.hamcrest.CoreMatchers.containsString
 import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertTrue
+import static org.junit.Assert.assertThat
 
 public class BasicFunctionalTest {
     @Rule
@@ -32,7 +33,7 @@ public class BasicFunctionalTest {
         def result = runner.buildAndFail()
 
         assertEquals(TaskOutcome.FAILED, result.task(":generateGitProperties").outcome)
-        assertTrue(result.output.contains("No Git repository found."))
+        assertThat(result.output, containsString("No Git repository found."))
     }
 
     @Test
