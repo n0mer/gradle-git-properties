@@ -7,9 +7,11 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
+import static org.hamcrest.CoreMatchers.startsWith
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.assertThat
 import static org.junit.Assert.assertTrue
 import static org.junit.Assert.fail
 
@@ -93,7 +95,7 @@ class GitPropertiesPluginTests {
             fail('should have gotten a GradleException')
         } catch (Exception e) {
             assertEquals(GradleException, e.class)
-            assertEquals("No Git repository found.", e.message)
+            assertThat(e.message, startsWith("No Git repository found."))
         }
     }
 }

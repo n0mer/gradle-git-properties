@@ -8,6 +8,7 @@ import org.gradle.api.file.FileTree
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
@@ -28,7 +29,7 @@ public class GenerateGitPropertiesTask extends DefaultTask {
     private final GitPropertiesPluginExtension gitProperties
 
     private final FileTree source
-    private final Object projectVersion
+    private final Property<Object> projectVersion
 
     GenerateGitPropertiesTask() {
         // Description for the task
@@ -43,7 +44,7 @@ public class GenerateGitPropertiesTask extends DefaultTask {
             include('HEAD')
             include('refs/**')
         }
-        this.projectVersion = project.version
+        this.projectVersion = project.objects.property(Object).convention(project.version)
 
         outputs.upToDateWhen { GenerateGitPropertiesTask task ->
             // when extProperty is configured or failOnNoGitDirectory=false always execute the task
@@ -73,7 +74,7 @@ public class GenerateGitPropertiesTask extends DefaultTask {
     }
 
     @Input
-    public Object getProjectVersion() {
+    public Property<Object> getProjectVersion() {
         return projectVersion
     }
 
@@ -90,7 +91,7 @@ public class GenerateGitPropertiesTask extends DefaultTask {
         GitProperties builder = new GitProperties()
         Map<String, String> newMap = builder.generate(dotGitDirectory,
                 gitProperties.keys, gitProperties.dateFormat, gitProperties.dateFormatTimeZone, gitProperties.branch,
-                projectVersion, gitProperties.customProperties)
+                projectVersion.get(), gitProperties.customProperties)
 
         if (logger.debugEnabled) {
             logger.debug("Generated Git properties  = ${newMap}")
@@ -109,7 +110,9 @@ public class GenerateGitPropertiesTask extends DefaultTask {
 
         if (getSource().empty) {
             if (gitProperties.failOnNoGitDirectory) {
-                throw new GradleException("No Git repository found. Please set gitProperties.dotGitDirectory to the correct path.")
+                throw new GradleException(
+                        "No Git repository found. " +
+                        "Ensure the gitProperties.dotGitDirectory property points to the correct .git directory.")
             } else {
                 logger.info("No Git repository found and failOnNoGitDirectory = false.")
                 return
