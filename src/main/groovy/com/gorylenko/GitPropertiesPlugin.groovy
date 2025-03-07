@@ -56,12 +56,9 @@ class GitPropertiesPlugin implements Plugin<Project> {
 
 @ToString(includeNames=true)
 class GitPropertiesPluginExtension {
-    @InputDirectory
     final DirectoryProperty gitPropertiesDir
-    @InputDirectory
     final DirectoryProperty gitPropertiesResourceDir
     String gitPropertiesName = "git.properties"
-    @InputDirectory
     final DirectoryProperty dotGitDirectory
     List keys = GitProperties.standardProperties
     Map<String, Object> customProperties = [:]

@@ -139,22 +139,19 @@ gitProperties {
 > ```
 
 
-The `.git` directory for the project should be detected automatically, otherwise it can be specified manually using `dotGitDirectory`:
+If the `.git` directory is not located in the same directory as the Gradle project, you will need to specify it using `dotGitDirectory`:
 
 ```groovy
 gitProperties {
+    // if .git directory is on the same level as the root project
+    dotGitDirectory = project.rootProject.layout.projectDirectory.dir(".git")
+    
+    // if .git directory is in a different location
     dotGitDirectory = "${project.rootDir}/../somefolder/.git"
 }
 ```
 
-Note: Kotlin DSL syntax
-```kotlin
-configure<com.gorylenko.GitPropertiesPluginExtension> {
-    (dotGitDirectory as DirectoryProperty).set("${project.rootDir}/../somefolder/.git")
-}
-```
-
-If for some reason, the `.git` directory for the project doesn't exist and you don't want the task to fail in that case, use `failOnNoGitDirectory=false`:
+If for some reason, the `.git` directory for the project doesn't exist, and you don't want the task to fail in that case, use `failOnNoGitDirectory=false`:
 
 ```groovy
 gitProperties {
