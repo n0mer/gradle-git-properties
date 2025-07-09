@@ -1,13 +1,16 @@
 package com.gorylenko.writer
 
+import groovy.transform.CompileStatic
+
 /**
  * Remove all lines start with # and end with LF (\n)
  */
+@CompileStatic
 class SkipPropertiesCommentsOutputStream extends FilterOutputStream {
 
-    private static int START_COMMENT_CHAR1 = '#'
-    private static int START_COMMENT_CHAR2 = '!'
-    private static int LINE_END_CHAR = '\n'
+    private static int START_COMMENT_CHAR1 = '#' as char
+    private static int START_COMMENT_CHAR2 = '!' as char
+    private static int LINE_END_CHAR = '\n' as char
 
     private boolean commentFound = false
     private int lastChar = LINE_END_CHAR
