@@ -31,6 +31,8 @@ public class GenerateGitPropertiesTask extends DefaultTask {
     private final FileTree source
     private final Property<Object> projectVersion
 
+    private final gitProps = new HashMap()
+
     GenerateGitPropertiesTask() {
         // Description for the task
         description = 'Generate a git.properties file.'
@@ -49,6 +51,10 @@ public class GenerateGitPropertiesTask extends DefaultTask {
         outputs.upToDateWhen { GenerateGitPropertiesTask task ->
             // when extProperty is configured or failOnNoGitDirectory=false always execute the task
             return !task.gitProperties.extProperty && task.gitProperties.failOnNoGitDirectory
+        }
+
+        if (gitProperties.extProperty) {
+            project.ext[gitProperties.extProperty] = gitProps
         }
     }
 
@@ -124,7 +130,7 @@ public class GenerateGitPropertiesTask extends DefaultTask {
         // Expose generated properties to project.ext[gitProperties.extProperty] if configured
         if (gitProperties.extProperty) {
             logger.debug("Exposing git properties model to project.ext[${gitProperties.extProperty}]")
-            project.ext[gitProperties.extProperty] = new HashMap(newMap)
+            gitProps.putAll(newMap)
         }
 
         // Write to git.properties file
