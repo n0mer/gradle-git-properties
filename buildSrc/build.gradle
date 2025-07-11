@@ -1,0 +1,18 @@
+plugins {
+    id 'groovy'
+    id 'java-gradle-plugin'
+}
+
+description = 'Dogfooding: minimalist build to assemble and apply the plugin we are building on itself (the parent build)'
+
+apply from: '../gradle/dependencies.gradle'
+
+dependencies {
+    gradleApi()
+}
+
+sourceSets.main {
+    resources.srcDirs = ['../src/main/resources']
+    java.srcDirs = ['../src/main/java']
+    groovy.srcDirs = ['../src/main/groovy']
+}
