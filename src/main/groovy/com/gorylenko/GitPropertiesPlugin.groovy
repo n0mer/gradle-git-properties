@@ -72,7 +72,22 @@ class GitPropertiesPluginExtension {
     GitPropertiesPluginExtension(Project project) {
         gitPropertiesDir = project.objects.directoryProperty()
         gitPropertiesResourceDir = project.objects.directoryProperty()
-        dotGitDirectory = project.objects.directoryProperty().convention(project.layout.projectDirectory.dir(".git"))
+        dotGitDirectory = project.objects.directoryProperty().convention(findGitDirectory(project))
+    }
+    
+    private static Directory findGitDirectory(Project project) {
+        // Start from current project and walk up to find .git directory
+        Project currentProject = project
+        while (currentProject != null) {
+            def gitDir = currentProject.layout.projectDirectory.dir(".git")
+            if (gitDir.asFile.exists()) {
+                return gitDir
+            }
+            currentProject = currentProject.parent
+        }
+        
+        // Fallback to current project's .git directory (original behavior)
+        return project.layout.projectDirectory.dir(".git")
     }
 
     void customProperty(String name, Object value) {
