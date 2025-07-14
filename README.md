@@ -251,8 +251,9 @@ gitProperties {
 generateGitProperties.outputs.upToDateWhen { false } // make sure the generateGitProperties task always executes (even when git.properties is not changed)
 
 task printGitProperties(dependsOn: 'generateGitProperties') { // make sure generateGitProperties task to execute before accessing generated properties
+    def ext = project.ext // accessing 'project' inside 'doLast' would make it incompatible with Gradle configuration cache
     doLast {
-        println "git.commit.id.abbrev=" + project.ext.gitProps['git.commit.id.abbrev']
+        println "git.commit.id.abbrev=" + ext.gitProps['git.commit.id.abbrev']
     }
 }
 ```
@@ -266,9 +267,10 @@ gitProperties {
 generateGitProperties.outputs.upToDateWhen { false } // make sure the generateGitProperties task always executes (even when git.properties is not changed)
 
 bootJar {
+  def ext = project.ext // accessing 'project' inside 'attributes' would make it incompatible with Gradle configuration cache
   manifest {
     attributes(
-        'Build-Revision': "${-> project.ext.gitProps['git.commit.id.abbrev']}"  // Use GString lazy evaluation to delay until git properties are populated
+        'Build-Revision': "${-> ext.gitProps['git.commit.id.abbrev']}"  // Use GString lazy evaluation to delay until git properties are populated
     )
   }
 }
