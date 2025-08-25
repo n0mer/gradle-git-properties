@@ -80,14 +80,57 @@ class GitPropertiesPluginExtension {
         Project currentProject = project
         while (currentProject != null) {
             def gitDir = currentProject.layout.projectDirectory.dir(".git")
-            if (gitDir.asFile.exists()) {
-                return gitDir
+            def gitFile = gitDir.asFile
+            
+            if (gitFile.exists()) {
+                // Check if it's a worktree (file with gitdir: reference)
+                if (gitFile.isFile()) {
+                    def resolvedGitDir = resolveWorktreeGitDir(gitFile, currentProject)
+                    if (resolvedGitDir != null) {
+                        return resolvedGitDir
+                    }
+                } else if (gitFile.isDirectory()) {
+                    // Regular .git directory
+                    return gitDir
+                }
             }
             currentProject = currentProject.parent
         }
         
         // Fallback to current project's .git directory (original behavior)
         return project.layout.projectDirectory.dir(".git")
+    }
+    
+    private static Directory resolveWorktreeGitDir(File gitFile, Project project) {
+        // Read the .git file to find the actual git directory
+        def lines = gitFile.readLines()
+        def gitDirLine = lines.find { it.startsWith("gitdir: ") }
+        
+        if (gitDirLine) {
+            def gitPath = gitDirLine.substring("gitdir: ".length()).trim()
+            
+            // Convert to File to handle both absolute and relative paths
+            File gitDir
+            if (new File(gitPath).isAbsolute()) {
+                gitDir = new File(gitPath)
+            } else {
+                // Relative path - resolve relative to the .git file's parent directory
+                gitDir = new File(gitFile.parentFile, gitPath).canonicalFile
+            }
+            
+            // Check if it's a worktree path
+            def gitDirPath = gitDir.absolutePath
+            def worktreesIndex = gitDirPath.lastIndexOf(File.separator + "worktrees" + File.separator)
+            if (worktreesIndex > 0) {
+                // Return the main git directory (before /worktrees/)
+                gitDir = new File(gitDirPath.substring(0, worktreesIndex))
+            }
+            
+            // Convert back to Directory
+            return project.layout.projectDirectory.dir(gitDir.absolutePath)
+        }
+        
+        return null
     }
 
     void customProperty(String name, Object value) {
