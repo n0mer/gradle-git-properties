@@ -21,7 +21,7 @@ import org.gradle.api.tasks.TaskAction
 import javax.inject.Inject
 
 @CacheableTask
-public class GenerateGitPropertiesTask extends DefaultTask {
+class GenerateGitPropertiesTask extends DefaultTask {
     public static final String TASK_NAME = "generateGitProperties"
 
     private static final String DEFAULT_OUTPUT_DIR = "resources/main"
@@ -29,7 +29,7 @@ public class GenerateGitPropertiesTask extends DefaultTask {
     private final GitPropertiesPluginExtension gitProperties
 
     private final FileTree source
-    private final Property<Object> projectVersion
+    private final Property<String> projectVersion
 
     private final gitProps = new HashMap()
 
@@ -46,7 +46,7 @@ public class GenerateGitPropertiesTask extends DefaultTask {
             include('HEAD')
             include('refs/**')
         }
-        this.projectVersion = project.objects.property(Object).convention(project.version)
+        this.projectVersion = project.objects.property(String).convention(project.provider { project.version?.toString() })
 
         outputs.upToDateWhen { GenerateGitPropertiesTask task ->
             // when extProperty is configured or failOnNoGitDirectory=false always execute the task
@@ -70,17 +70,17 @@ public class GenerateGitPropertiesTask extends DefaultTask {
 
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
-    public FileTree getSource() {
+    FileTree getSource() {
         return source
     }
 
     @OutputFile
-    public RegularFileProperty getOutput() {
+    RegularFileProperty getOutput() {
         return getGitPropertiesFile()
     }
 
     @Input
-    public Property<Object> getProjectVersion() {
+    Property<String> getProjectVersion() {
         return projectVersion
     }
 
