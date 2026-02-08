@@ -11,6 +11,8 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertTrue
+import static org.junit.Assert.assertNotNull
 
 @RunWith(Parameterized.class)
 public class BackwardCompatibilityFunctionalTest {
@@ -100,6 +102,22 @@ public class BackwardCompatibilityFunctionalTest {
         def result = runner.build()
         assertEquals(TaskOutcome.SUCCESS, result.task(":generateGitProperties").outcome)
 
+        // Verify git.properties file was created with expected content
+        def gitPropertiesFile = new File(projectDir, "build/resources/main/git.properties")
+        assertTrue("git.properties should exist", gitPropertiesFile.exists())
+
+        def properties = new Properties()
+        gitPropertiesFile.withInputStream { properties.load(it) }
+
+        // Verify essential properties are present and non-empty
+        assertNotNull("Should have git.branch", properties.getProperty("git.branch"))
+        assertNotNull("Should have git.commit.id", properties.getProperty("git.commit.id"))
+        assertNotNull("Should have git.commit.id.abbrev", properties.getProperty("git.commit.id.abbrev"))
+        assertNotNull("Should have git.commit.time", properties.getProperty("git.commit.time"))
+        assertNotNull("Should have git.commit.message.short", properties.getProperty("git.commit.message.short"))
+        assertEquals("Added hello.txt", properties.getProperty("git.commit.message.short"))
+
+        // Verify up-to-date check works
         result = runner.build()
         assertEquals(TaskOutcome.UP_TO_DATE, result.task(":generateGitProperties").outcome)
     }
