@@ -82,27 +82,26 @@ class GitPropertiesPluginExtension {
     }
     
     private static Directory findGitDirectory(Project project) {
-        // Start from current project and walk up to find .git directory
-        Project currentProject = project
-        while (currentProject != null) {
-            def gitDir = currentProject.layout.projectDirectory.dir(".git")
-            def gitFile = gitDir.asFile
-            
+        // Walk up the filesystem from the current project directory
+        // This handles: single project, multi-project, and monorepo scenarios
+        File currentDir = project.projectDir
+        while (currentDir != null) {
+            File gitFile = new File(currentDir, ".git")
             if (gitFile.exists()) {
-                // Check if it's a worktree (file with gitdir: reference)
                 if (gitFile.isFile()) {
-                    def resolvedGitDir = resolveWorktreeGitDir(gitFile, currentProject)
+                    // Worktree - resolve the actual git directory
+                    def resolvedGitDir = resolveWorktreeGitDir(gitFile, project)
                     if (resolvedGitDir != null) {
                         return resolvedGitDir
                     }
                 } else if (gitFile.isDirectory()) {
                     // Regular .git directory
-                    return gitDir
+                    return project.layout.projectDirectory.dir(gitFile.absolutePath)
                 }
             }
-            currentProject = currentProject.parent
+            currentDir = currentDir.parentFile
         }
-        
+
         // Fallback to current project's .git directory (original behavior)
         return project.layout.projectDirectory.dir(".git")
     }
