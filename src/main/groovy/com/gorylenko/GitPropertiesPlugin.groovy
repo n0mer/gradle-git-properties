@@ -29,14 +29,20 @@ class GitPropertiesPlugin implements Plugin<Project> {
         project.plugins.withType(JavaPlugin) {
             project.tasks.named(JavaPlugin.CLASSES_TASK_NAME).configure {
                 dependsOn(task)
+            }
 
-                // if Java plugin is used, this method will be called to register gitPropertiesResourceDir to classpath
-                // at the end of evaluation phase (to make sure extension values are set)
+            // if Java plugin is used, this method will be called to register gitPropertiesResourceDir to classpath
+            // at the end of evaluation phase (to make sure extension values are set)
+            project.afterEvaluate {
                 if (extension.gitPropertiesResourceDir.present) {
                     String gitPropertiesDir = getGitPropertiesDir(extension, project.layout).asFile.absolutePath
                     def sourceSets = project.extensions.getByType(SourceSetContainer)
                     sourceSets.named(SourceSet.MAIN_SOURCE_SET_NAME).configure {
                         it.resources.srcDir(gitPropertiesDir)
+                    }
+                    // Ensure processResources depends on generateGitProperties when using custom resource dir
+                    project.tasks.named(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).configure {
+                        dependsOn(task)
                     }
                 }
             }
