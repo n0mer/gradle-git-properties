@@ -11,11 +11,22 @@ Idea - @lievendoclo, originally published in article [Spring Boot's info endpoin
 
 This Gradle plugin is compatible with the following versions of Gradle and Java:
 
-| Plugin version | Gradle versions | Java versions |
-| -------------- | --------------- | ------------- |
-| 2.5.x          | 5.1 - 9.x       | 8 - 21        |
-| 2.3.2          | 5.1+            | 8+            |
-| 2.2.4          | 4.x+            | 8+            |
+| Plugin version | Gradle versions |
+| -------------- | --------------- |
+| 2.5.x          | 5.1 - 9.x       |
+| 2.3.2          | 5.1+            |
+| 2.2.4          | 4.x+            |
+
+Java compatibility depends on your Gradle version (see [Gradle compatibility matrix](https://docs.gradle.org/current/userguide/compatibility.html)):
+
+| Gradle | Java |
+| ------ | ---- |
+| 9.x    | 17 - 23 |
+| 8.5+   | 8 - 21 |
+| 8.0-8.4| 8 - 19 |
+| 7.x    | 8 - 17 |
+| 6.x    | 8 - 15 |
+| 5.x    | 8 - 12 |
 
 ## notes
 * Plugin requires Java 8+
