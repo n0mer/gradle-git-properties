@@ -1,4 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
 buildscript {
     dependencies {
         classpath ('org.eclipse.jgit:org.eclipse.jgit:') {
@@ -12,17 +11,10 @@ plugins {
     id 'groovy'
     id 'maven-publish'
     id 'java-gradle-plugin'
-    id "com.gradle.plugin-publish" version "0.14.0"
-    id "com.github.johnrengelman.shadow" version "7.0.0"
-    id "com.gorylenko.gradle-git-properties" version "2.3.2"
+    id "com.gradle.plugin-publish" version "1.2.1"
+    id "com.github.johnrengelman.shadow" version "8.1.1"
+    id "com.gorylenko.gradle-git-properties" version "2.4.2"
 }
-
-buildScan {
-    termsOfServiceUrl = 'https://gradle.com/terms-of-service'
-    termsOfServiceAgree = 'yes'
-}
-
-apply plugin: "com.gradle.plugin-publish"
 
 repositories {
     mavenCentral()
@@ -58,15 +50,12 @@ dependencies {
     integrationTestImplementation sourceSets.test.output // Include test files for git project utils
 }
 
-task relocateShadowJar(type: ConfigureShadowRelocation) {
-    target = tasks.shadowJar
-    prefix = "gradlegitproperties"
-}
-
-tasks.shadowJar.dependsOn tasks.relocateShadowJar
-
 shadowJar {
     archiveClassifier.set('')
+    // Relocate bundled dependencies to avoid conflicts with user's dependencies
+    relocate 'org.ajoberstar', 'gradlegitproperties.org.ajoberstar'
+    relocate 'org.eclipse.jgit', 'gradlegitproperties.org.eclipse.jgit'
+    relocate 'com.googlecode.javaewah', 'gradlegitproperties.com.googlecode.javaewah'
 }
 
 tasks.shadowJar.dependsOn tasks.jar
@@ -75,7 +64,7 @@ components.java.withVariantsFromConfiguration(configurations.runtimeElements) {
     skip()
 }
 
-version = "2.5.5"
+version = "2.5.6"
 group = "com.gorylenko.gradle-git-properties"
 
 gitProperties {
@@ -84,7 +73,13 @@ gitProperties {
     dateFormatTimeZone = "PST"
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 tasks.withType(GroovyCompile) {
+    sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 test {
@@ -105,7 +100,7 @@ tasks.register("integrationTest", Test) {
 }
 
 tasks.register("sourceJar", Jar) {
-    classifier = "sources"
+    archiveClassifier.set("sources")
     from sourceSets.main.resources, sourceSets.main.groovy
 
     dependsOn tasks.named("classes")
@@ -128,16 +123,17 @@ publishing {
     }
 }
 
-pluginBundle {
+gradlePlugin {
     website = 'http://github.com/n0mer/gradle-git-properties'
     vcsUrl = 'https://github.com/n0mer/gradle-git-properties'
-    description = 'Produce git.properties for spring-boot-actuator'
-    tags = ['git', 'spring-boot']
 
     plugins {
         gitPropertiesPlugin {
             id = 'com.gorylenko.gradle-git-properties'
+            implementationClass = 'com.gorylenko.GitPropertiesPlugin'
             displayName = 'Gradle Git Properties plugin'
+            description = 'Produce git.properties for spring-boot-actuator'
+            tags.set(['git', 'spring-boot'])
         }
     }
 }
