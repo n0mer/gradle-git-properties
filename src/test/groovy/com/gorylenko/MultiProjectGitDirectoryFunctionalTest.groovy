@@ -239,6 +239,68 @@ public class MultiProjectGitDirectoryFunctionalTest {
         assertTrue("Should have git.branch", properties.getProperty("git.branch") != null)
     }
 
+    /**
+     * Test for monorepo scenario where .git is ABOVE the Gradle root project.
+     * Directory structure:
+     * monorepo/
+     * ├── .git/                    <-- Git repo root
+     * └── projects/
+     *     └── gradle-project/      <-- Gradle root project (settings.gradle here)
+     *         └── build.gradle
+     */
+    @Test
+    public void testMonorepoWithGitAboveGradleRoot() {
+        // Create monorepo structure: monorepo/.git and monorepo/projects/gradle-project
+        def monorepoDir = temporaryFolder.newFolder("monorepo")
+        def projectsDir = new File(monorepoDir, "projects")
+        def gradleProjectDir = new File(projectsDir, "gradle-project")
+        gradleProjectDir.mkdirs()
+
+        // Setup git repository at monorepo root (ABOVE Gradle project)
+        GitRepositoryBuilder.setupProjectDir(monorepoDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("README.md", "# Monorepo", "Initial commit")
+        })
+
+        // Verify .git is at monorepo level, NOT in gradle project
+        assertTrue("Git should exist at monorepo root", new File(monorepoDir, ".git").exists())
+        assertFalse("Git should NOT exist in gradle project", new File(gradleProjectDir, ".git").exists())
+
+        // Setup Gradle project
+        new File(gradleProjectDir, "settings.gradle") << """\
+            rootProject.name = 'gradle-in-monorepo'
+        """.stripIndent()
+
+        new File(gradleProjectDir, "build.gradle") << """\
+            plugins {
+                id 'java'
+                id 'com.gorylenko.gradle-git-properties'
+            }
+
+            gitProperties {
+                // No explicit dotGitDirectory - should auto-detect from monorepo
+                customProperty 'test.scenario', 'monorepo'
+            }
+        """.stripIndent()
+
+        def runner = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments("generateGitProperties", "--info", "--stacktrace")
+                .withProjectDir(gradleProjectDir)
+
+        def result = runner.build()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":generateGitProperties").outcome)
+
+        // Verify git.properties was created
+        def gitPropertiesFile = new File(gradleProjectDir, "build/resources/main/git.properties")
+        assertTrue("git.properties should exist", gitPropertiesFile.exists())
+
+        def properties = new Properties()
+        gitPropertiesFile.withInputStream { properties.load(it) }
+        assertEquals("monorepo", properties.getProperty("test.scenario"))
+        assertTrue("Should have git.commit.id", properties.getProperty("git.commit.id") != null)
+    }
+
     @Test
     public void testNestedMultiProjectBuildWithDotGitInRoot() {
         def rootProjectDir = temporaryFolder.newFolder()
@@ -318,6 +380,84 @@ public class MultiProjectGitDirectoryFunctionalTest {
         assertEquals(":level1:level2", properties.getProperty("project.path"))
         
         // Verify that git properties are populated
+        assertTrue("Should have git.commit.id", properties.getProperty("git.commit.id") != null)
+        assertTrue("Should have git.branch", properties.getProperty("git.branch") != null)
+    }
+
+    /**
+     * Test for composite build scenario where an included build needs to find .git
+     * from the composing build's root.
+     * Directory structure:
+     * composite-root/
+     * ├── .git/                    <-- Git repo root
+     * ├── settings.gradle          <-- includeBuild 'included-build'
+     * └── included-build/
+     *     ├── settings.gradle      <-- Separate Gradle build
+     *     └── build.gradle         <-- Plugin applied here
+     *
+     * This addresses the composite build scenario from issue #240:
+     * https://github.com/n0mer/gradle-git-properties/issues/240#issuecomment-2710689037
+     */
+    @Test
+    public void testCompositeBuildWithGitInComposingRoot() {
+        // Create composite build structure
+        def compositeRootDir = temporaryFolder.newFolder("composite-root")
+        def includedBuildDir = new File(compositeRootDir, "included-build")
+        includedBuildDir.mkdirs()
+
+        // Setup git repository at composite root
+        GitRepositoryBuilder.setupProjectDir(compositeRootDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("README.md", "# Composite build", "Initial commit")
+        })
+
+        // Verify .git is at composite root, NOT in included build
+        assertTrue("Git should exist at composite root", new File(compositeRootDir, ".git").exists())
+        assertFalse("Git should NOT exist in included build", new File(includedBuildDir, ".git").exists())
+
+        // Setup composing build (root)
+        new File(compositeRootDir, "settings.gradle") << """\
+            rootProject.name = 'composite-root'
+            includeBuild 'included-build'
+        """.stripIndent()
+
+        new File(compositeRootDir, "build.gradle") << """\
+            // Composing build
+        """.stripIndent()
+
+        // Setup included build (separate Gradle build)
+        new File(includedBuildDir, "settings.gradle") << """\
+            rootProject.name = 'included-build'
+        """.stripIndent()
+
+        new File(includedBuildDir, "build.gradle") << """\
+            plugins {
+                id 'java'
+                id 'com.gorylenko.gradle-git-properties'
+            }
+
+            gitProperties {
+                // No explicit dotGitDirectory - should auto-detect from composite root
+                customProperty 'test.scenario', 'composite-build'
+            }
+        """.stripIndent()
+
+        // Run the included build's task from the composite root
+        def runner = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments(":included-build:generateGitProperties", "--info", "--stacktrace")
+                .withProjectDir(compositeRootDir)
+
+        def result = runner.build()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":included-build:generateGitProperties").outcome)
+
+        // Verify git.properties was created in the included build
+        def gitPropertiesFile = new File(includedBuildDir, "build/resources/main/git.properties")
+        assertTrue("git.properties should exist", gitPropertiesFile.exists())
+
+        def properties = new Properties()
+        gitPropertiesFile.withInputStream { properties.load(it) }
+        assertEquals("composite-build", properties.getProperty("test.scenario"))
         assertTrue("Should have git.commit.id", properties.getProperty("git.commit.id") != null)
         assertTrue("Should have git.branch", properties.getProperty("git.branch") != null)
     }
