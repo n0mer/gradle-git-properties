@@ -23,7 +23,7 @@ public class BackwardCompatibilityFunctionalTest {
                 // Gradle 9.x - supports Java 8-23
                 ["9.0", ["generateGitProperties", "--configuration-cache", "--build-cache"], 23],
                 // Gradle 8.x - supports Java 8-21 (8.5+), Java 8-19 (8.0-8.4)
-                ["8.12", ["generateGitProperties", "--configuration-cache", "--build-cache"], 23],
+                ["8.14.4", ["generateGitProperties", "--configuration-cache", "--build-cache"], 23],
                 ["8.5", ["generateGitProperties", "--configuration-cache", "--build-cache"], 21],
                 ["8.0", ["generateGitProperties", "--configuration-cache", "--build-cache"], 19],
                 // Gradle 7.x - supports Java 8-17 (7.3+), Java 8-16 (7.0-7.2)
