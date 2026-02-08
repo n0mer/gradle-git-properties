@@ -20,40 +20,42 @@ public class BackwardCompatibilityFunctionalTest {
     @Parameterized.Parameters(name = "Gradle {0}")
     static List<Object[]> data() {
         return [
-                // Gradle 9.x - supports Java 8-23
-                ["9.0", ["generateGitProperties", "--configuration-cache", "--build-cache"], 23],
-                // Gradle 8.x - supports Java 8-21 (8.5+), Java 8-19 (8.0-8.4)
-                ["8.14.4", ["generateGitProperties", "--configuration-cache", "--build-cache"], 23],
-                ["8.5", ["generateGitProperties", "--configuration-cache", "--build-cache"], 21],
-                ["8.0", ["generateGitProperties", "--configuration-cache", "--build-cache"], 19],
-                // Gradle 7.x - supports Java 8-17 (7.3+), Java 8-16 (7.0-7.2)
-                ["7.6.4", ["generateGitProperties", "--configuration-cache", "--build-cache"], 19],
-                ["7.0", ["generateGitProperties", "--configuration-cache", "--build-cache"], 16],
-                // Gradle 6.x - supports Java 8-15 (6.7+), Java 8-14 (6.3-6.6)
-                ["6.8.3", ["generateGitProperties", "--configuration-cache", "--build-cache"], 15],
-                ["6.7.1", ["generateGitProperties", "--configuration-cache", "--build-cache"], 15],
-                ["6.6.1", ["generateGitProperties", "--configuration-cache", "--build-cache"], 14],
-                ["6.5.1", ["generateGitProperties"], 14],
-                ["6.4.1", ["generateGitProperties"], 14],
-                // ["6.3", ["generateGitProperties"], 14], // StackOverflowError: https://github.com/gradle/gradle/issues/11466
-                // ["6.2.2", ["generateGitProperties"], 13], // StackOverflowError: https://github.com/gradle/gradle/issues/11466
-                // ["6.1.1", ["generateGitProperties"], 13], // StackOverflowError: https://github.com/gradle/gradle/issues/11466
-                // ["6.0.1", ["generateGitProperties"], 13], // StackOverflowError: https://github.com/gradle/gradle/issues/11466
-                // Gradle 5.x - supports Java 8-12 (5.4+), Java 8-11 (5.0-5.3)
-                ["5.6.4", ["generateGitProperties"], 12],
-                ["5.5.1", ["generateGitProperties"], 12],
-                ["5.1", ["generateGitProperties"], 11],
-                // ["5.0", ["generateGitProperties"], 11], // Doesn't support conventions: https://docs.gradle.org/5.1/release-notes.html#specify-a-convention-for-a-property
+                // Gradle 9.x - requires Java 17+, supports up to Java 23
+                ["9.0", ["generateGitProperties", "--configuration-cache", "--build-cache"], 17, 23],
+                // Gradle 8.x - requires Java 8+, supports up to Java 21/23
+                ["8.14.4", ["generateGitProperties", "--configuration-cache", "--build-cache"], 8, 23],
+                ["8.5", ["generateGitProperties", "--configuration-cache", "--build-cache"], 8, 21],
+                ["8.0", ["generateGitProperties", "--configuration-cache", "--build-cache"], 8, 19],
+                // Gradle 7.x - requires Java 8+, supports up to Java 16-19
+                ["7.6.4", ["generateGitProperties", "--configuration-cache", "--build-cache"], 8, 19],
+                ["7.0", ["generateGitProperties", "--configuration-cache", "--build-cache"], 8, 16],
+                // Gradle 6.x - requires Java 8+, supports up to Java 14-15
+                ["6.8.3", ["generateGitProperties", "--configuration-cache", "--build-cache"], 8, 15],
+                ["6.7.1", ["generateGitProperties", "--configuration-cache", "--build-cache"], 8, 15],
+                ["6.6.1", ["generateGitProperties", "--configuration-cache", "--build-cache"], 8, 14],
+                ["6.5.1", ["generateGitProperties"], 8, 14],
+                ["6.4.1", ["generateGitProperties"], 8, 14],
+                // ["6.3", ["generateGitProperties"], 8, 14], // StackOverflowError: https://github.com/gradle/gradle/issues/11466
+                // ["6.2.2", ["generateGitProperties"], 8, 13], // StackOverflowError: https://github.com/gradle/gradle/issues/11466
+                // ["6.1.1", ["generateGitProperties"], 8, 13], // StackOverflowError: https://github.com/gradle/gradle/issues/11466
+                // ["6.0.1", ["generateGitProperties"], 8, 13], // StackOverflowError: https://github.com/gradle/gradle/issues/11466
+                // Gradle 5.x - requires Java 8+, supports up to Java 11-12
+                ["5.6.4", ["generateGitProperties"], 8, 12],
+                ["5.5.1", ["generateGitProperties"], 8, 12],
+                ["5.1", ["generateGitProperties"], 8, 11],
+                // ["5.0", ["generateGitProperties"], 8, 11], // Doesn't support conventions: https://docs.gradle.org/5.1/release-notes.html#specify-a-convention-for-a-property
         ]*.toArray()
     }
 
     private final String gradleVersion;
     private final List<String> arguments;
+    private final int minJavaVersion;
     private final int maxJavaVersion;
 
-    BackwardCompatibilityFunctionalTest(String gradleVersion, List<String> arguments, int maxJavaVersion) {
+    BackwardCompatibilityFunctionalTest(String gradleVersion, List<String> arguments, int minJavaVersion, int maxJavaVersion) {
         this.gradleVersion = gradleVersion
         this.arguments = arguments
+        this.minJavaVersion = minJavaVersion
         this.maxJavaVersion = maxJavaVersion
     }
 
@@ -69,7 +71,10 @@ public class BackwardCompatibilityFunctionalTest {
     @Test
     public void testPluginSupportsConfigurationCache() {
         int javaVersion = getMajorJavaVersion()
-        Assume.assumeTrue("Skipping test on Java ${javaVersion} (max supported: ${maxJavaVersion})", javaVersion <= maxJavaVersion);
+        Assume.assumeTrue("Skipping Gradle ${gradleVersion} on Java ${javaVersion} (requires Java ${minJavaVersion}+)",
+                javaVersion >= minJavaVersion)
+        Assume.assumeTrue("Skipping Gradle ${gradleVersion} on Java ${javaVersion} (max supported: ${maxJavaVersion})",
+                javaVersion <= maxJavaVersion)
 
         def projectDir = temporaryFolder.newFolder()
 
