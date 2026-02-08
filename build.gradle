@@ -64,7 +64,7 @@ components.java.withVariantsFromConfiguration(configurations.runtimeElements) {
     skip()
 }
 
-version = "2.5.5"
+version = "2.5.6"
 group = "com.gorylenko.gradle-git-properties"
 
 gitProperties {
