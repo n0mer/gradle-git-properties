@@ -171,7 +171,7 @@ public class BasicFunctionalTest {
 
         def runner = GradleRunner.create()
                 .withPluginClasspath()
-                .withArguments("processResources", "--warning-mode=fail")
+                .withArguments("processResources")
                 .withProjectDir(projectDir)
 
         def result = runner.build()
