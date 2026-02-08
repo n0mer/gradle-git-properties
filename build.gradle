@@ -55,6 +55,7 @@ shadowJar {
     // Relocate bundled dependencies to avoid conflicts with user's dependencies
     relocate 'org.ajoberstar', 'gradlegitproperties.org.ajoberstar'
     relocate 'org.eclipse.jgit', 'gradlegitproperties.org.eclipse.jgit'
+    relocate 'com.googlecode.javaewah', 'gradlegitproperties.com.googlecode.javaewah'
 }
 
 tasks.shadowJar.dependsOn tasks.jar
