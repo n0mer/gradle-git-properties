@@ -36,7 +36,7 @@ public class BuildSrcFunctionalTest {
                 gradlePluginPortal()
             }
             dependencies {
-                runtimeClasspath files($classpathString)
+                implementation files($classpathString)
             }
         """
         def pluginSourceDir = buildSrcDir.toPath().resolve("src").resolve("main").resolve("groovy").toFile()
@@ -94,7 +94,7 @@ public class BuildSrcFunctionalTest {
                 gradlePluginPortal()
             }
             dependencies {
-                runtimeClasspath files($classpathString)
+                implementation files($classpathString)
             }
         """
         def pluginSourceDir = buildSrcDir.toPath().resolve("src").resolve("main").resolve("groovy").toFile()

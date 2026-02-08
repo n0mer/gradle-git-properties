@@ -5,16 +5,28 @@ Plugin is available from [Gradle Plugins repository](https://plugins.gradle.org/
 
 Idea - @lievendoclo, originally published in article [Spring Boot's info endpoint, Git and Gradle - InsaneProgramming](http://www.insaneprogramming.be/article/2014/08/15/spring-boot-info-git/).
 
-[![Build Status](https://travis-ci.org/n0mer/gradle-git-properties.svg?branch=master)](https://travis-ci.org/n0mer/gradle-git-properties)
+[![Build](https://github.com/n0mer/gradle-git-properties/actions/workflows/build.yml/badge.svg)](https://github.com/n0mer/gradle-git-properties/actions/workflows/build.yml)
 
 ## compatibility matrix
 
-This Gradle plugin is compatible with the following versions of Gradle:
+This Gradle plugin is compatible with the following versions of Gradle and Java:
 
-| Plugin version | Min. Gradle version |
-| -------------- | ------------------- |
-| 2.3.2          | 5.1                 |
-| 2.2.4          | 4.x                 |
+| Plugin version | Gradle versions |
+| -------------- | --------------- |
+| 2.5.x          | 5.1 - 9.x       |
+| 2.3.2          | 5.1+            |
+| 2.2.4          | 4.x+            |
+
+Java compatibility depends on your Gradle version (see [Gradle compatibility matrix](https://docs.gradle.org/current/userguide/compatibility.html)):
+
+| Gradle | Java |
+| ------ | ---- |
+| 9.x    | 17 - 23 |
+| 8.5+   | 8 - 21 |
+| 8.0-8.4| 8 - 19 |
+| 7.x    | 8 - 17 |
+| 6.x    | 8 - 15 |
+| 5.x    | 8 - 12 |
 
 ## notes
 * Plugin requires Java 8+
@@ -28,7 +40,7 @@ Declare this in your `build.gradle`
 
 ```groovy
 plugins {
-  id "com.gorylenko.gradle-git-properties" version "2.5.5"
+  id "com.gorylenko.gradle-git-properties" version "2.5.6"
 }
 ```
 
@@ -296,7 +308,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath ("com.gorylenko.gradle-git-properties:gradle-git-properties:2.5.5") {
+    classpath ("com.gorylenko.gradle-git-properties:gradle-git-properties:2.5.6") {
         exclude group: 'org.eclipse.jgit', module: 'org.eclipse.jgit' // remove plugin's jgit dependency
     }
     classpath 'org.eclipse.jgit:org.eclipse.jgit:5.5.0.201909110433-r' // use the specified jgit dependency
