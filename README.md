@@ -5,16 +5,17 @@ Plugin is available from [Gradle Plugins repository](https://plugins.gradle.org/
 
 Idea - @lievendoclo, originally published in article [Spring Boot's info endpoint, Git and Gradle - InsaneProgramming](http://www.insaneprogramming.be/article/2014/08/15/spring-boot-info-git/).
 
-[![Build Status](https://travis-ci.org/n0mer/gradle-git-properties.svg?branch=master)](https://travis-ci.org/n0mer/gradle-git-properties)
+[![Build](https://github.com/n0mer/gradle-git-properties/actions/workflows/build.yml/badge.svg)](https://github.com/n0mer/gradle-git-properties/actions/workflows/build.yml)
 
 ## compatibility matrix
 
-This Gradle plugin is compatible with the following versions of Gradle:
+This Gradle plugin is compatible with the following versions of Gradle and Java:
 
-| Plugin version | Min. Gradle version |
-| -------------- | ------------------- |
-| 2.3.2          | 5.1                 |
-| 2.2.4          | 4.x                 |
+| Plugin version | Gradle versions | Java versions |
+| -------------- | --------------- | ------------- |
+| 2.5.x          | 5.1 - 9.x       | 8 - 21        |
+| 2.3.2          | 5.1+            | 8+            |
+| 2.2.4          | 4.x+            | 8+            |
 
 ## notes
 * Plugin requires Java 8+
