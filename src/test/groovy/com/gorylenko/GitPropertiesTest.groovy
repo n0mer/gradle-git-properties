@@ -111,14 +111,16 @@ class GitPropertiesTest {
         List<String> keys = ['git.branch','git.commit.id','git.commit.time']
         String dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
         String dateFormatTimeZone = "PST"
-        String branch
+        // Use explicit branch to avoid CI environment variable detection (e.g., GITHUB_REF_NAME)
+        // Branch detection from repo/CI is already tested in BranchPropertyTest
+        String branch = "test-branch"
         String buildVersion = "1.0"
         Map<String, Closure> customProperties = [:]
 
         Map<String, String> generated = props.generate(dotGitDirectory, keys, dateFormat, dateFormatTimeZone, branch, buildVersion, customProperties)
 
         assertEquals(3, generated.size())
-        assertEquals('master', generated['git.branch'])
+        assertEquals('test-branch', generated['git.branch'])
         assertNotNull(generated['git.commit.id'])
         assertNotNull(generated['git.commit.time'])
     }
