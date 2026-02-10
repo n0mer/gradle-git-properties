@@ -3,7 +3,7 @@
 This Gradle plugin can be used for generating `git.properties` file generation for Git-based projects (similar to maven git commit id plugin). It can be used for (but not limited to) Spring Boot apps.
 Plugin is available from [Gradle Plugins repository](https://plugins.gradle.org/plugin/com.gorylenko.gradle-git-properties).
 
-Idea - @lievendoclo, originally published in article [Spring Boot's info endpoint, Git and Gradle - InsaneProgramming](http://www.insaneprogramming.be/article/2014/08/15/spring-boot-info-git/).
+Idea - @lievendoclo, originally published in article "Spring Boot's info endpoint, Git and Gradle" on InsaneProgramming (2014).
 
 [![Build](https://github.com/n0mer/gradle-git-properties/actions/workflows/build.yml/badge.svg)](https://github.com/n0mer/gradle-git-properties/actions/workflows/build.yml)
 
@@ -30,6 +30,7 @@ Java compatibility depends on your Gradle version (see [Gradle compatibility mat
 
 ## notes
 * Plugin requires Java 8+
+* Plugin supports Gradle [configuration cache](https://docs.gradle.org/current/userguide/configuration_cache.html)
 * If `git.properties` is missing on Gradle 5.1.x and 5.2.x [Issue 128](https://github.com/n0mer/gradle-git-properties/issues/128), use `gitPropertiesResourceDir` to config a different output directory 
 * Since gradle-git-properties v2.x, we require JGit 5.x, this might cause some issues if you have other gradle plugin which uses JGit 1.4.x. In that case, you can use gradle-git-properties v1.5.x (instead of 2.x) which uses JGit 1.4.x. See [Issue 133](https://github.com/n0mer/gradle-git-properties/issues/133) for more info about this plugin's dependencies
 * With gradle-git-properties v2.2.4, v2.3.0, and v2.3.1, grgit v4.1.0 always requires the latest JGit which can be 6+, this cause build fails if you run Gradle with Java under 11. See [Issue 195](https://github.com/n0mer/gradle-git-properties/issues/195) for more info about this issue
@@ -46,7 +47,7 @@ plugins {
 
 A `git.properties` file will be generated when building Java-based projects (the plugin will configure any existing `classes` task to depend on `generateGitProperties` task - which is responsible for generated `git.properties` file). For non-Java projects, `generateGitProperties` task must be executed explicitly to generate `git.properties` file. The git repository for the project will be used.
 
-Spring Boot specific info: This is enough to see git details via `info` endpoint of [spring-boot-actuator](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready).
+Spring Boot specific info: This is enough to see git details via `info` endpoint of [spring-boot-actuator](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#actuator).
 
 If needed - override folder and file name of the generated file using `gitPropertiesName` and `gitPropertiesResourceDir` config keys.
 (NOTE: By default, the file will be generated at `build/resources/main/git.properties`)
@@ -68,7 +69,7 @@ gitProperties {
 ```
 > Please note that `spring-boot-actuator` expects `git.properties` to be available at certain location.
 
-If needed - use `dateFormat` and `dateFormatTimeZone` to format `git.commit.time` property (See [SimpleDateFormat](http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html) and [TimeZone](http://docs.oracle.com/javase/7/docs/api/java/util/TimeZone.html) for valid values)
+If needed - use `dateFormat` and `dateFormatTimeZone` to format `git.commit.time` property (See [SimpleDateFormat](https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html) and [TimeZone](https://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html) for valid values)
 
 ```groovy
 gitProperties {
@@ -90,6 +91,19 @@ gitProperties {
 }
 ```
 
+The plugin automatically detects the branch name from the following CI environments (in order of priority):
+- GitHub Actions (`GITHUB_REF_NAME`)
+- GitLab CI (`CI_COMMIT_REF_NAME`)
+- Jenkins (`GIT_LOCAL_BRANCH`, `GIT_BRANCH`, `BRANCH_NAME`)
+- Travis CI (`TRAVIS_BRANCH`)
+- Bitbucket Pipelines (`BITBUCKET_BRANCH`)
+- AWS CodeBuild (`CODEBUILD_WEBHOOK_HEAD_REF`, `CODEBUILD_WEBHOOK_TRIGGER`, `CODEBUILD_SOURCE_VERSION`)
+- CircleCI (`CIRCLE_BRANCH`)
+- Buddy (`BUDDY_EXECUTION_BRANCH`)
+- Google Cloud Build (`BRANCH_NAME`)
+- Azure DevOps (`BUILD_SOURCEBRANCHNAME`)
+- TeamCity (`BRANCH_NAME`)
+- Concourse CI (`BRANCH_NAME`)
 
 By default, all git properties which are supported by the plugin will be generated:
 
@@ -132,12 +146,23 @@ gitProperties {
 }
 ```
 
+Note: Kotlin DSL syntax for `customProperty` with closures requires using `KotlinClosure1`:
+```kotlin
+import org.gradle.kotlin.dsl.KotlinClosure1
+import gradlegitproperties.org.ajoberstar.grgit.Grgit // relocated class
+
+gitProperties {
+    customProperty("greeting", "Hello") // expression
+    customProperty("my_custom_git_id", KotlinClosure1<Grgit, String>({ head().id }))
+}
+```
+
 You can also replace standard properties using `customProperty`. In the below example, the logic `it.describe(tags: true)` will replace the plugin's logic which using `describe(tags: false)`
 
 ```groovy
 gitProperties {
     // using any tags (not limited to annotated tags) for "git.commit.id.describe" property
-    // see http://ajoberstar.org/grgit/grgit-describe.html for more info about the describe method and available parameters
+    // see https://ajoberstar.org/grgit/docs/grgit-describe.html for more info about the describe method and available parameters
     // 'it' is an instance of org.ajoberstar.grgit.Grgit
     customProperty 'git.commit.id.describe', { it.describe(tags: true) } 
 }
@@ -145,7 +170,7 @@ gitProperties {
 
 
 > Spring Boot specific info: By default, the `info` endpoint exposes only `git.branch`, `git.commit.id`, and `git.commit.time` properties (even then there are more in your `git.properties`).
-> In order to expose all available properties, set the "management.info.git.mode" property to "full" per [the Spring Boot documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html#production-ready-application-info-git), e.g. in application.properties:
+> In order to expose all available properties, set the "management.info.git.mode" property to "full" per [the Spring Boot documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html#actuator.endpoints.info.git-commit-information), e.g. in application.properties:
 > ```
 > management.info.git.mode=full
 > ```
@@ -321,4 +346,4 @@ apply plugin: 'java'
 ```
 ## license
 
-`gradle-git-properties` is Open Source software released under the [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0.html)
+`gradle-git-properties` is Open Source software released under the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0.html)
