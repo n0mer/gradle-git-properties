@@ -139,10 +139,27 @@ gitProperties {
     // using any tags (not limited to annotated tags) for "git.commit.id.describe" property
     // see http://ajoberstar.org/grgit/grgit-describe.html for more info about the describe method and available parameters
     // 'it' is an instance of org.ajoberstar.grgit.Grgit
-    customProperty 'git.commit.id.describe', { it.describe(tags: true) } 
+    customProperty 'git.commit.id.describe', { it.describe(tags: true) }
 }
 ```
 
+Note: Kotlin DSL syntax for `customProperty` with closures:
+```kotlin
+import org.gradle.kotlin.dsl.KotlinClosure1
+import gradlegitproperties.org.ajoberstar.grgit.Grgit // Must use relocated class
+
+gitProperties {
+    // Expression (simple)
+    customProperty("greeting", "Hello")
+
+    // Closure using KotlinClosure1
+    customProperty("git.commit.id.describe", KotlinClosure1<Grgit, String>({
+        describe(mapOf("tags" to true))
+    }))
+}
+```
+
+> **Important**: The plugin uses Shadow JAR packaging, so grgit classes are relocated to `gradlegitproperties.org.ajoberstar.grgit`. You must import this relocated package, not the original `org.ajoberstar.grgit`.
 
 > Spring Boot specific info: By default, the `info` endpoint exposes only `git.branch`, `git.commit.id`, and `git.commit.time` properties (even then there are more in your `git.properties`).
 > In order to expose all available properties, set the "management.info.git.mode" property to "full" per [the Spring Boot documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-endpoints.html#production-ready-application-info-git), e.g. in application.properties:
