@@ -27,6 +27,7 @@ import com.gorylenko.properties.TagsProperty
 import com.gorylenko.properties.TotalCommitCountProperty
 
 import java.io.File
+import java.nio.file.Files
 import java.util.List
 import java.util.Map
 
@@ -66,7 +67,13 @@ class GitProperties {
         // Evaluate property values
 
         def result = [:]
-        def repo = Grgit.open(dir: dotGitDirectory)
+        def repo
+        if (dotGitDirectory.name == ".git" && Files.isSymbolicLink(dotGitDirectory.toPath())) {
+            // For symlinked .git directories (e.g., Gerrit repo), open from working tree
+            repo = Grgit.open(currentDir: dotGitDirectory.parentFile)
+        } else {
+            repo = Grgit.open(dir: dotGitDirectory)
+        }
         try {
             properties.each{ k, v -> result.put(k, v instanceof Closure ? v.call(repo).toString() : v.toString() ) }
         } finally {
