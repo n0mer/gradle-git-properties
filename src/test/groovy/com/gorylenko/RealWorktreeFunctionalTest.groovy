@@ -95,7 +95,9 @@ class RealWorktreeFunctionalTest {
         def worktreeDir = new File(temporaryFolder.root, "feature-worktree")
         runGitCommand(mainRepoDir, "worktree", "add", "-b", "feature-branch", worktreeDir.absolutePath)
 
-        // Make a new commit in the worktree
+        // Make a new commit in the worktree (configure identity for CI environments)
+        runGitCommand(worktreeDir, "config", "user.email", "test@example.com")
+        runGitCommand(worktreeDir, "config", "user.name", "Test User")
         new File(worktreeDir, "worktree-file.txt").text = "worktree content"
         runGitCommand(worktreeDir, "add", "worktree-file.txt")
         runGitCommand(worktreeDir, "commit", "-m", "Worktree commit")
