@@ -2,7 +2,6 @@ package com.gorylenko.properties
 
 import com.gorylenko.jgit.GitFacade
 import groovy.transform.Memoized
-import org.eclipse.jgit.lib.Constants
 
 import java.util.concurrent.ConcurrentHashMap
 
@@ -24,10 +23,12 @@ class CacheSupport {
     }
 
     Integer totalCommitCount(GitFacade facade) {
-        def headId = facade.jgit.resolve(Constants.HEAD)
+        def headId = facade.headId
+        if (headId == null) {
+            return 0
+        }
         if (get(headId) == null) {
-            def commits = facade.log()
-            put(headId, commits.size())
+            put(headId, facade.countCommits())
         }
         return get(headId)
     }

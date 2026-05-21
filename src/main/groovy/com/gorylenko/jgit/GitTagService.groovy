@@ -55,7 +55,13 @@ class GitTagService {
                 email: authorIdent.emailAddress
         )
 
-        def abbreviatedId = repository.newObjectReader().abbreviate(revCommit.id, 7).name()
+        def objectReader = repository.newObjectReader()
+        String abbreviatedId
+        try {
+            abbreviatedId = objectReader.abbreviate(revCommit.id, 7).name()
+        } finally {
+            objectReader.close()
+        }
 
         return new GitCommit(
                 id: revCommit.name,

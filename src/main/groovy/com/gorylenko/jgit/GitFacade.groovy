@@ -118,6 +118,41 @@ class GitFacade implements AutoCloseable {
     }
 
     /**
+     * Returns the ObjectId of HEAD, handling worktree case.
+     * This is the public API for getting HEAD - use this instead of jgit.resolve(Constants.HEAD).
+     *
+     * @return ObjectId of HEAD, or null if repository is empty
+     */
+    ObjectId getHeadId() {
+        return resolveHead()
+    }
+
+    /**
+     * Counts total commits reachable from HEAD without loading them all into memory.
+     * Uses RevWalk iteration which is more memory-efficient than materializing a list.
+     *
+     * @return count of commits, or 0 if repository is empty
+     */
+    int countCommits() {
+        def headId = resolveHead()
+        if (headId == null) {
+            return 0
+        }
+
+        RevWalk revWalk = new RevWalk(repository)
+        try {
+            revWalk.markStart(revWalk.parseCommit(headId))
+            int count = 0
+            while (revWalk.next() != null) {
+                count++
+            }
+            return count
+        } finally {
+            revWalk.close()
+        }
+    }
+
+    /**
      * Resolves HEAD, handling worktree case where HEAD is in a different location.
      */
     private ObjectId resolveHead() {
@@ -165,7 +200,13 @@ class GitFacade implements AutoCloseable {
                 email: authorIdent.emailAddress
         )
 
-        def abbreviatedId = repository.newObjectReader().abbreviate(revCommit.id, 7).name()
+        def objectReader = repository.newObjectReader()
+        String abbreviatedId
+        try {
+            abbreviatedId = objectReader.abbreviate(revCommit.id, 7).name()
+        } finally {
+            objectReader.close()
+        }
 
         return new GitCommit(
                 id: revCommit.name,
