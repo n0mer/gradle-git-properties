@@ -22,11 +22,20 @@ Process for validating version parity between gradle-git-properties releases.
    - Keep main context clean for coordination
 5. **Verify Before Committing** - Always verify native behavior (e.g., `git rev-parse --abbrev-ref HEAD`) before assuming expected output
 6. **Ask Before Fixing** - Discuss parity issues with user before applying fixes
-7. **No Bias / Fresh Discovery** - Each validation run must discover features independently:
+7. **No Bias / Fresh Discovery** - Each validation run must start completely fresh:
+   - **DELETE `/tmp/git-props-validation/` first** - Never "add to" existing harness
    - Read README and source code to discover ALL features
    - Design test scenarios based on YOUR discovery
-   - Do NOT reuse previous test results or scenarios
+   - Do NOT look at previous test results, scenarios, or harness code
    - Do NOT assume any specific number of tests
+   - Build the entire test harness from scratch each time
+8. **Test Harness is the CONTRACT** - Once created from README/docs, the harness is FINAL:
+   - **NEVER modify tests to make them pass** - this is cheating
+   - The harness represents the documented API contract
+   - If a test fails, investigate as a potential PARITY ISSUE in the code
+   - Only modify harness if you can prove a bug in test generation (not in the code under test)
+   - When in doubt, ASK the user before changing any test
+   - Changing tests to pass = hiding bugs, not fixing them
 
 ## Process Overview
 

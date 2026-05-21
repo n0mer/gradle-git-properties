@@ -37,7 +37,7 @@ class GitBranch {
                 if (headContent.startsWith("ref: ")) {
                     return headContent.substring("ref: ".length())
                 }
-                // Detached HEAD - return "HEAD" to match Grgit behavior
+                // Detached HEAD - return "HEAD" (Grgit returns null, but we return "HEAD" to avoid NPE in callers)
                 return "HEAD"
             }
         }
@@ -45,7 +45,7 @@ class GitBranch {
         // Check if HEAD is detached (not pointing to a branch)
         def headRef = repository.exactRef("HEAD")
         if (headRef == null || !headRef.isSymbolic()) {
-            // Detached HEAD - return "HEAD" to match Grgit behavior
+            // Detached HEAD - return "HEAD" (Grgit returns null, but we return "HEAD" to avoid NPE in callers)
             return "HEAD"
         }
 
