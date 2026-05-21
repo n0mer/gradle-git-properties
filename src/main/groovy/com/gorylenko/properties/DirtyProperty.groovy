@@ -1,10 +1,10 @@
 package com.gorylenko.properties
 
-import org.ajoberstar.grgit.Grgit
+import com.gorylenko.jgit.GitFacade
 
 class DirtyProperty extends AbstractGitProperty {
 
-    String doCall(Grgit repo) {
-        return !repo.status().clean
+    String doCall(GitFacade facade) {
+        return !facade.status().clean
     }
 }

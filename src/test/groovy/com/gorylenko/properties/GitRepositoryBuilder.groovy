@@ -1,55 +1,50 @@
 package com.gorylenko.properties
 
-import java.io.File
-import org.ajoberstar.grgit.Commit
-import org.ajoberstar.grgit.Grgit
-import org.ajoberstar.grgit.Person
+import com.gorylenko.jgit.JGitTestHelper
+import org.eclipse.jgit.revwalk.RevCommit
 
 import groovy.lang.Closure
 
+/**
+ * Test helper for building Git repositories using pure JGit.
+ * Migrated from Grgit to JGit for compatibility with JGit 7.x.
+ */
 class GitRepositoryBuilder implements AutoCloseable {
     private File workingDirectory
-    private Grgit grgit
-
-    Person user = new Person('testuser', 'testuser@example.com')
+    private JGitTestHelper helper
 
     GitRepositoryBuilder(File workingDirectory) {
-
         this.workingDirectory = workingDirectory
         if (new File(workingDirectory, '.git').exists()) {
-            this.grgit = Grgit.open(dir: workingDirectory)
+            this.helper = JGitTestHelper.open(workingDirectory)
         } else {
-            this.grgit = Grgit.init(dir: workingDirectory)
+            this.helper = JGitTestHelper.create(workingDirectory)
         }
-
     }
 
-    Commit commitFile(String name, String content, String message) {
-        new File(workingDirectory, name).text = content
-        grgit.add(patterns: [name])
-        Commit commit = grgit.commit(message: message, author: user, committer: user)
-        return commit
+    RevCommit commitFile(String name, String content, String message) {
+        return helper.commitFile(name, content, message)
     }
 
     void addBranch(String name) {
-        grgit.branch.add(name: name)
+        helper.createBranch(name)
     }
 
     void addTag(String name) {
-        grgit.tag.add (name: name)
+        // Use annotated tags - git describe by default only looks at annotated tags
+        helper.createTag(name, "Tag ${name}")
     }
 
     void addBranchAndCheckout(String name) {
-        grgit.checkout(branch: name, createBranch: true)
+        helper.createBranchAndCheckout(name)
     }
 
     void setConfigString(final String section, final String subsection, final String name, final String value) {
-        grgit.repository.jgit.repository.config.setString(section, subsection, name, value)
-        grgit.repository.jgit.repository.config.save()
+        helper.setConfig(section, subsection, name, value)
     }
 
     void close() {
-        grgit?.close()
+        helper?.close()
     }
 
     static void setupProjectDir(File projectDir, Closure closure, GitRepositoryBuilder builder = null) {

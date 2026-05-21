@@ -1,22 +1,15 @@
 package com.gorylenko.properties
 
-import java.net.URI
-import java.net.URISyntaxException
-import java.text.SimpleDateFormat
-import java.util.Collection
-import java.util.regex.Pattern
-
-import org.ajoberstar.grgit.Commit
-import org.ajoberstar.grgit.Grgit
-import org.ajoberstar.grgit.Tag
+import com.gorylenko.jgit.GitFacade
 
 class RemoteOriginUrlProperty extends AbstractGitProperty {
 
-    String doCall(Grgit repo) {
-        String url = repo.repository.jgit.repository.config.getString("remote", "origin", "url")
+    String doCall(GitFacade facade) {
+        String url = facade.getConfig("remote", "origin", "url")
         url = removeUserInfo(url) ?: ''
         return url
     }
+
     private String removeUserInfo(String url) {
         String result = url
         if (url) {

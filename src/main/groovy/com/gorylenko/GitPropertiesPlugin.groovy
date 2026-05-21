@@ -107,13 +107,17 @@ class GitPropertiesPluginExtension {
     }
     
     private static Directory resolveWorktreeGitDir(File gitFile, Project project) {
-        // Read the .git file to find the actual git directory
+        // For worktrees, the .git file contains "gitdir: <path>" pointing to the
+        // worktree-specific git directory (inside .git/worktrees/<name>/ of the main repo).
+        //
+        // We return the resolved gitdir (which IS a directory, e.g., .git/worktrees/<name>/).
+        // RepositoryFactory.open() handles this worktree gitdir specially.
         def lines = gitFile.readLines()
         def gitDirLine = lines.find { it.startsWith("gitdir: ") }
-        
+
         if (gitDirLine) {
             def gitPath = gitDirLine.substring("gitdir: ".length()).trim()
-            
+
             // Convert to File to handle both absolute and relative paths
             File gitDir
             if (new File(gitPath).isAbsolute()) {
@@ -122,19 +126,11 @@ class GitPropertiesPluginExtension {
                 // Relative path - resolve relative to the .git file's parent directory
                 gitDir = new File(gitFile.parentFile, gitPath).canonicalFile
             }
-            
-            // Check if it's a worktree path
-            def gitDirPath = gitDir.absolutePath
-            def worktreesIndex = gitDirPath.lastIndexOf(File.separator + "worktrees" + File.separator)
-            if (worktreesIndex > 0) {
-                // Return the main git directory (before /worktrees/)
-                gitDir = new File(gitDirPath.substring(0, worktreesIndex))
-            }
-            
-            // Convert back to Directory
+
+            // Return the worktree's gitdir
             return project.layout.projectDirectory.dir(gitDir.absolutePath)
         }
-        
+
         return null
     }
 

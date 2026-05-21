@@ -1,6 +1,6 @@
 package com.gorylenko.properties
 
-import org.ajoberstar.grgit.Grgit
+import com.gorylenko.jgit.GitFacade
 
 class BuildUserNameProperty extends Closure<String> {
 
@@ -8,8 +8,8 @@ class BuildUserNameProperty extends Closure<String> {
         super(null)
     }
 
-    String doCall(Grgit repo) {
-        String username = repo.repository.jgit.repository.config.getString("user", null, "name")
+    String doCall(GitFacade facade) {
+        String username = facade.getConfig("user", "name")
         return username ?: ''
     }
 }

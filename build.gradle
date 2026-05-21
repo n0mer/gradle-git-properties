@@ -1,12 +1,3 @@
-buildscript {
-    dependencies {
-        classpath ('org.eclipse.jgit:org.eclipse.jgit:') {
-            version {
-                strictly '5.13.3.202401111512-r'
-            }
-        }
-    }
-}
 plugins {
     id 'groovy'
     id 'maven-publish'
@@ -18,10 +9,6 @@ plugins {
 
 repositories {
     mavenCentral()
-    maven {
-        name = 'ajoberstar-backup'
-        url = 'https://ajoberstar.org/bintray-backup/'
-    }
     // for debugging
     //maven {
     //    url 'https://repo.gradle.org/gradle/libs-releases-local/'
@@ -33,9 +20,7 @@ def integrationTest = sourceSets.create("integrationTest")
 dependencies {
     shadow gradleApi()
     shadow localGroovy()
-    implementation('org.ajoberstar.grgit:grgit-core:4.1.1') {
-        exclude(group: 'org.slf4j')
-    }
+    implementation 'org.eclipse.jgit:org.eclipse.jgit:7.1.0.202411261347-r'
     // for debugging
     //implementation 'org.gradle:gradle-language-jvm:5.6.2'
     //implementation 'org.gradle:gradle-language-java:5.6.2'
@@ -53,7 +38,6 @@ dependencies {
 shadowJar {
     archiveClassifier.set('')
     // Relocate bundled dependencies to avoid conflicts with user's dependencies
-    relocate 'org.ajoberstar', 'gradlegitproperties.org.ajoberstar'
     relocate 'org.eclipse.jgit', 'gradlegitproperties.org.eclipse.jgit'
     relocate 'com.googlecode.javaewah', 'gradlegitproperties.com.googlecode.javaewah'
 }
@@ -64,7 +48,7 @@ components.java.withVariantsFromConfiguration(configurations.runtimeElements) {
     skip()
 }
 
-version = "2.5.7"
+version = "3.0.0"
 group = "com.gorylenko.gradle-git-properties"
 
 gitProperties {
@@ -74,13 +58,13 @@ gitProperties {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks.withType(GroovyCompile) {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 test {
     testLogging {

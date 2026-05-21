@@ -1,6 +1,6 @@
 package com.gorylenko.properties
 
-import org.ajoberstar.grgit.Grgit
+import com.gorylenko.jgit.GitFacade
 
 class TotalCommitCountProperty extends AbstractGitProperty {
     CacheSupport cacheSupport
@@ -8,7 +8,7 @@ class TotalCommitCountProperty extends AbstractGitProperty {
         this.cacheSupport = cacheSupport
     }
 
-    String doCall(Grgit repo) {
-        return isEmpty(repo) ? '0' : this.cacheSupport.totalCommitCount(repo).toString()
+    String doCall(GitFacade facade) {
+        return isEmpty(facade) ? '0' : this.cacheSupport.totalCommitCount(facade).toString()
     }
 }

@@ -1,10 +1,9 @@
 package com.gorylenko
 
 import com.gorylenko.properties.CacheSupport
+import com.gorylenko.jgit.GitFacade
 
 import java.text.SimpleDateFormat
-
-import org.ajoberstar.grgit.Grgit
 
 import com.gorylenko.properties.BranchProperty
 import com.gorylenko.properties.BuildHostProperty
@@ -66,11 +65,11 @@ class GitProperties {
         // Evaluate property values
 
         def result = [:]
-        def repo = Grgit.open(dir: dotGitDirectory)
+        def facade = GitFacade.open(dotGitDirectory)
         try {
-            properties.each{ k, v -> result.put(k, v instanceof Closure ? v.call(repo).toString() : v.toString() ) }
+            properties.each{ k, v -> result.put(k, v instanceof Closure ? v.call(facade).toString() : v.toString() ) }
         } finally {
-            repo.close()
+            facade.close()
         }
 
         return result

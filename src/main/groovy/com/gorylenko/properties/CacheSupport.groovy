@@ -1,9 +1,8 @@
 package com.gorylenko.properties
 
+import com.gorylenko.jgit.GitFacade
 import groovy.transform.Memoized
-import org.ajoberstar.grgit.Grgit
 import org.eclipse.jgit.lib.Constants
-import org.eclipse.jgit.lib.ObjectId
 
 import java.util.concurrent.ConcurrentHashMap
 
@@ -20,19 +19,15 @@ class CacheSupport {
     }
 
     @Memoized
-    String describe(Grgit repo, boolean longDescr) {
-        return repo.describe(longDescr: longDescr)
+    String describe(GitFacade facade, boolean longDescr) {
+        return facade.describe(longDescr: longDescr)
     }
 
-    Integer totalCommitCount(Grgit repo) {
-        ObjectId headId = repo.repository.jgit.repository.resolve(Constants.HEAD)
+    Integer totalCommitCount(GitFacade facade) {
+        def headId = facade.jgit.resolve(Constants.HEAD)
         if (get(headId) == null) {
-            Iterable commits = repo.repository.jgit.log().call()
-            int count = 0
-            for( Object commit : commits ) {
-                count++
-            }
-            put(headId, count)
+            def commits = facade.log()
+            put(headId, commits.size())
         }
         return get(headId)
     }

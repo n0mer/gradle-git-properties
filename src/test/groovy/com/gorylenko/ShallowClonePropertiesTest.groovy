@@ -1,9 +1,9 @@
 package com.gorylenko
 
-import org.ajoberstar.grgit.Grgit
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import com.gorylenko.jgit.GitFacade
 
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -30,7 +30,7 @@ class ShallowClonePropertiesTest {
     File tmpDir
     File shallowCloneDir
     File dotGitDirectory
-    Grgit repo
+    GitFacade facade
     GitProperties gitProperties
 
     @Before
@@ -47,13 +47,12 @@ class ShallowClonePropertiesTest {
 
         shallowCloneDir = new File(tmpDir, "shallowclone3")
         dotGitDirectory = new File(shallowCloneDir, ".git")
-        repo = Grgit.open(dir: shallowCloneDir)
         gitProperties = new GitProperties()
     }
 
     @After
     void tearDown() {
-        repo?.close()
+        facade?.close()
         tmpDir?.deleteDir()
     }
 
@@ -76,7 +75,8 @@ class ShallowClonePropertiesTest {
     @Test
     void testShallowCloneHasLimitedHistory() {
         // Shallow clone should only have 1 commit visible
-        def commits = repo.log()
+        facade = GitFacade.open(shallowCloneDir)
+        def commits = facade.log()
         assertEquals("Shallow clone should have limited commits visible", 1, commits.size())
     }
 

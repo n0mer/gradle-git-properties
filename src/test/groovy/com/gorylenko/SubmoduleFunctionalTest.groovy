@@ -145,10 +145,30 @@ class SubmoduleFunctionalTest {
     }
 
     private def runGradle(File projectDir) {
+        // Debug: show .git file content
+        def gitFile = new File(projectDir, ".git")
+        if (gitFile.isFile()) {
+            println "DEBUG: ${projectDir.name}/.git file content: ${gitFile.text}"
+            def gitdirPath = gitFile.text.trim().replace("gitdir: ", "")
+            def gitDir = new File(gitdirPath)
+            if (!gitDir.isAbsolute()) {
+                gitDir = new File(projectDir, gitdirPath).canonicalFile
+            }
+            println "DEBUG: gitDir resolved to: ${gitDir}"
+            println "DEBUG: gitDir exists: ${gitDir.exists()}"
+            if (gitDir.exists()) {
+                println "DEBUG: gitDir contents: ${gitDir.listFiles()*.name}"
+                def headFile = new File(gitDir, "HEAD")
+                if (headFile.exists()) {
+                    println "DEBUG: HEAD content: ${headFile.text}"
+                }
+            }
+        }
+
         return GradleRunner.create()
                 .withPluginClasspath()
                 .withProjectDir(projectDir)
-                .withArguments('generateGitProperties')
+                .withArguments('generateGitProperties', '--info')
                 .build()
     }
 
@@ -158,6 +178,10 @@ class SubmoduleFunctionalTest {
 
         def properties = new Properties()
         gitPropertiesFile.withInputStream { properties.load(it) }
+
+        // Debug: print all properties
+        println "DEBUG: git.properties contents for ${projectDir.name}:"
+        properties.each { k, v -> println "  ${k}=${v}" }
 
         def commitMessage = properties.getProperty("git.commit.message.short")
         assertEquals("Commit message should match expected git directory",

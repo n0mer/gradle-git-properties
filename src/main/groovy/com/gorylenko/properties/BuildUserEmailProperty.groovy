@@ -1,6 +1,6 @@
 package com.gorylenko.properties
 
-import org.ajoberstar.grgit.Grgit
+import com.gorylenko.jgit.GitFacade
 
 class BuildUserEmailProperty extends Closure<String> {
 
@@ -8,8 +8,8 @@ class BuildUserEmailProperty extends Closure<String> {
         super(null)
     }
 
-    String doCall(Grgit repo) {
-        String email = repo.repository.jgit.repository.config.getString("user", null, "email")
+    String doCall(GitFacade facade) {
+        String email = facade.getConfig("user", "email")
         return email ?: ''
     }
 }

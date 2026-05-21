@@ -1,9 +1,9 @@
 package com.gorylenko.properties
 
-import org.ajoberstar.grgit.Grgit
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import com.gorylenko.jgit.GitFacade
 
 import static org.junit.Assert.*
 
@@ -15,7 +15,7 @@ import static org.junit.Assert.*
 class CacheSupportTest {
 
     File projectDir
-    Grgit repo
+    GitFacade facade
 
     @Before
     void setUp() {
@@ -24,13 +24,16 @@ class CacheSupportTest {
             builder.commitFile("file1.txt", "content1", "First commit")
             builder.commitFile("file2.txt", "content2", "Second commit")
         })
-        repo = Grgit.open(dir: projectDir)
     }
 
     @After
     void tearDown() {
-        repo?.close()
+        facade?.close()
         projectDir?.deleteDir()
+    }
+
+    private GitFacade openFacade() {
+        return GitFacade.open(projectDir)
     }
 
     @Test
@@ -56,39 +59,45 @@ class CacheSupportTest {
 
     @Test
     void testTotalCommitCountReturnsCorrectCount() {
+        facade = openFacade()
         def cache = new CacheSupport()
-        assertEquals(2, cache.totalCommitCount(repo))
+        assertEquals(2, cache.totalCommitCount(facade))
     }
 
     @Test
     void testTotalCommitCountCachesResult() {
+        facade = openFacade()
         def cache = new CacheSupport()
 
         // First call should compute and cache
-        def count1 = cache.totalCommitCount(repo)
+        def count1 = cache.totalCommitCount(facade)
         assertEquals(2, count1)
+
+        // Close facade before modifying repo
+        facade.close()
 
         // Add another commit
         GitRepositoryBuilder.setupProjectDir(projectDir, { builder ->
             builder.commitFile("file3.txt", "content3", "Third commit")
         })
 
-        // Second call should return cached value (still 2, not 3)
-        // because cache key is based on HEAD at first call
-        def count2 = cache.totalCommitCount(repo)
-
-        // Note: After adding a commit, HEAD changes, so cache miss occurs
-        // and new count is computed
+        // Reopen facade - HEAD changes, so new count
+        facade = openFacade()
+        def count2 = cache.totalCommitCount(facade)
         assertEquals(3, count2)
     }
 
     @Test
     void testTotalCommitCountWithDifferentHeads() {
+        facade = openFacade()
         def cache = new CacheSupport()
 
         // Get count at current HEAD
-        def count1 = cache.totalCommitCount(repo)
+        def count1 = cache.totalCommitCount(facade)
         assertEquals(2, count1)
+
+        // Close facade before modifying repo
+        facade.close()
 
         // Create a branch and add a commit
         GitRepositoryBuilder.setupProjectDir(projectDir, { builder ->
@@ -97,29 +106,32 @@ class CacheSupportTest {
         })
 
         // Different HEAD should get different count
-        def count2 = cache.totalCommitCount(repo)
+        facade = openFacade()
+        def count2 = cache.totalCommitCount(facade)
         assertEquals(3, count2)
     }
 
     @Test
     void testDescribeReturnsNullWithoutTags() {
+        facade = openFacade()
         def cache = new CacheSupport()
         // Without tags, describe returns null
-        def describe = cache.describe(repo, false)
+        def describe = cache.describe(facade, false)
         assertNull(describe)
     }
 
     @Test
     void testDescribeWithLongFormat() {
-        def cache = new CacheSupport()
-
         // Add a tag first
         GitRepositoryBuilder.setupProjectDir(projectDir, { builder ->
             builder.addTag("v1.0.0")
         })
 
-        def shortDescribe = cache.describe(repo, false)
-        def longDescribe = cache.describe(repo, true)
+        facade = openFacade()
+        def cache = new CacheSupport()
+
+        def shortDescribe = cache.describe(facade, false)
+        def longDescribe = cache.describe(facade, true)
 
         assertNotNull(shortDescribe)
         assertNotNull(longDescribe)
@@ -129,16 +141,17 @@ class CacheSupportTest {
 
     @Test
     void testDescribeIsMemoized() {
-        def cache = new CacheSupport()
-
         // Add a tag
         GitRepositoryBuilder.setupProjectDir(projectDir, { builder ->
             builder.addTag("v1.0.0")
         })
 
+        facade = openFacade()
+        def cache = new CacheSupport()
+
         // Call describe multiple times with same parameters
-        def result1 = cache.describe(repo, false)
-        def result2 = cache.describe(repo, false)
+        def result1 = cache.describe(facade, false)
+        def result2 = cache.describe(facade, false)
 
         // Should return same result (memoized)
         assertEquals(result1, result2)

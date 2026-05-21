@@ -1,6 +1,6 @@
 package com.gorylenko.properties
 
-import org.ajoberstar.grgit.Grgit
+import com.gorylenko.jgit.GitFacade
 
 class AbstractGitProperty extends Closure<String> {
 
@@ -8,7 +8,7 @@ class AbstractGitProperty extends Closure<String> {
         super(null)
     }
 
-    boolean isEmpty(Grgit repo) {
-        return ! repo.repository.jgit.repository.resolve('HEAD')
+    boolean isEmpty(GitFacade facade) {
+        return facade.isEmpty()
     }
 }

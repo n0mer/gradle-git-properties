@@ -331,7 +331,7 @@ class GitPropertiesPluginExtensionTest {
             builder.commitFile("test.txt", "content", "Test commit")
         })
 
-        // Create a worktree-like structure
+        // Create a worktree-like structure with proper commondir file
         def worktreeDir = new File(projectDir, "worktree")
         worktreeDir.mkdirs()
 
@@ -339,20 +339,24 @@ class GitPropertiesPluginExtensionTest {
         def gitFile = new File(worktreeDir, ".git")
         gitFile.text = "gitdir: ../.git/worktrees/worktree\n"
 
-        // Create the worktrees directory in main .git
+        // Create the worktrees directory in main .git with required files
         def worktreesDir = new File(projectDir, ".git/worktrees/worktree")
         worktreesDir.mkdirs()
+        // Create commondir file pointing to main .git (relative path)
+        new File(worktreesDir, "commondir").text = "../..\n"
+        // Create HEAD file
+        new File(worktreesDir, "HEAD").text = "ref: refs/heads/worktree-branch\n"
 
         // Build project in worktree directory
         Project project = ProjectBuilder.builder().withProjectDir(worktreeDir).build()
         project.pluginManager.apply 'com.gorylenko.gradle-git-properties'
         def ext = getExtension(project)
 
-        // Should resolve to main .git directory (not the worktrees subdir)
+        // Should resolve to worktree's gitdir (where HEAD and commondir are)
         assertTrue(ext.dotGitDirectory.present)
         def gitDir = ext.dotGitDirectory.get().asFile
         // Use canonicalPath to handle symlinks (macOS /var -> /private/var)
-        assertEquals(new File(projectDir, ".git").canonicalPath, gitDir.canonicalPath)
+        assertEquals(worktreesDir.canonicalPath, gitDir.canonicalPath)
     }
 
     @Test
@@ -370,6 +374,10 @@ class GitPropertiesPluginExtensionTest {
         def mainGitDir = new File(projectDir, ".git")
         def worktreesDir = new File(mainGitDir, "worktrees/worktree-abs")
         worktreesDir.mkdirs()
+        // Create commondir file pointing to main .git (relative path)
+        new File(worktreesDir, "commondir").text = "../..\n"
+        // Create HEAD file
+        new File(worktreesDir, "HEAD").text = "ref: refs/heads/worktree-branch\n"
 
         def gitFile = new File(worktreeDir, ".git")
         gitFile.text = "gitdir: ${worktreesDir.absolutePath}\n"
@@ -379,11 +387,11 @@ class GitPropertiesPluginExtensionTest {
         project.pluginManager.apply 'com.gorylenko.gradle-git-properties'
         def ext = getExtension(project)
 
-        // Should resolve to main .git directory
+        // Should resolve to worktree's gitdir (where HEAD and commondir are)
         assertTrue(ext.dotGitDirectory.present)
         def gitDir = ext.dotGitDirectory.get().asFile
         // Use canonicalPath to handle symlinks (macOS /var -> /private/var)
-        assertEquals(mainGitDir.canonicalPath, gitDir.canonicalPath)
+        assertEquals(worktreesDir.canonicalPath, gitDir.canonicalPath)
     }
 
     // === toString() Test ===
