@@ -37,10 +37,18 @@ class GitBranch {
                 if (headContent.startsWith("ref: ")) {
                     return headContent.substring("ref: ".length())
                 }
-                // Detached HEAD - return the SHA (first 7 chars like git does)
-                return headContent.length() > 7 ? headContent.substring(0, 7) : headContent
+                // Detached HEAD - return "HEAD" to match Grgit behavior
+                return "HEAD"
             }
         }
+
+        // Check if HEAD is detached (not pointing to a branch)
+        def headRef = repository.exactRef("HEAD")
+        if (headRef == null || !headRef.isSymbolic()) {
+            // Detached HEAD - return "HEAD" to match Grgit behavior
+            return "HEAD"
+        }
+
         return repository.branch
     }
 }
