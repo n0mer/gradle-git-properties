@@ -3,49 +3,50 @@ package com.gorylenko.properties
 import static org.junit.Assert.*
 
 import java.io.File
-import org.ajoberstar.grgit.Commit
-import org.ajoberstar.grgit.Grgit
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import com.gorylenko.jgit.GitFacade
 
 class CommitMessageShortPropertyTest {
 
     File projectDir
-    Grgit repo
 
     @Before
     public void setUp() throws Exception {
-
-        // Set up projectDir
-
-        projectDir = File.createTempDir("BranchPropertyTest", ".tmp")
+        projectDir = File.createTempDir("CommitMessageShortPropertyTest", ".tmp")
         GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
             // empty repo
         })
-
-        // Set up repo
-        repo = Grgit.open(dir: projectDir)
     }
 
     @After
     public void tearDown() throws Exception {
-        repo?.close()
         projectDir.deleteDir()
     }
 
     @Test
     public void testDoCallOnEmptyRepo() {
-        assertEquals('', new CommitMessageShortProperty().doCall(repo))
+        def facade = GitFacade.open(projectDir)
+        try {
+            assertEquals('', new CommitMessageShortProperty().doCall(facade))
+        } finally {
+            facade.close()
+        }
     }
 
     @Test
     public void testDoCallOnOneCommit() {
         GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
-            // commit once
             gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt\n\nSecond paragraph\n")
         })
-        assertEquals("Added hello.txt", new CommitMessageShortProperty().doCall(repo))
+        def facade = GitFacade.open(projectDir)
+        try {
+            // Should return first line of commit message
+            assertEquals("Added hello.txt", new CommitMessageShortProperty().doCall(facade))
+        } finally {
+            facade.close()
+        }
     }
 
 }

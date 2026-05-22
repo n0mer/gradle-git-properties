@@ -1,10 +1,10 @@
 package com.gorylenko.properties
 
-import org.ajoberstar.grgit.Grgit
+import com.gorylenko.jgit.GitFacade
 
 class CommitMessageShortProperty extends AbstractGitProperty {
 
-    String doCall(Grgit repo) {
-        return isEmpty(repo) ? '' : repo.head().shortMessage
+    String doCall(GitFacade facade) {
+        return isEmpty(facade) ? '' : facade.head().shortMessage
     }
 }

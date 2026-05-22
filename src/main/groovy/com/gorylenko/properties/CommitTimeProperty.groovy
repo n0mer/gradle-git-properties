@@ -1,8 +1,8 @@
 package com.gorylenko.properties
 
+import com.gorylenko.jgit.GitFacade
 import java.text.SimpleDateFormat
 import java.time.Instant
-import org.ajoberstar.grgit.Grgit
 
 class CommitTimeProperty extends AbstractGitProperty {
     private String dateFormat
@@ -13,8 +13,8 @@ class CommitTimeProperty extends AbstractGitProperty {
         this.timezone = timezone
     }
 
-    String doCall(Grgit repo) {
-        return isEmpty(repo) ? '' : formatDate(repo.head().dateTime.toInstant(), dateFormat, timezone)
+    String doCall(GitFacade facade) {
+        return isEmpty(facade) ? '' : formatDate(facade.head().dateTime, dateFormat, timezone)
     }
 
     private String formatDate(Instant instant, String dateFormat, String timezone) {

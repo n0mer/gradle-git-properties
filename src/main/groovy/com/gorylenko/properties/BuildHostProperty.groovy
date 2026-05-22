@@ -1,9 +1,8 @@
 package com.gorylenko.properties
 
 import java.net.InetAddress
-import java.net.UnknownHostException
 
-import org.ajoberstar.grgit.Grgit
+import com.gorylenko.jgit.GitFacade
 
 class BuildHostProperty extends Closure<String> {
 
@@ -11,7 +10,11 @@ class BuildHostProperty extends Closure<String> {
         super(null)
     }
 
-    String doCall(Grgit repo) {
+    String doCall(GitFacade facade) {
+        return getHostName()
+    }
+
+    private String getHostName() {
         String buildHost = null
         try {
           buildHost = InetAddress.localHost.hostName

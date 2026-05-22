@@ -1,6 +1,6 @@
 package com.gorylenko.properties
 
-import org.ajoberstar.grgit.Grgit
+import com.gorylenko.jgit.GitFacade
 
 class BranchProperty extends AbstractGitProperty {
     String branch
@@ -40,7 +40,7 @@ class BranchProperty extends AbstractGitProperty {
         this.branch = branch
     }
 
-    String doCall(Grgit repo) {
+    String doCall(GitFacade facade) {
 
         String branchName
 
@@ -62,8 +62,8 @@ class BranchProperty extends AbstractGitProperty {
             }
 
             // could not detect from env variables, use branch from repo
-            if (!branchName && !isEmpty(repo)) {
-                branchName = repo.branch.current().name
+            if (!branchName && !isEmpty(facade)) {
+                branchName = facade.branch.current().name
             }
 
             // Strip git ref prefixes (e.g., Azure DevOps returns refs/heads/branch-name)

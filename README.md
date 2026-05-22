@@ -9,8 +9,8 @@ A Gradle plugin that generates a `git.properties` file containing Git repository
 
 - [Requirements](#requirements)
 - [Installation](#installation)
+- [Upgrading from 2.x](#upgrading-from-2x)
 - [Configuration](#configuration)
-- [Kotlin DSL](#kotlin-dsl)
 - [Spring Boot Integration](#spring-boot-integration)
 - [Advanced Usage](#advanced-usage)
 - [Compatibility](#compatibility)
@@ -18,9 +18,9 @@ A Gradle plugin that generates a `git.properties` file containing Git repository
 
 ## Requirements
 
-- Java 8 or higher
+- Java 17 or higher
 - Gradle 5.1 or higher
-- A Git repository (`.git` directory)
+- A Git repository (`.git` directory or git worktree)
 
 ## Installation
 
@@ -29,14 +29,14 @@ Add the plugin to your build file:
 **Groovy DSL** (`build.gradle`)
 ```groovy
 plugins {
-    id "com.gorylenko.gradle-git-properties" version "2.5.7"
+    id "com.gorylenko.gradle-git-properties" version "3.0.0"
 }
 ```
 
 **Kotlin DSL** (`build.gradle.kts`)
 ```kotlin
 plugins {
-    id("com.gorylenko.gradle-git-properties") version "2.5.7"
+    id("com.gorylenko.gradle-git-properties") version "3.0.0"
 }
 ```
 
@@ -45,6 +45,18 @@ The plugin generates `git.properties` at `build/resources/main/git.properties`. 
 ```bash
 ./gradlew generateGitProperties
 ```
+
+## Upgrading from 2.x
+
+Version 3.0 replaces the Grgit backend with JGit. Key changes:
+
+- **Java 17+ required** (was Java 8)
+- **Custom properties**: Closures now receive `GitFacade` instead of Grgit. See [GitFacade API](#gitfacade-api) for available methods.
+- **JGit escape hatch**: For advanced use cases, access `jgit` (Repository) or `jgitCommands` (Git) directly.
+
+Standard configuration options (`keys`, `dateFormat`, `branch`, etc.) are unchanged.
+
+See [MIGRATION.md](MIGRATION.md) for detailed upgrade instructions.
 
 ## Configuration
 
@@ -108,7 +120,7 @@ gitProperties {
 
 ### Custom Properties
 
-Add custom properties using static values or closures. Closures receive a [Grgit](https://ajoberstar.org/grgit/) instance for accessing Git data:
+Add custom properties using static values or closures. Closures receive a `GitFacade` instance for accessing Git data:
 
 ```groovy
 gitProperties {
@@ -123,6 +135,44 @@ You can also override standard properties. This example includes lightweight tag
 ```groovy
 gitProperties {
     customProperty 'git.commit.id.describe', { it.describe(tags: true) }
+}
+```
+
+#### GitFacade API
+
+The `GitFacade` class provides these methods for custom properties:
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `head()` | `GitCommit` | HEAD commit (id, abbreviatedId, author, dateTime, shortMessage, fullMessage) |
+| `status()` | `GitStatus` | Working tree status (clean property) |
+| `describe(options)` | `String` | Git describe output. Options: `tags: true`, `longDescr: true` |
+| `log(options)` | `List<GitCommit>` | Commit history. Options: `maxCommits: N` |
+| `branch.current()` | `String` | Current branch name |
+| `tag.list()` | `List<String>` | All tag names |
+| `tag.listOnCommit(commitId)` | `List<String>` | Tags pointing to a specific commit |
+| `tag.closest()` | `ClosestTag` | Nearest ancestor tag (name, distance) |
+| `getConfig(section, name)` | `String` | Git config value |
+| `isEmpty()` | `boolean` | True if repository has no commits |
+
+#### Escape Hatch (Advanced)
+
+For operations not covered by `GitFacade`, access the underlying JGit API:
+
+```groovy
+gitProperties {
+    // Access raw JGit Repository
+    customProperty 'refs.count', { it.jgit.refDatabase.refs.size() }
+    
+    // Access JGit Git command interface (caller must close)
+    customProperty 'stash.count', {
+        def git = it.jgitCommands
+        try {
+            return git.stashList().call().size()
+        } finally {
+            git.close()
+        }
+    }
 }
 ```
 
@@ -176,27 +226,20 @@ tasks.withType(com.gorylenko.GenerateGitPropertiesTask).configureEach {
 }
 ```
 
-## Kotlin DSL
+### Kotlin DSL Notes
 
-Basic configuration:
+Most configuration works identically in Kotlin DSL. For custom properties with closures, use `KotlinClosure1`:
 
 ```kotlin
+import org.gradle.kotlin.dsl.KotlinClosure1
+import com.gorylenko.jgit.GitFacade
+
 gitProperties {
     dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
     dateFormatTimeZone = "UTC"
     keys = listOf("git.branch", "git.commit.id", "git.commit.time")
-}
-```
-
-For custom properties with closures, use `KotlinClosure1`. The closure receiver is a [Grgit](https://ajoberstar.org/grgit/) instance:
-
-```kotlin
-import org.gradle.kotlin.dsl.KotlinClosure1
-import gradlegitproperties.org.ajoberstar.grgit.Grgit
-
-gitProperties {
     customProperty("greeting", "Hello")
-    customProperty("my_custom_git_id", KotlinClosure1<Grgit, String>({ head().id }))
+    customProperty("my_custom_git_id", KotlinClosure1<GitFacade, String>({ head().id }))
 }
 ```
 
@@ -306,11 +349,12 @@ bootJar {
 
 ## Compatibility
 
-| Plugin Version | Gradle | Java |
-|----------------|--------|------|
-| 2.5.x          | 5.1 – 9.x | 8+ |
+| Plugin Version | Gradle | Java | Notes |
+|----------------|--------|------|-------|
+| 3.0.x          | 5.1 – 9.x | 17+ | JGit backend, git worktree support |
+| 2.5.x          | 5.1 – 9.x | 8+ | Grgit backend (deprecated) |
 
-The plugin supports Gradle [configuration cache](https://docs.gradle.org/current/userguide/configuration_cache.html).
+The plugin supports Gradle [configuration cache](https://docs.gradle.org/current/userguide/configuration_cache.html) and [git worktrees](https://git-scm.com/docs/git-worktree).
 
 ## License
 

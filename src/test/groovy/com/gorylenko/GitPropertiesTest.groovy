@@ -5,12 +5,12 @@ import static org.junit.Assert.*
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
-import org.ajoberstar.grgit.Grgit
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
 import com.gorylenko.properties.GitRepositoryBuilder
+import com.gorylenko.jgit.GitFacade
 
 class GitPropertiesTest {
 
@@ -20,10 +20,7 @@ class GitPropertiesTest {
 
     @Before
     public void setUp() throws Exception {
-
-        // Set up projectDir
-
-        projectDir = File.createTempDir("BranchPropertyTest", ".tmp")
+        projectDir = File.createTempDir("GitPropertiesTest", ".tmp")
         dotGitDirectory = new File(projectDir, '.git')
 
         GitRepositoryBuilder.setupProjectDir(projectDir, { })
@@ -126,9 +123,7 @@ class GitPropertiesTest {
     }
 
     @Test
-    public void testGenerateAllPropsOnShalowClonedRepo() {
-
-
+    public void testGenerateAllPropsOnShallowClonedRepo() {
         List<String> keys = GitProperties.standardProperties
         String dateFormat
         String dateFormatTimeZone
@@ -136,34 +131,30 @@ class GitPropertiesTest {
         String buildVersion = "1.0"
         Map<String, Closure> customProperties = ['test' : { return 10 }]
 
-
-        File tmpDir = File.createTempDir("BranchPropertyTestShallowClone", ".tmp")
-        Grgit repo1 = null
+        File tmpDir = File.createTempDir("GitPropertiesTestShallowClone", ".tmp")
+        GitFacade facade = null
 
         try {
             InputStream is = GitPropertiesTest.class.getResourceAsStream('/shallowclone3.zip')
-
             is.withStream { Files.copy(it, new File(tmpDir, "shallowclone3.zip").toPath(), StandardCopyOption.REPLACE_EXISTING) }
 
-            AntBuilder ant  = new AntBuilder();
+            AntBuilder ant = new AntBuilder()
+            ant.unzip(src: new File(tmpDir, "shallowclone3.zip"), dest: tmpDir, overwrite: "true")
 
-            ant.unzip(src: new File(tmpDir, "shallowclone3.zip") ,dest: tmpDir, overwrite:"true" )
+            def shallowCloneDir = new File(tmpDir, "shallowclone3")
+            def shallowDotGitDir = new File(shallowCloneDir, ".git")
 
-            repo1 = Grgit.open(dir: new File(tmpDir, "shallowclone3"))
-
-            Map<String, String> generated = props.generate(dotGitDirectory, keys, dateFormat, dateFormatTimeZone, branch, buildVersion, customProperties)
+            Map<String, String> generated = props.generate(shallowDotGitDir, keys, dateFormat, dateFormatTimeZone, branch, buildVersion, customProperties)
 
             GitProperties.standardProperties.each {
-                assertNotNull(generated[it])
+                assertNotNull("Property ${it} should not be null", generated[it])
             }
             assertEquals('10', generated['test'])
 
         } finally {
-            repo1?.close()
+            facade?.close()
             tmpDir.deleteDir()
         }
-
-
     }
 
 }

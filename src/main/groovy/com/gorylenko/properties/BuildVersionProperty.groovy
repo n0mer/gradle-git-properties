@@ -1,6 +1,6 @@
 package com.gorylenko.properties
 
-import org.ajoberstar.grgit.Grgit
+import com.gorylenko.jgit.GitFacade
 
 class BuildVersionProperty extends Closure<String> {
     Object version
@@ -9,7 +9,7 @@ class BuildVersionProperty extends Closure<String> {
         this.version = version
     }
 
-    String doCall(Grgit repo) {
+    String doCall(GitFacade facade) {
         return "$version"
     }
 }
