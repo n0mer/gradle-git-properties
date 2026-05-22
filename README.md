@@ -342,6 +342,16 @@ bootJar {
 }
 ```
 
+## Upgrading from 2.x
+
+Version 3.0 replaces the Grgit backend with JGit. Key changes:
+
+- **Java 17+ required** (was Java 8)
+- **Custom properties**: Closures now receive `GitFacade` instead of Grgit. See [GitFacade API](#gitfacade-api) for available methods.
+- **JGit escape hatch**: For advanced use cases, access `jgit` (Repository) or `jgitCommands` (Git) directly.
+
+Standard configuration options (`keys`, `dateFormat`, `branch`, etc.) are unchanged.
+
 ## Compatibility
 
 | Plugin Version | Gradle | Java | Notes |
