@@ -117,3 +117,79 @@ Filter before comparing:
 ## Target
 
 100% parity on all comparable scenarios.
+
+## Test Scenarios (64 total)
+
+### Core Properties (01-14)
+- `01-basic-properties` - Standard git.properties with all default keys
+- `02-detached-head` - Detached HEAD state (checkout specific commit)
+- `03-no-tags` - Repository with no tags
+- `04-with-tags` - Repository with annotated tag on HEAD
+- `05-dirty-state` - Uncommitted changes in working directory
+- `06-custom-properties-static` - Static custom property values
+- `07-custom-properties-closure` - Custom properties via closure
+- `08-custom-properties-api` - Custom properties via GitRepositoryInfo API
+- `09-selective-keys` - Subset of keys via `keys` configuration
+- `10-date-format` - Custom dateFormat and dateFormatTimeZone
+- `11-empty-repo` - Repository with no commits
+- `12-multiple-tags-on-head` - Multiple tags pointing to same commit
+- `13-multiline-message` - Commit message with newlines
+- `14-custom-filename` - Custom gitPropertiesName
+
+### Worktree Variants (15-28)
+- `15-basic-properties-worktree` - Basic properties in git worktree
+- `16-detached-head-worktree` - Detached HEAD in worktree
+- `17-no-tags-worktree` - No tags in worktree
+- `18-with-tags-worktree` - Tags in worktree
+- `19-dirty-state-worktree` - Dirty state in worktree
+- `20-custom-properties-static-worktree` - Static custom props in worktree
+- `21-custom-properties-closure-worktree` - Closure custom props in worktree
+- `22-custom-properties-api-worktree` - API custom props in worktree
+- `23-selective-keys-worktree` - Selective keys in worktree
+- `24-date-format-worktree` - Date format in worktree
+- `25-empty-repo-worktree` - Empty repo in worktree
+- `26-multiple-tags-on-head-worktree` - Multiple tags in worktree
+- `27-multiline-message-worktree` - Multiline message in worktree
+- `28-custom-filename-worktree` - Custom filename in worktree
+
+### Special Git States (29-37)
+- `29-shallow-clone` - Shallow clone (--depth=1)
+- `30-remote-url-credentials` - Remote URL with embedded credentials (should be sanitized)
+- `31-annotated-tag` - Annotated tag behavior
+- `32-lightweight-tag` - Lightweight tag behavior
+- `33-special-branch-names` - Branch names with special characters
+- `34-unicode-commit-message` - Unicode in commit message
+- `35-unicode-author` - Unicode in author name/email
+- `36-merge-commit` - Merge commit properties
+- `37-long-commit-message` - Very long commit message truncation
+
+### Configuration Options (38-46)
+- `38-failOnNoGitDirectory-false` - No git directory with failOnNoGitDirectory=false
+- `39-ci-branch-override` - Branch override via gitProperties.branch
+- `40-ci-branch-override-refs-prefix` - Branch override with refs/heads/ prefix
+- `41-ci-branch-override-refs-tags` - Branch override with refs/tags/ prefix
+- `42-ci-detached-no-override` - Detached HEAD without branch override
+- `43-ci-branch-empty-string` - Branch override as empty string
+- `44-ci-branch-null` - Branch override as null
+- `45-ci-env-jenkins` - Jenkins CI environment simulation
+- `46-ci-env-github-actions` - GitHub Actions environment simulation
+
+### Auto-Detect Mode (47-64)
+- `47-auto-detect-git-directory` - Auto-detect .git directory (no dotGitDirectory config)
+- `48-auto-detect-git-worktree` - Auto-detect .git file in worktree
+- `49-auto-detect-subdirectory` - Auto-detect from project subdirectory
+- `50-auto-detect-worktree-subdirectory` - Auto-detect worktree from subdirectory
+- `51-auto-detect-basic-properties` - Basic properties with auto-detect
+- `52-auto-detect-detached-head` - Detached HEAD with auto-detect
+- `53-auto-detect-no-tags` - No tags with auto-detect
+- `54-auto-detect-with-tags` - With tags with auto-detect
+- `55-auto-detect-dirty-state` - Dirty state with auto-detect
+- `56-auto-detect-custom-properties-static` - Static custom props with auto-detect
+- `57-auto-detect-custom-properties-closure` - Closure custom props with auto-detect
+- `58-auto-detect-custom-properties-api` - API custom props with auto-detect
+- `59-auto-detect-selective-keys` - Selective keys with auto-detect
+- `60-auto-detect-date-format` - Date format with auto-detect
+- `61-auto-detect-empty-repo` - Empty repo with auto-detect
+- `62-auto-detect-multiple-tags-on-head` - Multiple tags with auto-detect
+- `63-auto-detect-multiline-message` - Multiline message with auto-detect
+- `64-auto-detect-custom-filename` - Custom filename with auto-detect
