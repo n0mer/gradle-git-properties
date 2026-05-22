@@ -118,7 +118,7 @@ Filter before comparing:
 
 100% parity on all comparable scenarios.
 
-## Test Scenarios (64 total)
+## Test Scenarios (77 total)
 
 ### Core Properties (01-14)
 - `01-basic-properties` - Standard git.properties with all default keys
@@ -193,3 +193,22 @@ Filter before comparing:
 - `62-auto-detect-multiple-tags-on-head` - Multiple tags with auto-detect
 - `63-auto-detect-multiline-message` - Multiline message with auto-detect
 - `64-auto-detect-custom-filename` - Custom filename with auto-detect
+
+### GitFacade API Methods (65-73)
+- `65-describe-long-format` - `it.describe(longDescr: true)` long describe output
+- `66-log-api` - `it.log(maxCommits: 5)` commit history API
+- `67-tag-list-api` - `it.tag.list()` all tags API
+- `68-tag-list-on-commit-api` - `it.tag.listOnCommit(id)` tags on specific commit
+- `69-tag-closest-api` - `it.tag.closest()` nearest tag with distance
+- `70-get-config-api` - `it.getConfig(section, name)` git config reading
+- `71-is-empty-api` - `it.isEmpty()` empty repository check
+- `72-jgit-escape-hatch` - `it.jgit` raw JGit Repository access
+- `73-jgit-commands-escape-hatch` - `it.jgitCommands` raw Git commands
+
+### Additional Configuration (74-75)
+- `74-ext-property` - `extProperty` exposing git props to project.ext
+- `75-force-write` - `force = true` always write file even if unchanged
+
+### Edge Cases (76-77)
+- `76-submodule` - Git submodule (.git file pointing to parent repo)
+- `77-no-git-user-config` - No user.name/email in git config
