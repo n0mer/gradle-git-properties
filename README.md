@@ -9,8 +9,8 @@ A Gradle plugin that generates a `git.properties` file containing Git repository
 
 - [Requirements](#requirements)
 - [Installation](#installation)
+- [Upgrading from 2.x](#upgrading-from-2x)
 - [Configuration](#configuration)
-- [Kotlin DSL](#kotlin-dsl)
 - [Spring Boot Integration](#spring-boot-integration)
 - [Advanced Usage](#advanced-usage)
 - [Compatibility](#compatibility)
@@ -45,6 +45,16 @@ The plugin generates `git.properties` at `build/resources/main/git.properties`. 
 ```bash
 ./gradlew generateGitProperties
 ```
+
+## Upgrading from 2.x
+
+Version 3.0 replaces the Grgit backend with JGit. Key changes:
+
+- **Java 17+ required** (was Java 8)
+- **Custom properties**: Closures now receive `GitFacade` instead of Grgit. See [GitFacade API](#gitfacade-api) for available methods.
+- **JGit escape hatch**: For advanced use cases, access `jgit` (Repository) or `jgitCommands` (Git) directly.
+
+Standard configuration options (`keys`, `dateFormat`, `branch`, etc.) are unchanged.
 
 ## Configuration
 
@@ -214,25 +224,16 @@ tasks.withType(com.gorylenko.GenerateGitPropertiesTask).configureEach {
 }
 ```
 
-## Kotlin DSL
+### Kotlin DSL Notes
 
-Basic configuration:
-
-```kotlin
-gitProperties {
-    dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-    dateFormatTimeZone = "UTC"
-    keys = listOf("git.branch", "git.commit.id", "git.commit.time")
-}
-```
-
-For custom properties with closures, use `KotlinClosure1`. The closure receiver is a `GitFacade` instance:
+Most configuration works identically in Kotlin DSL. For custom properties with closures, use `KotlinClosure1`:
 
 ```kotlin
 import org.gradle.kotlin.dsl.KotlinClosure1
 import com.gorylenko.jgit.GitFacade
 
 gitProperties {
+    keys = listOf("git.branch", "git.commit.id", "git.commit.time")
     customProperty("greeting", "Hello")
     customProperty("my_custom_git_id", KotlinClosure1<GitFacade, String>({ head().id }))
 }
@@ -341,16 +342,6 @@ bootJar {
     }
 }
 ```
-
-## Upgrading from 2.x
-
-Version 3.0 replaces the Grgit backend with JGit. Key changes:
-
-- **Java 17+ required** (was Java 8)
-- **Custom properties**: Closures now receive `GitFacade` instead of Grgit. See [GitFacade API](#gitfacade-api) for available methods.
-- **JGit escape hatch**: For advanced use cases, access `jgit` (Repository) or `jgitCommands` (Git) directly.
-
-Standard configuration options (`keys`, `dateFormat`, `branch`, etc.) are unchanged.
 
 ## Compatibility
 
