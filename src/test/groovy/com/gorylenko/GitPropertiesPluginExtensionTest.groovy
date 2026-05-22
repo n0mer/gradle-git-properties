@@ -409,4 +409,51 @@ class GitPropertiesPluginExtensionTest {
         assertTrue("toString should contain gitPropertiesName",
             str.contains("gitPropertiesName"))
     }
+
+    // === Issue #234: commitIdAbbrevLength Tests ===
+
+    @Test
+    void testDefaultCommitIdAbbrevLength() {
+        def project = createProjectWithGit()
+        def ext = getExtension(project)
+        assertEquals(7, ext.commitIdAbbrevLength)
+    }
+
+    @Test
+    void testSetCommitIdAbbrevLengthValid() {
+        def project = createProjectWithGit()
+        def ext = getExtension(project)
+        ext.commitIdAbbrevLength = 10
+        assertEquals(10, ext.commitIdAbbrevLength)
+    }
+
+    @Test
+    void testSetCommitIdAbbrevLengthMin() {
+        def project = createProjectWithGit()
+        def ext = getExtension(project)
+        ext.commitIdAbbrevLength = 2
+        assertEquals(2, ext.commitIdAbbrevLength)
+    }
+
+    @Test
+    void testSetCommitIdAbbrevLengthMax() {
+        def project = createProjectWithGit()
+        def ext = getExtension(project)
+        ext.commitIdAbbrevLength = 40
+        assertEquals(40, ext.commitIdAbbrevLength)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testSetCommitIdAbbrevLengthTooSmall() {
+        def project = createProjectWithGit()
+        def ext = getExtension(project)
+        ext.commitIdAbbrevLength = 1
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testSetCommitIdAbbrevLengthTooLarge() {
+        def project = createProjectWithGit()
+        def ext = getExtension(project)
+        ext.commitIdAbbrevLength = 41
+    }
 }

@@ -174,6 +174,24 @@ class GitFacade implements AutoCloseable {
     }
 
     /**
+     * Returns an abbreviated commit ID with the specified length.
+     *
+     * @param length abbreviation length (2-40)
+     * @return abbreviated commit ID, or null if repository is empty
+     */
+    String getAbbreviatedId(int length) {
+        def headId = resolveHead()
+        if (headId == null) return null
+
+        def objectReader = repository.newObjectReader()
+        try {
+            return objectReader.abbreviate(headId, length).name()
+        } finally {
+            objectReader.close()
+        }
+    }
+
+    /**
      * Returns the HEAD commit, or null if the repository is empty.
      *
      * @return GitCommit for HEAD, or null

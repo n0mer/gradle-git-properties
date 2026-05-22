@@ -84,6 +84,16 @@ gitProperties {
 }
 ```
 
+### Commit ID Abbreviation Length
+
+Configure the length of `git.commit.id.abbrev` (default: 7, range: 2-40):
+
+```groovy
+gitProperties {
+    commitIdAbbrevLength = 10
+}
+```
+
 ### Available Properties
 
 By default, the plugin generates all available properties:
@@ -92,7 +102,7 @@ By default, the plugin generates all available properties:
 |----------|-------------|
 | `git.branch` | Current branch name |
 | `git.commit.id` | Full 40-character commit SHA |
-| `git.commit.id.abbrev` | Abbreviated commit SHA (typically 7 characters) |
+| `git.commit.id.abbrev` | Abbreviated commit SHA (default 7 characters, configurable) |
 | `git.commit.id.describe` | Human-readable name from `git describe` |
 | `git.commit.time` | Commit timestamp |
 | `git.commit.message.short` | Commit message (first line) |

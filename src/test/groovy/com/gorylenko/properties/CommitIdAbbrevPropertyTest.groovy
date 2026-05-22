@@ -43,9 +43,53 @@ class CommitIdAbbrevPropertyTest {
         def facade = GitFacade.open(projectDir)
         try {
             def result = new CommitIdAbbrevProperty().doCall(facade)
-            // Should be abbreviated (7 chars by default)
-            assertTrue(result.length() < 40)
+            assertEquals("Default should be 7 chars", 7, result.length())
             assertTrue(result.matches('[a-f0-9]+'))
+        } finally {
+            facade.close()
+        }
+    }
+
+    // Issue #234: Configurable commit ID abbreviation length
+
+    @Test
+    public void testDoCallWithLength10() {
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+        def facade = GitFacade.open(projectDir)
+        try {
+            def result = new CommitIdAbbrevProperty(10).doCall(facade)
+            assertEquals("Should return 10 chars", 10, result.length())
+            assertTrue(result.matches('[a-f0-9]+'))
+        } finally {
+            facade.close()
+        }
+    }
+
+    @Test
+    public void testDoCallWithLength2() {
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+        def facade = GitFacade.open(projectDir)
+        try {
+            def result = new CommitIdAbbrevProperty(2).doCall(facade)
+            assertEquals("Should return 2 chars (minimum)", 2, result.length())
+        } finally {
+            facade.close()
+        }
+    }
+
+    @Test
+    public void testDoCallWithLength40() {
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+        def facade = GitFacade.open(projectDir)
+        try {
+            def result = new CommitIdAbbrevProperty(40).doCall(facade)
+            assertEquals("Should return full SHA (40 chars)", 40, result.length())
         } finally {
             facade.close()
         }

@@ -53,11 +53,11 @@ class GitProperties {
     private static final String KEY_GIT_BUILD_HOST = "git.build.host"
 
     public Map<String, String> generate(File dotGitDirectory, List<String> keys, String dateFormat, String dateFormatTimeZone, String branch,
-        Object buildVersion, Map<String, Object> customProperties) {
+        Object buildVersion, Map<String, Object> customProperties, int commitIdAbbrevLength = 7) {
 
         // Find standard properties and custom properties to be generated
 
-        Map properties = getStandardPropertiesMap(dateFormat, dateFormatTimeZone, branch, buildVersion).subMap(keys)
+        Map properties = getStandardPropertiesMap(dateFormat, dateFormatTimeZone, branch, buildVersion, commitIdAbbrevLength).subMap(keys)
         if (customProperties) {
             properties.putAll(customProperties)
         }
@@ -76,15 +76,15 @@ class GitProperties {
     }
 
     public static List getStandardProperties() {
-        return getStandardPropertiesMap(null, null, null, null).keySet() as List
+        return getStandardPropertiesMap(null, null, null, null, 7).keySet() as List
     }
 
-    private static Map getStandardPropertiesMap(String dateFormat, String dateFormatTimeZone, String branch, Object buildVersion) {
+    private static Map getStandardPropertiesMap(String dateFormat, String dateFormatTimeZone, String branch, Object buildVersion, int commitIdAbbrevLength) {
         def cacheSupport = new CacheSupport()
 
         def map = [(KEY_GIT_BRANCH)                     : new BranchProperty(branch)
                    , (KEY_GIT_COMMIT_ID)                : new CommitIdProperty()
-                   , (KEY_GIT_COMMIT_ID_ABBREVIATED)    : new CommitIdAbbrevProperty()
+                   , (KEY_GIT_COMMIT_ID_ABBREVIATED)    : new CommitIdAbbrevProperty(commitIdAbbrevLength)
                    , (KEY_GIT_COMMIT_USER_NAME)         : new CommitUserNameProperty()
                    , (KEY_GIT_COMMIT_USER_EMAIL)        : new CommitUserEmailProperty()
                    , (KEY_GIT_COMMIT_SHORT_MESSAGE)     : new CommitMessageShortProperty()
