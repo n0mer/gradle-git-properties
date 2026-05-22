@@ -157,4 +157,35 @@ class GitPropertiesTest {
         }
     }
 
+    // Issue #234: Configurable commit ID abbreviation length
+
+    @Test
+    public void testGenerateWithCustomAbbrevLength10() {
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+
+        List<String> keys = ['git.commit.id.abbrev']
+        Map<String, String> generated = props.generate(dotGitDirectory, keys, null, null, null, "1.0", [:], 10)
+
+        def abbrevId = generated['git.commit.id.abbrev']
+        assertNotNull(abbrevId)
+        assertEquals("Should return 10 chars", 10, abbrevId.length())
+        assertTrue(abbrevId.matches('[a-f0-9]+'))
+    }
+
+    @Test
+    public void testGenerateWithDefaultAbbrevLength7() {
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+
+        List<String> keys = ['git.commit.id.abbrev']
+        Map<String, String> generated = props.generate(dotGitDirectory, keys, null, null, null, "1.0", [:], 7)
+
+        def abbrevId = generated['git.commit.id.abbrev']
+        assertNotNull(abbrevId)
+        assertEquals("Should return 7 chars", 7, abbrevId.length())
+    }
+
 }

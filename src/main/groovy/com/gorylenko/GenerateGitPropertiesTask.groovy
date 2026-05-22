@@ -98,7 +98,7 @@ class GenerateGitPropertiesTask extends DefaultTask {
         GitProperties builder = new GitProperties()
         Map<String, String> newMap = builder.generate(dotGitDirectory,
                 gitProperties.keys, gitProperties.dateFormat, gitProperties.dateFormatTimeZone, gitProperties.branch,
-                projectVersion.get(), gitProperties.customProperties)
+                projectVersion.get(), gitProperties.customProperties, gitProperties.commitIdAbbrevLength)
 
         if (logger.debugEnabled) {
             logger.debug("Generated Git properties  = ${newMap}")

@@ -181,4 +181,69 @@ public class BasicFunctionalTest {
         // Verify git.properties was created in custom directory
         assert new File(customDir, "git.properties").exists()
     }
+
+    // Issue #234: Configurable commit ID abbreviation length
+
+    @Test
+    public void testCustomCommitIdAbbrevLength() {
+        def projectDir = temporaryFolder.newFolder()
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+
+        new File(projectDir, "settings.gradle") << ""
+        new File(projectDir, "build.gradle") << """
+            plugins {
+                id('com.gorylenko.gradle-git-properties')
+            }
+            gitProperties {
+                commitIdAbbrevLength = 10
+            }
+        """.stripIndent()
+
+        def runner = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments("generateGitProperties")
+                .withProjectDir(projectDir)
+
+        def result = runner.build()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":generateGitProperties").outcome)
+
+        // Verify the abbreviated commit ID length
+        def propsFile = new File(projectDir, "build/resources/main/git.properties")
+        def props = new Properties()
+        propsFile.withInputStream { props.load(it) }
+        def abbrevId = props.getProperty("git.commit.id.abbrev")
+        assertEquals("Should return 10 chars", 10, abbrevId.length())
+        assert abbrevId.matches('[a-f0-9]+')
+    }
+
+    @Test
+    public void testInvalidCommitIdAbbrevLengthFailsFast() {
+        def projectDir = temporaryFolder.newFolder()
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+
+        new File(projectDir, "settings.gradle") << ""
+        new File(projectDir, "build.gradle") << """
+            plugins {
+                id('com.gorylenko.gradle-git-properties')
+            }
+            gitProperties {
+                commitIdAbbrevLength = 1
+            }
+        """.stripIndent()
+
+        def runner = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments("generateGitProperties")
+                .withProjectDir(projectDir)
+
+        def result = runner.buildAndFail()
+        assertThat(result.output, containsString("commitIdAbbrevLength must be between 2 and 40"))
+    }
 }

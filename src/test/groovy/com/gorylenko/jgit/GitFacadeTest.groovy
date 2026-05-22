@@ -248,4 +248,45 @@ class GitFacadeTest {
         assertNull("getConfig should return null for missing config", facade.getConfig("nonexistent", "key"))
         assertNull("getConfig should return null for missing subsection config", facade.getConfig("remote", "nonexistent", "url"))
     }
+
+    // Issue #234: Configurable commit ID abbreviation length
+
+    @Test
+    void testGetAbbreviatedIdWithLength7() {
+        def repoDir = temporaryFolder.newFolder("test-repo")
+        helper = JGitTestHelper.create(repoDir)
+        helper.commitFile("test.txt", "content", "Initial commit")
+
+        facade = GitFacade.open(repoDir)
+
+        def abbrevId = facade.getAbbreviatedId(7)
+
+        assertNotNull("getAbbreviatedId(7) should return a value", abbrevId)
+        assertEquals("getAbbreviatedId(7) should return 7 chars", 7, abbrevId.length())
+        assertTrue("abbreviatedId should be hex", abbrevId.matches('[a-f0-9]+'))
+    }
+
+    @Test
+    void testGetAbbreviatedIdWithLength10() {
+        def repoDir = temporaryFolder.newFolder("test-repo")
+        helper = JGitTestHelper.create(repoDir)
+        helper.commitFile("test.txt", "content", "Initial commit")
+
+        facade = GitFacade.open(repoDir)
+
+        def abbrevId = facade.getAbbreviatedId(10)
+
+        assertEquals("getAbbreviatedId(10) should return 10 chars", 10, abbrevId.length())
+    }
+
+    @Test
+    void testGetAbbreviatedIdOnEmptyRepoReturnsNull() {
+        def repoDir = temporaryFolder.newFolder("empty-repo")
+        helper = JGitTestHelper.create(repoDir)
+        // No commits
+
+        facade = GitFacade.open(repoDir)
+
+        assertNull("getAbbreviatedId on empty repo should return null", facade.getAbbreviatedId(7))
+    }
 }

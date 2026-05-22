@@ -74,6 +74,15 @@ class GitPropertiesPluginExtension {
     String extProperty
     boolean failOnNoGitDirectory = true
     boolean force
+    int commitIdAbbrevLength = 7
+
+    void setCommitIdAbbrevLength(int length) {
+        if (length < 2 || length > 40) {
+            throw new IllegalArgumentException(
+                "commitIdAbbrevLength must be between 2 and 40, got: ${length}")
+        }
+        this.commitIdAbbrevLength = length
+    }
 
     GitPropertiesPluginExtension(Project project) {
         gitPropertiesDir = project.objects.directoryProperty()
