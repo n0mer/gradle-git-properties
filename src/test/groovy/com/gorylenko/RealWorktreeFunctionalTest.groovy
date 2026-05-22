@@ -58,9 +58,7 @@ class RealWorktreeFunctionalTest {
             }
         """.stripIndent()
 
-        def runner = GradleRunner.create()
-                .withPluginClasspath()
-                .withProjectDir(worktreeDir)
+        def runner = createCleanRunner(worktreeDir)
                 .withArguments('generateGitProperties', '--info', '--stacktrace')
                 .forwardOutput()
                 .build()
@@ -118,9 +116,7 @@ class RealWorktreeFunctionalTest {
             }
         """.stripIndent()
 
-        def runner = GradleRunner.create()
-                .withPluginClasspath()
-                .withProjectDir(worktreeDir)
+        def runner = createCleanRunner(worktreeDir)
                 .withArguments('generateGitProperties', '--stacktrace')
                 .forwardOutput()
                 .build()
@@ -169,9 +165,7 @@ class RealWorktreeFunctionalTest {
             }
         """.stripIndent()
 
-        def runner = GradleRunner.create()
-                .withPluginClasspath()
-                .withProjectDir(worktreeDir)
+        def runner = createCleanRunner(worktreeDir)
                 .withArguments('generateGitProperties', '--stacktrace')
                 .forwardOutput()
                 .build()
@@ -216,9 +210,7 @@ class RealWorktreeFunctionalTest {
             }
         """.stripIndent()
 
-        def runner = GradleRunner.create()
-                .withPluginClasspath()
-                .withProjectDir(worktreeDir)
+        def runner = createCleanRunner(worktreeDir)
                 .withArguments('generateGitProperties', '--stacktrace')
                 .forwardOutput()
                 .build()
@@ -235,6 +227,31 @@ class RealWorktreeFunctionalTest {
         // Commit should match the first commit we checked out
         def actualCommit = props.getProperty("git.commit.id")
         assertEquals("Commit should match detached HEAD", firstCommit, actualCommit)
+    }
+
+    /**
+     * Creates a GradleRunner with CI branch environment variables cleared.
+     * This ensures tests use git to detect the branch, not CI environment variables
+     * (which would override the worktree's branch with the CI's current branch).
+     */
+    private static GradleRunner createCleanRunner(File projectDir) {
+        def cleanEnv = System.getenv().findAll { k, v ->
+            !['GITHUB_ACTIONS', 'GITHUB_HEAD_REF', 'GITHUB_REF_NAME',
+              'TRAVIS', 'TRAVIS_BRANCH',
+              'GITLAB_CI', 'CI_COMMIT_REF_NAME',
+              'CIRCLECI', 'CIRCLE_BRANCH',
+              'TF_BUILD', 'BUILD_SOURCEBRANCH',
+              'BITBUCKET_BUILD_NUMBER', 'BITBUCKET_BRANCH',
+              'JOB_NAME', 'GIT_LOCAL_BRANCH', 'GIT_BRANCH', 'BRANCH_NAME',
+              'TEAMCITY_VERSION',
+              'BAMBOO_BUILDKEY', 'BAMBOO_PLANREPOSITORY_BRANCH',
+              'CODEBUILD_BUILD_ARN', 'CODEBUILD_WEBHOOK_HEAD_REF', 'CODEBUILD_WEBHOOK_TRIGGER', 'CODEBUILD_SOURCE_VERSION'
+            ].contains(k)
+        }
+        return GradleRunner.create()
+                .withPluginClasspath()
+                .withProjectDir(projectDir)
+                .withEnvironment(cleanEnv)
     }
 
     // Helper to run git commands
