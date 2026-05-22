@@ -41,11 +41,12 @@ class GenerateGitPropertiesTask extends DefaultTask {
 
         // we will not be able to access the project in the @TaskAction method,
         // if the configuration cache is enabled
-        this.source = project.fileTree(gitProperties.dotGitDirectory) {
+        File gitDir = resolveGitDir(gitProperties.dotGitDirectory.get().asFile)
+        this.source = gitDir?.isDirectory() ? project.fileTree(gitDir) {
             include('config')
             include('HEAD')
             include('refs/**')
-        }
+        } : project.files().asFileTree
         this.projectVersion = project.objects.property(String).convention(project.provider { project.version?.toString() })
 
         outputs.upToDateWhen { GenerateGitPropertiesTask task ->
@@ -169,5 +170,20 @@ class GenerateGitPropertiesTask extends DefaultTask {
         def fileProperty = objectFactory.fileProperty()
         fileProperty.set(getGitPropertiesDir().file(gitProperties.gitPropertiesName))
         return fileProperty
+    }
+
+    // Resolves .git file (worktree) to actual gitdir, or returns directory as-is
+    private static File resolveGitDir(File dotGit) {
+        if (dotGit == null || !dotGit.exists()) return null
+        if (dotGit.isDirectory()) return dotGit
+        if (!dotGit.isFile()) return null
+
+        // Worktree: .git file contains "gitdir: <path>"
+        def content = dotGit.text?.trim()
+        if (!content?.startsWith('gitdir:')) return null
+
+        def gitPath = content.substring(7).trim()
+        def gitDir = new File(gitPath)
+        return gitDir.isAbsolute() ? gitDir : new File(dotGit.parentFile, gitPath).canonicalFile
     }
 }
