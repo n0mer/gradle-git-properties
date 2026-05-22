@@ -56,6 +56,8 @@ Version 3.0 replaces the Grgit backend with JGit. Key changes:
 
 Standard configuration options (`keys`, `dateFormat`, `branch`, etc.) are unchanged.
 
+See [MIGRATION.md](MIGRATION.md) for detailed upgrade instructions.
+
 ## Configuration
 
 All configuration is optional. The plugin uses sensible defaults.
