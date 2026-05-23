@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
     id 'java-gradle-plugin'
     id "com.gradle.plugin-publish" version "1.2.1"
-    id "com.github.johnrengelman.shadow" version "8.1.1"
+    id "com.gradleup.shadow" version "9.0.2"
     id "com.gorylenko.gradle-git-properties" version "2.4.2"
 }
 
@@ -48,7 +48,7 @@ components.java.withVariantsFromConfiguration(configurations.runtimeElements) {
     skip()
 }
 
-version = "3.0.0"
+version = "3.0.1"
 group = "com.gorylenko.gradle-git-properties"
 
 gitProperties {
@@ -60,6 +60,7 @@ gitProperties {
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
+    withSourcesJar()
 }
 
 tasks.withType(GroovyCompile) {
@@ -83,24 +84,7 @@ tasks.register("integrationTest", Test) {
     it.systemProperty "integration.plugin.path", tasks.shadowJar.outputs.getFiles().asPath // Pass java system property indicating integration plugin path
 }
 
-tasks.register("sourceJar", Jar) {
-    archiveClassifier.set("sources")
-    from sourceSets.main.resources, sourceSets.main.groovy
-
-    dependsOn tasks.named("classes")
-}
-
 publishing {
-
-    publications {
-
-        pluginJar(MavenPublication) {  publication ->
-
-            from project.shadow.component(publication)
-
-            artifact sourceJar
-        }
-    }
     // for testing: ./gradlew clean publishToMavenLocal
     repositories {
         mavenLocal()
