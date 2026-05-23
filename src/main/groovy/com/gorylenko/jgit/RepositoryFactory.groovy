@@ -175,6 +175,38 @@ class RepositoryFactory {
         return builder.build()
     }
 
+    /**
+     * Resolves .git file (worktree) to actual gitdir, or returns directory as-is.
+     * Used for determining directories to watch for incremental builds.
+     */
+    private static File resolveDotGit(File dotGit) {
+        if (dotGit == null || !dotGit.exists()) return null
+        if (dotGit.isDirectory()) return dotGit
+        if (!dotGit.isFile()) return null
+        def content = dotGit.text?.trim()
+        if (!content?.startsWith('gitdir:')) return null
+        def gitPath = content.substring(7).trim()
+        def gitDir = new File(gitPath)
+        return gitDir.isAbsolute() ? gitDir : new File(dotGit.parentFile, gitPath).canonicalFile
+    }
+
+    /**
+     * Returns list of directories to watch for git state changes.
+     * For worktrees, returns both worktree gitdir AND main repo gitdir (via commondir).
+     * For regular repos, returns just the git directory.
+     */
+    static List<File> getDirectoriesToWatch(File dotGit) {
+        File gitDir = resolveDotGit(dotGit)
+        if (gitDir == null || !gitDir.isDirectory()) return []
+
+        def commonDirFile = new File(gitDir, "commondir")
+        if (commonDirFile.exists()) {
+            def commonDir = new File(gitDir, commonDirFile.text.trim()).canonicalFile
+            return [gitDir, commonDir]
+        }
+        return [gitDir]
+    }
+
     private static Repository openWorktree(File worktreeDir, File gitFile) {
         def content = gitFile.text.trim()
         if (!content.startsWith("gitdir:")) {

@@ -72,4 +72,52 @@ class RepositoryFactoryTest {
             facade.close()
         }
     }
+
+    // ============================================
+    // Tests for getDirectoriesToWatch
+    // ============================================
+
+    @Test
+    void testGetDirectoriesToWatch_NullInput() {
+        def result = RepositoryFactory.getDirectoriesToWatch(null)
+        assertTrue("Null input should return empty list", result.isEmpty())
+    }
+
+    @Test
+    void testGetDirectoriesToWatch_NonExistent() {
+        def nonExistent = new File(temporaryFolder.root, "does-not-exist/.git")
+        def result = RepositoryFactory.getDirectoriesToWatch(nonExistent)
+        assertTrue("Non-existent file should return empty list", result.isEmpty())
+    }
+
+    @Test
+    void testGetDirectoriesToWatch_RegularRepo() {
+        def repoDir = temporaryFolder.newFolder("test-repo")
+        helper = JGitTestHelper.create(repoDir)
+        helper.commitFile("test.txt", "content", "Initial commit")
+
+        def dotGit = new File(repoDir, ".git")
+        def result = RepositoryFactory.getDirectoriesToWatch(dotGit)
+
+        assertEquals("Regular repo should return 1 directory", 1, result.size())
+        assertEquals("Should return .git directory", dotGit.canonicalFile, result[0].canonicalFile)
+    }
+
+    @Test
+    void testGetDirectoriesToWatch_Worktree() {
+        def mainRepoDir = temporaryFolder.newFolder("main-repo")
+        def worktreeDir = new File(temporaryFolder.root, "worktree")
+
+        helper = JGitTestHelper.create(mainRepoDir)
+        helper.commitFile("test.txt", "content", "Initial commit")
+        helper.createWorktree(worktreeDir, "feature-branch")
+
+        def dotGit = new File(worktreeDir, ".git")
+        def result = RepositoryFactory.getDirectoriesToWatch(dotGit)
+
+        assertEquals("Worktree should return 2 directories", 2, result.size())
+        // First should be worktree gitdir, second should be main git dir
+        def mainGitDir = new File(mainRepoDir, ".git")
+        assertTrue("Should include main git dir", result.any { it.canonicalPath == mainGitDir.canonicalPath })
+    }
 }
