@@ -1,5 +1,6 @@
 package com.gorylenko
 
+import com.gorylenko.jgit.RepositoryFactory
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Transformer
@@ -41,12 +42,18 @@ class GenerateGitPropertiesTask extends DefaultTask {
 
         // we will not be able to access the project in the @TaskAction method,
         // if the configuration cache is enabled
-        File gitDir = resolveGitDir(gitProperties.dotGitDirectory.get().asFile)
-        this.source = gitDir?.isDirectory() ? project.fileTree(gitDir) {
-            include('config')
-            include('HEAD')
-            include('refs/**')
-        } : project.files().asFileTree
+        List<File> watchDirs = RepositoryFactory.getDirectoriesToWatch(
+            gitProperties.dotGitDirectory.get().asFile)
+        this.source = watchDirs.isEmpty()
+            ? project.files().asFileTree
+            : watchDirs.collect { dir ->
+                project.fileTree(dir) {
+                    include('config')
+                    include('HEAD')
+                    include('refs/**')
+                    include('packed-refs')
+                }
+            }.inject { acc, tree -> acc.plus(tree) }
         this.projectVersion = project.objects.property(String).convention(project.provider { project.version?.toString() })
 
         outputs.upToDateWhen { GenerateGitPropertiesTask task ->
@@ -172,18 +179,4 @@ class GenerateGitPropertiesTask extends DefaultTask {
         return fileProperty
     }
 
-    // Resolves .git file (worktree) to actual gitdir, or returns directory as-is
-    private static File resolveGitDir(File dotGit) {
-        if (dotGit == null || !dotGit.exists()) return null
-        if (dotGit.isDirectory()) return dotGit
-        if (!dotGit.isFile()) return null
-
-        // Worktree: .git file contains "gitdir: <path>"
-        def content = dotGit.text?.trim()
-        if (!content?.startsWith('gitdir:')) return null
-
-        def gitPath = content.substring(7).trim()
-        def gitDir = new File(gitPath)
-        return gitDir.isAbsolute() ? gitDir : new File(dotGit.parentFile, gitPath).canonicalFile
-    }
 }
