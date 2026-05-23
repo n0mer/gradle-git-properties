@@ -161,9 +161,25 @@ class SymlinkedGitDirectoryFunctionalTest {
     }
 
     private def runGradle(File projectDir) {
+        // Clear CI environment variables so the test uses git to detect the branch
+        def cleanEnv = System.getenv().findAll { k, v ->
+            !['GITHUB_ACTIONS', 'GITHUB_HEAD_REF', 'GITHUB_REF_NAME',
+              'TRAVIS', 'TRAVIS_BRANCH',
+              'GITLAB_CI', 'CI_COMMIT_REF_NAME',
+              'CIRCLECI', 'CIRCLE_BRANCH',
+              'TF_BUILD', 'BUILD_SOURCEBRANCH',
+              'BITBUCKET_BUILD_NUMBER', 'BITBUCKET_BRANCH',
+              'JOB_NAME', 'GIT_LOCAL_BRANCH', 'GIT_BRANCH', 'BRANCH_NAME',
+              'TEAMCITY_VERSION',
+              'BAMBOO_BUILDKEY', 'BAMBOO_PLANREPOSITORY_BRANCH',
+              'CODEBUILD_BUILD_ARN', 'CODEBUILD_WEBHOOK_HEAD_REF', 'CODEBUILD_WEBHOOK_TRIGGER', 'CODEBUILD_SOURCE_VERSION'
+            ].contains(k)
+        }
+
         return GradleRunner.create()
                 .withPluginClasspath()
                 .withProjectDir(projectDir)
+                .withEnvironment(cleanEnv)
                 .withArguments('generateGitProperties', '--info')
                 .build()
     }
