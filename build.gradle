@@ -4,11 +4,14 @@ plugins {
     id 'java-gradle-plugin'
     id "com.gradle.plugin-publish" version "1.2.1"
     id "com.gradleup.shadow" version "9.0.2"
-    id "com.gorylenko.gradle-git-properties" version "3.0.1"
+    id "com.gorylenko.gradle-git-properties" version "3.0.2"
 }
 
 repositories {
     mavenCentral()
+    maven {
+        url 'https://repo.eclipse.org/content/repositories/jgit-releases/'
+    }
     // for debugging
     //maven {
     //    url 'https://repo.gradle.org/gradle/libs-releases-local/'
@@ -20,7 +23,7 @@ def integrationTest = sourceSets.create("integrationTest")
 dependencies {
     shadow gradleApi()
     shadow localGroovy()
-    implementation 'org.eclipse.jgit:org.eclipse.jgit:7.1.0.202411261347-r'
+    implementation 'org.eclipse.jgit:org.eclipse.jgit:7.6.0.202603022253-r'
     // for debugging
     //implementation 'org.gradle:gradle-language-jvm:5.6.2'
     //implementation 'org.gradle:gradle-language-java:5.6.2'
@@ -48,7 +51,7 @@ components.java.withVariantsFromConfiguration(configurations.runtimeElements) {
     skip()
 }
 
-version = "3.0.2"
+version = "3.0.3"
 group = "com.gorylenko.gradle-git-properties"
 
 gitProperties {
