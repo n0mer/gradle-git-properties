@@ -9,6 +9,9 @@ plugins {
 
 repositories {
     mavenCentral()
+    maven {
+        url 'https://repo.eclipse.org/content/repositories/jgit-releases/'
+    }
     // for debugging
     //maven {
     //    url 'https://repo.gradle.org/gradle/libs-releases-local/'
@@ -20,7 +23,7 @@ def integrationTest = sourceSets.create("integrationTest")
 dependencies {
     shadow gradleApi()
     shadow localGroovy()
-    implementation 'org.eclipse.jgit:org.eclipse.jgit:7.1.0.202411261347-r'
+    implementation 'org.eclipse.jgit:org.eclipse.jgit:7.6.0.202603022253-r'
     // for debugging
     //implementation 'org.gradle:gradle-language-jvm:5.6.2'
     //implementation 'org.gradle:gradle-language-java:5.6.2'
