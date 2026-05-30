@@ -359,32 +359,13 @@ The plugin supports Gradle [configuration cache](https://docs.gradle.org/current
 
 ### Upgrading from 3.x
 
-Version 4.0 changes the default intermediate output directory for `generateGitProperties`
-from `build/resources/main/` to `build/generated/resources/git/`.
+Version 4.0 changes the default output directory for `generateGitProperties` from `build/resources/main/` to `build/generated/resources/git/`. The file still ends up at the root of your JAR — `processResources` copies it there.
 
-**The location of `git.properties` inside your JAR is unchanged** — it is still copied
-to `build/resources/main/` by `processResources` and packaged at the root of the JAR.
-
-**Why this changed:** Writing directly into `build/resources/main/` caused Gradle's
-stale-output detection to silently delete `git.properties` on every second `clean build`
-when the Gradle build cache was enabled (Gradle 8.6+). The build always reported SUCCESS.
-See [docs/fix-overlapping-outputs.md](docs/fix-overlapping-outputs.md) for details.
-
-**Migration:**
-
-- **Default config (no `gitPropertiesDir` / `gitPropertiesResourceDir` set):** No action
-  needed. The file still ends up at the root of your JAR. The plugin now automatically
-  registers `build/generated/resources/git/` as a resource source and wires
-  `processResources` to depend on `generateGitProperties`.
-- **Scripts or tasks referencing `build/resources/main/git.properties` directly:** That
-  path is still valid after `assemble` — `processResources` copies the file there.
-  If you reference the file *before* `processResources` runs (e.g. in a task that depends
-  only on `generateGitProperties`), update the path to
-  `build/generated/resources/git/git.properties`.
-- **`gitPropertiesDir` set explicitly:** Behaviour unchanged, but this property is deprecated — migrate to `gitPropertiesResourceDir`.
+- **Default config:** No action needed.
+- **`gitPropertiesDir` set explicitly:** Behaviour unchanged, but deprecated — migrate to `gitPropertiesResourceDir`.
 - **`gitPropertiesResourceDir` set explicitly:** Behaviour unchanged.
-- **Non-Java / Android projects:** Unaffected — sourceSets wiring is gated on the
-  `java` plugin being applied.
+
+See [MIGRATION.md](MIGRATION.md) for the full migration table.
 
 ### Upgrading from 2.x
 
