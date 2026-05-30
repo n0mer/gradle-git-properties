@@ -7,8 +7,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
+import java.util.zip.ZipFile
+
 import static org.hamcrest.CoreMatchers.containsString
 import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.assertNull
 import static org.junit.Assert.assertThat
 
 public class BasicFunctionalTest {
@@ -245,5 +249,125 @@ public class BasicFunctionalTest {
 
         def result = runner.buildAndFail()
         assertThat(result.output, containsString("commitIdAbbrevLength must be between 2 and 40"))
+    }
+
+    /**
+     * Verify that when gitPropertiesResourceDir is set to a custom directory,
+     * git.properties ends up packaged inside the JAR via sourceSets wiring.
+     */
+    @Test
+    public void testGitPropertiesResourceDirInJar() {
+        def projectDir = temporaryFolder.newFolder()
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+
+        def customDir = new File(projectDir, "custom-git-props")
+        customDir.mkdirs()
+
+        new File(projectDir, "settings.gradle") << ""
+        new File(projectDir, "build.gradle") << """
+            plugins {
+                id('java')
+                id('com.gorylenko.gradle-git-properties')
+            }
+            gitProperties {
+                gitPropertiesResourceDir = file('custom-git-props')
+            }
+        """.stripIndent()
+
+        def runner = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments("assemble")
+                .withProjectDir(projectDir)
+
+        def result = runner.build()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":generateGitProperties").outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":processResources").outcome)
+
+        // Verify git.properties was written to the custom directory on disk
+        assert new File(customDir, "git.properties").exists()
+
+        // Verify git.properties was copied into build/resources/main and packaged in the JAR
+        def libsDir = new File(projectDir, "build/libs")
+        def jarFiles = libsDir.listFiles({ File f -> f.name.endsWith(".jar") } as FileFilter)
+        assertNotNull("build/libs directory not found or empty", jarFiles)
+        assert jarFiles.length > 0 : "no JAR found in build/libs"
+
+        def zipFile = new ZipFile(jarFiles[0])
+        try {
+            def entry = zipFile.getEntry("git.properties")
+            assertNotNull(
+                "git.properties NOT found in JAR '${jarFiles[0].name}' " +
+                "(entries: ${zipFile.entries().collect { it.name }.join(', ')})",
+                entry
+            )
+        } finally {
+            zipFile.close()
+        }
+    }
+
+    /**
+     * Verify that when the deprecated gitPropertiesDir is set:
+     * - git.properties is written to the custom path
+     * - a deprecation warning is emitted
+     * - git.properties is NOT packaged in the JAR (no sourceSets wiring for deprecated property)
+     */
+    @Test
+    public void testDeprecatedGitPropertiesDir() {
+        def projectDir = temporaryFolder.newFolder()
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+
+        def customDir = new File(projectDir, "deprecated-git-props")
+        customDir.mkdirs()
+
+        new File(projectDir, "settings.gradle") << ""
+        new File(projectDir, "build.gradle") << """
+            plugins {
+                id('java')
+                id('com.gorylenko.gradle-git-properties')
+            }
+            gitProperties {
+                gitPropertiesDir = file('deprecated-git-props')
+            }
+        """.stripIndent()
+
+        def runner = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments("assemble")
+                .withProjectDir(projectDir)
+
+        def result = runner.build()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":generateGitProperties").outcome)
+
+        // Verify git.properties was written to the custom directory on disk
+        assert new File(customDir, "git.properties").exists()
+
+        // Verify the deprecation warning was emitted
+        assertThat(result.output, containsString("'gitPropertiesDir' is deprecated"))
+
+        // Verify git.properties is NOT packaged in the JAR (deprecated property has no sourceSets wiring)
+        def libsDir = new File(projectDir, "build/libs")
+        def jarFiles = libsDir.listFiles({ File f -> f.name.endsWith(".jar") } as FileFilter)
+        assertNotNull("build/libs directory not found or empty", jarFiles)
+        assert jarFiles.length > 0 : "no JAR found in build/libs"
+
+        def zipFile = new ZipFile(jarFiles[0])
+        try {
+            def entry = zipFile.getEntry("git.properties")
+            assertNull(
+                "git.properties SHOULD NOT be in JAR when gitPropertiesDir (deprecated) is used, " +
+                "but was found in '${jarFiles[0].name}'",
+                entry
+            )
+        } finally {
+            zipFile.close()
+        }
     }
 }
