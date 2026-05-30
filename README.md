@@ -19,7 +19,7 @@ A Gradle plugin that generates a `git.properties` file containing Git repository
 ## Requirements
 
 - Java 17 or higher
-- Gradle 5.1 or higher
+- Gradle 5.1 – 9.x
 - A Git repository (`.git` directory or git worktree)
 
 ## Installation
@@ -349,6 +349,7 @@ bootJar {
 
 | Plugin Version | Gradle | Java | Notes |
 |----------------|--------|------|-------|
+| 4.0.x          | 5.1 – 9.x | 17+ | Fixed overlapping outputs; `processResources` auto-wired |
 | 3.0.x          | 5.1 – 9.x | 17+ | JGit backend, git worktree support |
 | 2.5.x          | 5.1 – 9.x | 8+ | Grgit backend (deprecated) |
 
