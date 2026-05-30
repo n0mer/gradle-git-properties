@@ -75,7 +75,9 @@ See [docs/fix-overlapping-outputs.md](docs/fix-overlapping-outputs.md) for detai
 **Migration:**
 
 - **Default config (no `gitPropertiesDir` / `gitPropertiesResourceDir` set):** No action
-  needed. The file still ends up at the root of your JAR.
+  needed. The file still ends up at the root of your JAR. The plugin now automatically
+  registers `build/generated/resources/git/` as a resource source and wires
+  `processResources` to depend on `generateGitProperties`.
 - **Scripts or tasks referencing `build/resources/main/git.properties` directly:** That
   path is still valid after `assemble` — `processResources` copies the file there.
   If you reference the file *before* `processResources` runs (e.g. in a task that depends
