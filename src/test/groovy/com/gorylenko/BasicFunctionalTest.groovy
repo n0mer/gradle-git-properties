@@ -212,7 +212,7 @@ public class BasicFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, result.task(":generateGitProperties").outcome)
 
         // Verify the abbreviated commit ID length
-        def propsFile = new File(projectDir, "build/resources/main/git.properties")
+        def propsFile = new File(projectDir, "build/generated/resources/git/git.properties")
         def props = new Properties()
         propsFile.withInputStream { props.load(it) }
         def abbrevId = props.getProperty("git.commit.id.abbrev")

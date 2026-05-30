@@ -25,7 +25,7 @@ import javax.inject.Inject
 class GenerateGitPropertiesTask extends DefaultTask {
     public static final String TASK_NAME = "generateGitProperties"
 
-    private static final String DEFAULT_OUTPUT_DIR = "resources/main"
+    private static final String DEFAULT_OUTPUT_DIR = "generated/resources/git"
 
     private final GitPropertiesPluginExtension gitProperties
 

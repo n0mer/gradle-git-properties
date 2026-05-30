@@ -66,7 +66,7 @@ class RealWorktreeFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, runner.task(":generateGitProperties").outcome)
 
         // Load and verify git.properties
-        def gitPropertiesFile = new File(worktreeDir, "build/resources/main/git.properties")
+        def gitPropertiesFile = new File(worktreeDir, "build/generated/resources/git/git.properties")
         assertTrue("git.properties file should exist", gitPropertiesFile.exists())
 
         def props = new Properties()
@@ -124,7 +124,7 @@ class RealWorktreeFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, runner.task(":generateGitProperties").outcome)
 
         def props = new Properties()
-        new File(worktreeDir, "build/resources/main/git.properties").withInputStream { props.load(it) }
+        new File(worktreeDir, "build/generated/resources/git/git.properties").withInputStream { props.load(it) }
 
         def actualCommit = props.getProperty("git.commit.id")
         assertEquals("git.commit.id should be the worktree's commit",
@@ -172,7 +172,7 @@ class RealWorktreeFunctionalTest {
 
         assertEquals(TaskOutcome.SUCCESS, runner.task(":generateGitProperties").outcome)
 
-        def gitPropertiesFile = new File(worktreeDir, "build/resources/main/git.properties")
+        def gitPropertiesFile = new File(worktreeDir, "build/generated/resources/git/git.properties")
         assertTrue("git.properties should exist for bare repo worktree", gitPropertiesFile.exists())
 
         def props = new Properties()
@@ -218,7 +218,7 @@ class RealWorktreeFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, runner.task(":generateGitProperties").outcome)
 
         def props = new Properties()
-        new File(worktreeDir, "build/resources/main/git.properties").withInputStream { props.load(it) }
+        new File(worktreeDir, "build/generated/resources/git/git.properties").withInputStream { props.load(it) }
 
         // In detached HEAD, branch might be empty or contain commit SHA
         def branch = props.getProperty("git.branch")

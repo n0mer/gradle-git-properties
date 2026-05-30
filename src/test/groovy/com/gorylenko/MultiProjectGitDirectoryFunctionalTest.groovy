@@ -81,9 +81,9 @@ public class MultiProjectGitDirectoryFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, result.task(":subproject:generateGitProperties").outcome)
         
         // Verify that the git.properties file was created
-        def gitPropertiesFile = new File(subProjectDir, "build/resources/main/git.properties")
+        def gitPropertiesFile = new File(subProjectDir, "build/generated/resources/git/git.properties")
         assertTrue("git.properties should exist", gitPropertiesFile.exists())
-        
+
         // Verify that the custom properties are included
         def properties = new Properties()
         gitPropertiesFile.withInputStream { properties.load(it) }
@@ -153,9 +153,9 @@ public class MultiProjectGitDirectoryFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, result.task(":subproject:generateGitProperties").outcome)
         
         // Verify that the git.properties file was created
-        def gitPropertiesFile = new File(subProjectDir, "build/resources/main/git.properties")
+        def gitPropertiesFile = new File(subProjectDir, "build/generated/resources/git/git.properties")
         assertTrue("git.properties should exist", gitPropertiesFile.exists())
-        
+
         // Verify that the custom properties are included
         def properties = new Properties()
         gitPropertiesFile.withInputStream { properties.load(it) }
@@ -226,9 +226,9 @@ public class MultiProjectGitDirectoryFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, result.task(":subproject:generateGitProperties").outcome)
         
         // Verify that the git.properties file was created
-        def gitPropertiesFile = new File(subProjectDir, "build/resources/main/git.properties")
+        def gitPropertiesFile = new File(subProjectDir, "build/generated/resources/git/git.properties")
         assertTrue("git.properties should exist", gitPropertiesFile.exists())
-        
+
         // Verify that the custom properties are included
         def properties = new Properties()
         gitPropertiesFile.withInputStream { properties.load(it) }
@@ -292,7 +292,7 @@ public class MultiProjectGitDirectoryFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, result.task(":generateGitProperties").outcome)
 
         // Verify git.properties was created
-        def gitPropertiesFile = new File(gradleProjectDir, "build/resources/main/git.properties")
+        def gitPropertiesFile = new File(gradleProjectDir, "build/generated/resources/git/git.properties")
         assertTrue("git.properties should exist", gitPropertiesFile.exists())
 
         def properties = new Properties()
@@ -370,9 +370,9 @@ public class MultiProjectGitDirectoryFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, result.task(":level1:level2:generateGitProperties").outcome)
         
         // Verify that the git.properties file was created
-        def gitPropertiesFile = new File(level2Dir, "build/resources/main/git.properties")
+        def gitPropertiesFile = new File(level2Dir, "build/generated/resources/git/git.properties")
         assertTrue("git.properties should exist", gitPropertiesFile.exists())
-        
+
         // Verify that the custom properties are included
         def properties = new Properties()
         gitPropertiesFile.withInputStream { properties.load(it) }
@@ -452,7 +452,7 @@ public class MultiProjectGitDirectoryFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, result.task(":included-build:generateGitProperties").outcome)
 
         // Verify git.properties was created in the included build
-        def gitPropertiesFile = new File(includedBuildDir, "build/resources/main/git.properties")
+        def gitPropertiesFile = new File(includedBuildDir, "build/generated/resources/git/git.properties")
         assertTrue("git.properties should exist", gitPropertiesFile.exists())
 
         def properties = new Properties()

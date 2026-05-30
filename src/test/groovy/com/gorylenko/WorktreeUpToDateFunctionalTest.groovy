@@ -52,7 +52,7 @@ class WorktreeUpToDateFunctionalTest {
             TaskOutcome.SUCCESS, result3.task(":generateGitProperties").outcome)
 
         // 8. Verify git.properties was regenerated (file exists and was updated)
-        def gitProperties = new File(worktreeDir, "build/resources/main/git.properties")
+        def gitProperties = new File(worktreeDir, "build/generated/resources/git/git.properties")
         assertTrue("git.properties should exist", gitProperties.exists())
         // The core fix is verified: task detected the shared ref change and rebuilt.
         // The closest tag property may or may not show v1.0.0 depending on commit distance.

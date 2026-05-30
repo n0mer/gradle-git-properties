@@ -47,7 +47,7 @@ class GitPropertiesPluginTests {
 
         task.generate()
 
-        def gitPropertiesFile = project.buildDir.getAbsolutePath() + '/resources/main/git.properties'
+        def gitPropertiesFile = project.buildDir.getAbsolutePath() + '/generated/resources/git/git.properties'
 
         Properties properties = new Properties()
         properties.load(new FileInputStream(gitPropertiesFile))
@@ -72,7 +72,7 @@ class GitPropertiesPluginTests {
 
         task.generate()
 
-        def gitPropertiesFile = project.buildDir.getAbsolutePath() + '/resources/main/git.properties'
+        def gitPropertiesFile = project.buildDir.getAbsolutePath() + '/generated/resources/git/git.properties'
         assertFalse(new File(gitPropertiesFile).exists())
     }
 

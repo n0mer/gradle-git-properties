@@ -68,7 +68,7 @@ class FSMonitorFunctionalTest {
             result2.task(":generateGitProperties").outcome in [TaskOutcome.SUCCESS, TaskOutcome.UP_TO_DATE])
 
         // Verify git.properties was created
-        def gitPropertiesFile = new File(projectDir, "build/resources/main/git.properties")
+        def gitPropertiesFile = new File(projectDir, "build/generated/resources/git/git.properties")
         assertTrue("git.properties should be created", gitPropertiesFile.exists())
     }
 

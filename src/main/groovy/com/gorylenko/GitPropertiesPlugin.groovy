@@ -15,7 +15,7 @@ import org.gradle.api.tasks.SourceSetContainer
 class GitPropertiesPlugin implements Plugin<Project> {
 
     private static final String EXTENSION_NAME = "gitProperties"
-    private static final String DEFAULT_OUTPUT_DIR = "resources/main"
+    private static final String DEFAULT_OUTPUT_DIR = "generated/resources/git"
 
     @Override
     void apply(Project project) {
@@ -34,7 +34,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
             // if Java plugin is used, this method will be called to register gitPropertiesResourceDir to classpath
             // at the end of evaluation phase (to make sure extension values are set)
             project.afterEvaluate {
-                if (extension.gitPropertiesResourceDir.present) {
+                if (!extension.gitPropertiesDir.present) {
                     String gitPropertiesDir = getGitPropertiesDir(extension, project.layout).asFile.absolutePath
                     def sourceSets = project.extensions.getByType(SourceSetContainer)
                     sourceSets.named(SourceSet.MAIN_SOURCE_SET_NAME).configure {
