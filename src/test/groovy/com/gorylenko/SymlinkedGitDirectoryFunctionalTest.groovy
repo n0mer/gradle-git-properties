@@ -135,7 +135,7 @@ class SymlinkedGitDirectoryFunctionalTest {
         // 4. Verify branch is correctly read
         assertEquals(TaskOutcome.SUCCESS, result.task(":generateGitProperties").outcome)
 
-        def propsFile = new File(workingProjectDir, "build/resources/main/git.properties")
+        def propsFile = new File(workingProjectDir, "build/generated/resources/git/git.properties")
         assertTrue("git.properties should exist", propsFile.exists())
 
         def props = new Properties()
@@ -185,7 +185,7 @@ class SymlinkedGitDirectoryFunctionalTest {
     }
 
     private void assertGitPropertiesValid(File projectDir, String expectedCommitMessage) {
-        def gitPropertiesFile = new File(projectDir, "build/resources/main/git.properties")
+        def gitPropertiesFile = new File(projectDir, "build/generated/resources/git/git.properties")
         assertTrue("git.properties file should exist", gitPropertiesFile.exists())
 
         def properties = new Properties()

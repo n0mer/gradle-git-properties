@@ -76,7 +76,7 @@ class WorktreeFunctionalTest {
         assertTrue("Output should contain worktree gitdir path",
             runner.output.contains(worktreeGitDir))
 
-        def gitPropertiesFile = new File(worktreeDir, "build/resources/main/git.properties")
+        def gitPropertiesFile = new File(worktreeDir, "build/generated/resources/git/git.properties")
         assertTrue("git.properties file should exist", gitPropertiesFile.exists())
 
         // Verify properties are correct for the worktree

@@ -103,7 +103,7 @@ public class BackwardCompatibilityFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, result.task(":generateGitProperties").outcome)
 
         // Verify git.properties file was created with expected content
-        def gitPropertiesFile = new File(projectDir, "build/resources/main/git.properties")
+        def gitPropertiesFile = new File(projectDir, "build/generated/resources/git/git.properties")
         assertTrue("git.properties should exist", gitPropertiesFile.exists())
 
         def properties = new Properties()

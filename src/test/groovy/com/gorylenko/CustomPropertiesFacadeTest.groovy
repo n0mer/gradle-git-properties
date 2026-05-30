@@ -65,7 +65,7 @@ class CustomPropertiesFacadeTest {
         assertEquals(TaskOutcome.SUCCESS, runner.task(":generateGitProperties").outcome)
 
         def props = new Properties()
-        new File(projectDir, "build/resources/main/git.properties").withInputStream { props.load(it) }
+        new File(projectDir, "build/generated/resources/git/git.properties").withInputStream { props.load(it) }
 
         // Verify head() API works
         assertTrue("custom.commit.id should be 40 chars", props.getProperty("custom.commit.id").length() == 40)
@@ -108,7 +108,7 @@ class CustomPropertiesFacadeTest {
         assertEquals(TaskOutcome.SUCCESS, runner.task(":generateGitProperties").outcome)
 
         def props = new Properties()
-        new File(projectDir, "build/resources/main/git.properties").withInputStream { props.load(it) }
+        new File(projectDir, "build/generated/resources/git/git.properties").withInputStream { props.load(it) }
 
         assertEquals("master", props.getProperty("custom.branch"))
     }
@@ -147,7 +147,7 @@ class CustomPropertiesFacadeTest {
         assertEquals(TaskOutcome.SUCCESS, runner.task(":generateGitProperties").outcome)
 
         def props = new Properties()
-        new File(projectDir, "build/resources/main/git.properties").withInputStream { props.load(it) }
+        new File(projectDir, "build/generated/resources/git/git.properties").withInputStream { props.load(it) }
 
         assertTrue("describe should contain tag", props.getProperty("custom.describe").startsWith("v1.0.0"))
         assertTrue("describe long should contain -1-g", props.getProperty("custom.describe.long").contains("-1-g"))
@@ -187,7 +187,7 @@ class CustomPropertiesFacadeTest {
         assertEquals(TaskOutcome.SUCCESS, runner.task(":generateGitProperties").outcome)
 
         def props = new Properties()
-        new File(projectDir, "build/resources/main/git.properties").withInputStream { props.load(it) }
+        new File(projectDir, "build/generated/resources/git/git.properties").withInputStream { props.load(it) }
 
         assertEquals("2", props.getProperty("custom.tag.count"))
         assertEquals("v1.0.0,v1.0.1", props.getProperty("custom.tag.names"))
@@ -224,7 +224,7 @@ class CustomPropertiesFacadeTest {
         assertEquals(TaskOutcome.SUCCESS, runner.task(":generateGitProperties").outcome)
 
         def props = new Properties()
-        new File(projectDir, "build/resources/main/git.properties").withInputStream { props.load(it) }
+        new File(projectDir, "build/generated/resources/git/git.properties").withInputStream { props.load(it) }
 
         // Clean because build.gradle and settings.gradle are untracked but not in working tree
         // Actually, they ARE in working tree - so they make it dirty
@@ -266,7 +266,7 @@ class CustomPropertiesFacadeTest {
         assertEquals(TaskOutcome.SUCCESS, runner.task(":generateGitProperties").outcome)
 
         def props = new Properties()
-        new File(projectDir, "build/resources/main/git.properties").withInputStream { props.load(it) }
+        new File(projectDir, "build/generated/resources/git/git.properties").withInputStream { props.load(it) }
 
         assertEquals("3", props.getProperty("custom.total.commits"))
         assertEquals("2", props.getProperty("custom.recent.commits"))
@@ -307,7 +307,7 @@ class CustomPropertiesFacadeTest {
         assertEquals(TaskOutcome.SUCCESS, runner.task(":generateGitProperties").outcome)
 
         def props = new Properties()
-        new File(projectDir, "build/resources/main/git.properties").withInputStream { props.load(it) }
+        new File(projectDir, "build/generated/resources/git/git.properties").withInputStream { props.load(it) }
 
         assertEquals("master", props.getProperty("custom.jgit.branch"))
         // JGit Repository implementation class name
@@ -350,7 +350,7 @@ class CustomPropertiesFacadeTest {
         assertEquals(TaskOutcome.SUCCESS, runner.task(":generateGitProperties").outcome)
 
         def props = new Properties()
-        new File(projectDir, "build/resources/main/git.properties").withInputStream { props.load(it) }
+        new File(projectDir, "build/generated/resources/git/git.properties").withInputStream { props.load(it) }
 
         // Not clean because build.gradle and settings.gradle are untracked
         // JGit status().isClean() doesn't include untracked files by default

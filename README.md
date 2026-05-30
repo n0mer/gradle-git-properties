@@ -9,17 +9,17 @@ A Gradle plugin that generates a `git.properties` file containing Git repository
 
 - [Requirements](#requirements)
 - [Installation](#installation)
-- [Upgrading from 2.x](#upgrading-from-2x)
 - [Configuration](#configuration)
 - [Spring Boot Integration](#spring-boot-integration)
 - [Advanced Usage](#advanced-usage)
 - [Compatibility](#compatibility)
+- [Migration Guide](#migration-guide)
 - [License](#license)
 
 ## Requirements
 
 - Java 17 or higher
-- Gradle 5.1 or higher
+- Gradle 5.1 – 9.x
 - A Git repository (`.git` directory or git worktree)
 
 ## Installation
@@ -29,14 +29,14 @@ Add the plugin to your build file:
 **Groovy DSL** (`build.gradle`)
 ```groovy
 plugins {
-    id "com.gorylenko.gradle-git-properties" version "3.0.3"
+    id "com.gorylenko.gradle-git-properties" version "4.0.0"
 }
 ```
 
 **Kotlin DSL** (`build.gradle.kts`)
 ```kotlin
 plugins {
-    id("com.gorylenko.gradle-git-properties") version "3.0.3"
+    id("com.gorylenko.gradle-git-properties") version "4.0.0"
 }
 ```
 
@@ -45,18 +45,6 @@ The plugin generates `git.properties` at `build/resources/main/git.properties`. 
 ```bash
 ./gradlew generateGitProperties
 ```
-
-## Upgrading from 2.x
-
-Version 3.0 replaces the Grgit backend with JGit. Key changes:
-
-- **Java 17+ required** (was Java 8)
-- **Custom properties**: Closures now receive `GitFacade` instead of Grgit. See [GitFacade API](#gitfacade-api) for available methods.
-- **JGit escape hatch**: For advanced use cases, access `jgit` (Repository) or `jgitCommands` (Git) directly.
-
-Standard configuration options (`keys`, `dateFormat`, `branch`, etc.) are unchanged.
-
-See [MIGRATION.md](MIGRATION.md) for detailed upgrade instructions.
 
 ## Configuration
 
@@ -72,6 +60,8 @@ gitProperties {
     gitPropertiesResourceDir = file("${project.rootDir}/src/main/resources")
 }
 ```
+
+> **Note:** The older `gitPropertiesDir` property is deprecated. Replace it with `gitPropertiesResourceDir`.
 
 ### Date Format
 
@@ -158,10 +148,8 @@ The `GitFacade` class provides these methods for custom properties:
 | `status()` | `GitStatus` | Working tree status (clean property) |
 | `describe(options)` | `String` | Git describe output. Options: `tags: true`, `longDescr: true` |
 | `log(options)` | `List<GitCommit>` | Commit history. Options: `maxCommits: N` |
-| `branch.current()` | `String` | Current branch name |
-| `tag.list()` | `List<String>` | All tag names |
-| `tag.listOnCommit(commitId)` | `List<String>` | Tags pointing to a specific commit |
-| `tag.closest()` | `ClosestTag` | Nearest ancestor tag (name, distance) |
+| `branch.current()` | `GitBranchInfo` | Current branch info (use `.name` for branch name) |
+| `tag.list()` | `List<GitTag>` | All tags (use `.name` for tag name) |
 | `getConfig(section, name)` | `String` | Git config value |
 | `isEmpty()` | `boolean` | True if repository has no commits |
 
@@ -361,10 +349,35 @@ bootJar {
 
 | Plugin Version | Gradle | Java | Notes |
 |----------------|--------|------|-------|
+| 4.0.x          | 5.1 – 9.x | 17+ | Fixed overlapping outputs; `processResources` auto-wired |
 | 3.0.x          | 5.1 – 9.x | 17+ | JGit backend, git worktree support |
 | 2.5.x          | 5.1 – 9.x | 8+ | Grgit backend (deprecated) |
 
 The plugin supports Gradle [configuration cache](https://docs.gradle.org/current/userguide/configuration_cache.html) and [git worktrees](https://git-scm.com/docs/git-worktree).
+
+## Migration Guide
+
+### Upgrading from 3.x
+
+Version 4.0 changes the default output directory for `generateGitProperties` from `build/resources/main/` to `build/generated/resources/git/`. The file still ends up at the root of your JAR — `processResources` copies it there.
+
+- **Default config:** No action needed.
+- **`gitPropertiesDir` set explicitly:** Behaviour unchanged, but deprecated — migrate to `gitPropertiesResourceDir`.
+- **`gitPropertiesResourceDir` set explicitly:** Behaviour unchanged.
+
+See [MIGRATION.md](MIGRATION.md) for the full migration table.
+
+### Upgrading from 2.x
+
+Version 3.0 replaces the Grgit backend with JGit. Key changes:
+
+- **Java 17+ required** (was Java 8)
+- **Custom properties**: Closures now receive `GitFacade` instead of Grgit. See [GitFacade API](#gitfacade-api) for available methods.
+- **JGit escape hatch**: For advanced use cases, access `jgit` (Repository) or `jgitCommands` (Git) directly.
+
+Standard configuration options (`keys`, `dateFormat`, `branch`, etc.) are unchanged.
+
+See [MIGRATION.md](MIGRATION.md) for detailed upgrade instructions.
 
 ## License
 

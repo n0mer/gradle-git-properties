@@ -83,7 +83,7 @@ public class ConfigurationCacheFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, firstResult.task(":generateGitProperties").outcome)
 
         // Verify git.properties was created
-        def gitPropertiesFile = new File(projectDir, "build/resources/main/git.properties")
+        def gitPropertiesFile = new File(projectDir, "build/generated/resources/git/git.properties")
         assertTrue("git.properties should exist", gitPropertiesFile.exists())
         def properties = new Properties()
         gitPropertiesFile.withInputStream { properties.load(it) }
@@ -133,7 +133,7 @@ public class ConfigurationCacheFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, firstResult.task(":generateGitProperties").outcome)
 
         // Verify custom properties in output
-        def gitPropertiesFile = new File(projectDir, "build/resources/main/git.properties")
+        def gitPropertiesFile = new File(projectDir, "build/generated/resources/git/git.properties")
         assertTrue("git.properties should exist", gitPropertiesFile.exists())
         def properties = new Properties()
         gitPropertiesFile.withInputStream { properties.load(it) }

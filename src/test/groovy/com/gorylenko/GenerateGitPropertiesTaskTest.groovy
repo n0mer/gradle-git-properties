@@ -89,8 +89,8 @@ class GenerateGitPropertiesTaskTest {
         def outputFile = task.output.get().asFile
         assertTrue("Output should be in build directory",
             outputFile.absolutePath.contains("build"))
-        assertTrue("Output should be in resources/main",
-            outputFile.absolutePath.contains("resources${File.separator}main"))
+        assertTrue("Output should be in generated/resources/git",
+            outputFile.absolutePath.contains("generated${File.separator}resources${File.separator}git"))
         assertTrue("Output should be named git.properties",
             outputFile.name == "git.properties")
     }

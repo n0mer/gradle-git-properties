@@ -173,7 +173,7 @@ class SubmoduleFunctionalTest {
     }
 
     private void assertGitProperties(File projectDir, String expectedCommitMessage) {
-        def gitPropertiesFile = new File(projectDir, "build/resources/main/git.properties")
+        def gitPropertiesFile = new File(projectDir, "build/generated/resources/git/git.properties")
         assertTrue("git.properties file should exist", gitPropertiesFile.exists())
 
         def properties = new Properties()

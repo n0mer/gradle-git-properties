@@ -1,5 +1,22 @@
 # Changelog
 
+## 4.0.0
+
+### Breaking Changes
+
+- **Default output directory changed** - `generateGitProperties` now writes to `build/generated/resources/git/` instead of `build/resources/main/`. The file still ends up at the root of the JAR — `processResources` copies it there.
+
+### Changed
+
+- **`processResources` auto-wired** - When the `java` plugin is applied, `processResources` automatically depends on `generateGitProperties` and `build/generated/resources/git/` is added as a resource source directory.
+- **`gitPropertiesDir` deprecated** - Use `gitPropertiesResourceDir` instead. The deprecated property no longer triggers classpath wiring.
+
+### Fixed
+
+- **Overlapping outputs bug** ([#212](https://github.com/n0mer/gradle-git-properties/issues/212), [#233](https://github.com/n0mer/gradle-git-properties/issues/233)) - `git.properties` was silently deleted on alternating `clean build` runs when the Gradle build cache was enabled. Fixed by separating the generate output directory from the `processResources` input directory.
+
+See [README.md](README.md#migration-guide) for upgrade instructions.
+
 ## 3.0.0
 
 ### Breaking Changes
