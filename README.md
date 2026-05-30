@@ -186,10 +186,8 @@ The `GitFacade` class provides these methods for custom properties:
 | `status()` | `GitStatus` | Working tree status (clean property) |
 | `describe(options)` | `String` | Git describe output. Options: `tags: true`, `longDescr: true` |
 | `log(options)` | `List<GitCommit>` | Commit history. Options: `maxCommits: N` |
-| `branch.current()` | `String` | Current branch name |
-| `tag.list()` | `List<String>` | All tag names |
-| `tag.listOnCommit(commitId)` | `List<String>` | Tags pointing to a specific commit |
-| `tag.closest()` | `ClosestTag` | Nearest ancestor tag (name, distance) |
+| `branch.current()` | `GitBranchInfo` | Current branch info (use `.name` for branch name) |
+| `tag.list()` | `List<GitTag>` | All tags (use `.name` for tag name) |
 | `getConfig(section, name)` | `String` | Git config value |
 | `isEmpty()` | `boolean` | True if repository has no commits |
 
