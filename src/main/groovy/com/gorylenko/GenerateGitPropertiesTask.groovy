@@ -25,8 +25,6 @@ import javax.inject.Inject
 class GenerateGitPropertiesTask extends DefaultTask {
     public static final String TASK_NAME = "generateGitProperties"
 
-    private static final String DEFAULT_OUTPUT_DIR = "generated/resources/git"
-
     private final GitPropertiesPluginExtension gitProperties
 
     private final FileTree source
@@ -164,13 +162,7 @@ class GenerateGitPropertiesTask extends DefaultTask {
     }
 
     private Directory getGitPropertiesDir() {
-        if (gitProperties.gitPropertiesResourceDir.present) {
-            return gitProperties.gitPropertiesResourceDir.get()
-        } else if (gitProperties.gitPropertiesDir.present) {
-            return gitProperties.gitPropertiesDir.get()
-        } else {
-            return layout.buildDirectory.dir(DEFAULT_OUTPUT_DIR).get()
-        }
+        return GitPropertiesPlugin.getGitPropertiesDir(gitProperties, layout)
     }
 
     private RegularFileProperty getGitPropertiesFile() {

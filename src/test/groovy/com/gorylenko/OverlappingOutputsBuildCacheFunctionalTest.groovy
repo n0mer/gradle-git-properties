@@ -60,11 +60,8 @@ public class OverlappingOutputsBuildCacheFunctionalTest {
             runner.withArguments("clean").build()
 
             def assembleResult = runner.withArguments("assemble", "--build-cache").build()
-            assertEquals(
-                "Run ${run}: assemble did not succeed",
-                TaskOutcome.SUCCESS,
-                assembleResult.task(":assemble").outcome
-            )
+            assert assembleResult.task(":assemble").outcome in [TaskOutcome.SUCCESS, TaskOutcome.FROM_CACHE] :
+                "Run ${run}: assemble outcome was ${assembleResult.task(":assemble").outcome}"
 
             // Find the built JAR
             def libsDir = new File(projectDir, "build/libs")

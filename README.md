@@ -81,7 +81,7 @@ See [docs/fix-overlapping-outputs.md](docs/fix-overlapping-outputs.md) for detai
   If you reference the file *before* `processResources` runs (e.g. in a task that depends
   only on `generateGitProperties`), update the path to
   `build/generated/resources/git/git.properties`.
-- **`gitPropertiesDir` set explicitly:** Behaviour unchanged.
+- **`gitPropertiesDir` set explicitly:** Behaviour unchanged, but this property is deprecated — migrate to `gitPropertiesResourceDir`.
 - **`gitPropertiesResourceDir` set explicitly:** Behaviour unchanged.
 - **Non-Java / Android projects:** Unaffected — sourceSets wiring is gated on the
   `java` plugin being applied.
@@ -100,6 +100,8 @@ gitProperties {
     gitPropertiesResourceDir = file("${project.rootDir}/src/main/resources")
 }
 ```
+
+> **Note:** The older `gitPropertiesDir` property is deprecated. Replace it with `gitPropertiesResourceDir`.
 
 ### Date Format
 

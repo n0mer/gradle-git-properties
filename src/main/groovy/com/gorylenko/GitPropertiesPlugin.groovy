@@ -15,7 +15,7 @@ import org.gradle.api.tasks.SourceSetContainer
 class GitPropertiesPlugin implements Plugin<Project> {
 
     private static final String EXTENSION_NAME = "gitProperties"
-    private static final String DEFAULT_OUTPUT_DIR = "generated/resources/git"
+    static final String DEFAULT_OUTPUT_DIR = "generated/resources/git"
 
     @Override
     void apply(Project project) {
@@ -34,13 +34,18 @@ class GitPropertiesPlugin implements Plugin<Project> {
             // if Java plugin is used, this method will be called to register gitPropertiesResourceDir to classpath
             // at the end of evaluation phase (to make sure extension values are set)
             project.afterEvaluate {
+                if (extension.gitPropertiesDir.present) {
+                    project.logger.warn(
+                        "gradle-git-properties: 'gitPropertiesDir' is deprecated and will be removed in a future version. " +
+                        "Use 'gitPropertiesResourceDir' instead.")
+                }
                 if (!extension.gitPropertiesDir.present) {
                     String gitPropertiesDir = getGitPropertiesDir(extension, project.layout).asFile.absolutePath
                     def sourceSets = project.extensions.getByType(SourceSetContainer)
                     sourceSets.named(SourceSet.MAIN_SOURCE_SET_NAME).configure {
                         it.resources.srcDir(gitPropertiesDir)
                     }
-                    // Ensure processResources depends on generateGitProperties when using custom resource dir
+                    // Ensure processResources depends on generateGitProperties
                     project.tasks.named(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).configure {
                         dependsOn(task)
                     }
@@ -49,7 +54,7 @@ class GitPropertiesPlugin implements Plugin<Project> {
         }
     }
 
-    private static Directory getGitPropertiesDir(GitPropertiesPluginExtension extension, ProjectLayout layout) {
+    static Directory getGitPropertiesDir(GitPropertiesPluginExtension extension, ProjectLayout layout) {
         if (extension.gitPropertiesResourceDir.present) {
             return extension.gitPropertiesResourceDir.get()
         } else if (extension.gitPropertiesDir.present) {
@@ -62,6 +67,8 @@ class GitPropertiesPlugin implements Plugin<Project> {
 
 @ToString(includeNames=true)
 class GitPropertiesPluginExtension {
+    /** @deprecated Use {@link #gitPropertiesResourceDir} instead. */
+    @Deprecated
     final DirectoryProperty gitPropertiesDir
     final DirectoryProperty gitPropertiesResourceDir
     String gitPropertiesName = "git.properties"
