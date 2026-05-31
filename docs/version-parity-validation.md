@@ -206,7 +206,11 @@ Filter before comparing:
 - `73-jgit-commands-escape-hatch` - `it.jgitCommands` raw Git commands
 
 ### Additional Configuration (74-75)
-- `74-ext-property` - `extProperty` exposing git props to project.ext
+- `74-ext-property` - `extProperty` exposing git props to `project.ext` (Issue #304)
+  - `74a-ext-property-task-before-config` - task reference with `dependsOn generateGitProperties` appears **before** `gitProperties { extProperty = 'gitProps' }` block — the bug scenario from #304; must succeed and print branch name
+  - `74b-ext-property-config-before-task` - `gitProperties { extProperty = 'gitProps' }` block appears **before** the task reference — safe ordering control test; must succeed and print branch name
+  - `74c-ext-property-not-set` - `extProperty` not configured; `project.ext` must not have any extra key registered by the plugin
+  - `74d-ext-property-config-cache` - configuration cache compatibility: `def ext = project.ext` captured as a local variable before `doLast` (correct pattern); accessing `project.ext` directly inside `doLast` may fail with config cache enabled and is not supported
 - `75-force-write` - `force = true` always write file even if unchanged
 
 ### Edge Cases (76-77)
