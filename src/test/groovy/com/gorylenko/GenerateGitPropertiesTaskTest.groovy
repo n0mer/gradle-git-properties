@@ -188,6 +188,13 @@ class GenerateGitPropertiesTaskTest {
         ext.extProperty = "gitInfo"
 
         def task = project.tasks.generateGitProperties as GenerateGitPropertiesTask
+
+        // Simulate what GitPropertiesPlugin.afterEvaluate does:
+        // register the gitPropsMap in project.ext before execution.
+        // (In a real build, this is done by the plugin's afterEvaluate callback;
+        // ProjectBuilder-based unit tests don't trigger afterEvaluate automatically.)
+        project.ext[ext.extProperty] = task.gitPropsMap
+
         task.generate()
 
         // Verify that project.ext.gitInfo contains generated properties

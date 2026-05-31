@@ -58,10 +58,6 @@ class GenerateGitPropertiesTask extends DefaultTask {
             // when extProperty is configured or failOnNoGitDirectory=false always execute the task
             return !task.gitProperties.extProperty && task.gitProperties.failOnNoGitDirectory
         }
-
-        if (gitProperties.extProperty) {
-            project.ext[gitProperties.extProperty] = gitProps
-        }
     }
 
     @Inject
@@ -115,6 +111,16 @@ class GenerateGitPropertiesTask extends DefaultTask {
     @Internal
     GitPropertiesPluginExtension getGitProperties() {
         return gitProperties
+    }
+
+    /**
+     * Returns the mutable HashMap that will be populated by {@link #generate()}.
+     * This map is pre-registered in {@code project.ext} by {@link GitPropertiesPlugin}
+     * so that downstream tasks can reference the same object before it is filled.
+     */
+    @Internal
+    Map getGitPropsMap() {
+        return gitProps
     }
 
     @TaskAction

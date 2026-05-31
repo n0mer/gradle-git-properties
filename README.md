@@ -326,7 +326,31 @@ management.info.git.mode=full
 
 ### Accessing Properties at Build Time
 
-Use `extProperty` to expose generated properties to other build tasks. This enables use cases such as embedding the Git commit ID in JAR manifests.
+Use `extProperty` to expose generated properties to other build tasks. This enables use cases such as printing Git info during the build or embedding the Git commit ID in JAR manifests.
+
+**Printing Git properties from a task:**
+
+```groovy
+gitProperties {
+    extProperty = 'gitProps'
+}
+
+// Ensure properties are always regenerated
+generateGitProperties.outputs.upToDateWhen { false }
+
+task printGitProperties {
+    dependsOn generateGitProperties
+    // Capture project.ext before doLast for configuration cache compatibility
+    def ext = project.ext
+    doLast {
+        println "git.branch=" + ext.gitProps['git.branch']
+    }
+}
+```
+
+> **Why `def ext = project.ext` before `doLast`?** Gradle's configuration cache forbids referencing `project` inside `doLast` (execution phase). Capturing `project.ext` at configuration time—before `doLast`—keeps the task configuration-cache safe.
+
+**Embedding Git info in a JAR manifest (Spring Boot example):**
 
 ```groovy
 gitProperties {
