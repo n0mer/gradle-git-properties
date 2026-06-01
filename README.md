@@ -29,14 +29,14 @@ Add the plugin to your build file:
 **Groovy DSL** (`build.gradle`)
 ```groovy
 plugins {
-    id "com.gorylenko.gradle-git-properties" version "4.0.0"
+    id "com.gorylenko.gradle-git-properties" version "4.0.1"
 }
 ```
 
 **Kotlin DSL** (`build.gradle.kts`)
 ```kotlin
 plugins {
-    id("com.gorylenko.gradle-git-properties") version "4.0.0"
+    id("com.gorylenko.gradle-git-properties") version "4.0.1"
 }
 ```
 
