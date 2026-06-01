@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.0.1
+
+### Fixed
+
+- **`extProperty` now works regardless of build script ordering** ([#304](https://github.com/n0mer/gradle-git-properties/issues/304)) - Previously, if a task referenced `generateGitProperties` (e.g. via `dependsOn`) before the `gitProperties { extProperty = ... }` block in the build script, the task was realized before `extProperty` was set and `project.ext` was never populated. Fixed by moving registration to `afterEvaluate`.
+
 ## 4.0.0
 
 ### Breaking Changes

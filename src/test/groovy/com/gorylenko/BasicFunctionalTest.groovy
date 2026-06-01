@@ -14,6 +14,7 @@ import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertNull
 import static org.junit.Assert.assertThat
+import static org.junit.Assert.assertTrue
 
 public class BasicFunctionalTest {
     @Rule
@@ -369,5 +370,107 @@ public class BasicFunctionalTest {
         } finally {
             zipFile.close()
         }
+    }
+
+    /**
+     * Issue #304: extProperty broken when task reference (dependsOn generateGitProperties)
+     * appears BEFORE the gitProperties { extProperty = 'gitProps' } block.
+     *
+     * This ordering forces the task to be realized (constructor runs) during the
+     * dependsOn resolution, BEFORE extProperty is set on the extension.
+     * As a result, the extProperty check in the constructor fires with extProperty == null,
+     * and project.ext['gitProps'] is never pre-registered — causing the error:
+     * "Cannot get property 'gitProps' on extra properties extension as it does not exist"
+     *
+     * RED test — should FAIL demonstrating the bug.
+     */
+    @Test
+    public void testExtPropertyWorksWhenTaskReferenceBeforeGitPropertiesBlock() {
+        def projectDir = temporaryFolder.newFolder()
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+
+        new File(projectDir, "settings.gradle") << ""
+        // Reproduces user's exact failing order: task definition (with dependsOn) BEFORE gitProperties block
+        new File(projectDir, "build.gradle") << """
+            plugins {
+                id('com.gorylenko.gradle-git-properties')
+            }
+
+            task printGitProperties {
+                dependsOn generateGitProperties
+                def ext = project.ext
+                doLast {
+                    println "Branch: " + ext.gitProps["git.branch"]
+                }
+            }
+
+            gitProperties {
+                extProperty = 'gitProps'
+            }
+
+            generateGitProperties.finalizedBy printGitProperties
+            generateGitProperties.outputs.upToDateWhen { false }
+        """.stripIndent()
+
+        def runner = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments("generateGitProperties")
+                .withProjectDir(projectDir)
+
+        def result = runner.build()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":generateGitProperties").outcome)
+        assertThat(result.output, containsString("Branch:"))
+    }
+
+    /**
+     * Issue #304: Control test — extProperty works correctly when gitProperties block
+     * appears BEFORE the task reference (the "safe" order).
+     *
+     * GREEN test — should PASS.
+     */
+    @Test
+    public void testExtPropertyWorksWhenGitPropertiesBlockBeforeTaskReference() {
+        def projectDir = temporaryFolder.newFolder()
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+
+        new File(projectDir, "settings.gradle") << ""
+        // Safe order: gitProperties block FIRST, then task reference
+        new File(projectDir, "build.gradle") << """
+            plugins {
+                id('com.gorylenko.gradle-git-properties')
+            }
+
+            gitProperties {
+                extProperty = 'gitProps'
+            }
+
+            task printGitProperties {
+                dependsOn generateGitProperties
+                def ext = project.ext
+                doLast {
+                    println "Branch: " + ext.gitProps["git.branch"]
+                }
+            }
+
+            generateGitProperties.finalizedBy printGitProperties
+            generateGitProperties.outputs.upToDateWhen { false }
+        """.stripIndent()
+
+        def runner = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments("generateGitProperties")
+                .withProjectDir(projectDir)
+
+        def result = runner.build()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":generateGitProperties").outcome)
+        assertThat(result.output, containsString("Branch:"))
     }
 }

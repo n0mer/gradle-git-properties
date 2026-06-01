@@ -24,6 +24,21 @@ class GitPropertiesPlugin implements Plugin<Project> {
             group = BasePlugin.BUILD_GROUP
         }
 
+        // Register the extProperty in project.ext after the configuration phase is complete.
+        // This ensures that extProperty is read from the extension only after all user
+        // configuration blocks (including gitProperties { extProperty = '…' }) have run,
+        // regardless of the order in which build script blocks appear.
+        //
+        // The gitPropsMap HashMap is pre-registered here so that other tasks configured at
+        // configuration time (e.g. bootJar attributes) get a reference to the same object;
+        // GenerateGitPropertiesTask.generate() then fills it in-place via putAll().
+        project.afterEvaluate {
+            if (extension.extProperty) {
+                def gitPropsMap = task.get().gitPropsMap
+                project.ext[extension.extProperty] = gitPropsMap
+            }
+        }
+
         // if Java plugin is applied, execute this task automatically when "classes" task is executed
         // see https://guides.gradle.org/implementing-gradle-plugins/#reacting_to_plugins
         project.plugins.withType(JavaPlugin) {
