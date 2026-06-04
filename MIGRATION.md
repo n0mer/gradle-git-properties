@@ -19,6 +19,7 @@
 | Referencing `build/resources/main/git.properties` before `processResources` | Update path to `build/generated/resources/git/git.properties` |
 | `gitPropertiesResourceDir` set explicitly | Unchanged |
 | `gitPropertiesDir` set explicitly | Unchanged, but deprecated — migrate to `gitPropertiesResourceDir` |
+| `gitPropertiesDir` set to path inside `build/resources/main/` | Use `gitPropertiesName` with relative path instead |
 | Non-Java / Android projects | Unaffected — sourceSets wiring requires the `java` plugin |
 
 ### `gitPropertiesDir` Deprecated
@@ -36,6 +37,34 @@ gitProperties {
     gitPropertiesResourceDir = file('custom-git-props')
 }
 ```
+
+### Custom JAR Subpath (issue #306)
+
+Some users set `gitPropertiesDir` to a path inside `build/resources/main/` in order to control where the file appeared inside the JAR. For example:
+
+```groovy
+// Before (v3) — caused silent build cache corruption
+gitProperties {
+    gitPropertiesDir = file("${buildDir}/resources/main/discord4j/common")
+}
+// Result in JAR: discord4j/common/git.properties
+```
+
+The v4.0 migration guide said to rename `gitPropertiesDir` to `gitPropertiesResourceDir`. However, pointing `gitPropertiesResourceDir` at a path inside `build/resources/main/` recreates the overlapping-output problem that v4.0 was designed to fix: `generateGitProperties` and `processResources` would both own the same output directory, causing stale-output corruption on cached builds.
+
+As of v4.0.2, use `gitPropertiesName` with a relative path instead:
+
+```groovy
+// After (v4.0.2) — correct
+gitProperties {
+    gitPropertiesName = "discord4j/common/git.properties"
+}
+// Result in JAR: discord4j/common/git.properties
+```
+
+`gitPropertiesName` separates the JAR subpath concern from the write-location concern. The file is still written to `build/generated/resources/git/` (under the relative path), and `processResources` copies it into the JAR at the correct subpath.
+
+Invalid values (`null`, paths starting with `/`, paths containing `..` segments) are rejected at configuration time with the error: `gitPropertiesName must be a relative path that stays under gitPropertiesResourceDir`.
 
 ## 2.x to 3.0
 

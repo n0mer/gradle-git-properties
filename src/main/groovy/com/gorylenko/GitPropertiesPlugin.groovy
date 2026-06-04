@@ -106,6 +106,18 @@ class GitPropertiesPluginExtension {
         this.commitIdAbbrevLength = length
     }
 
+    void setGitPropertiesName(String name) {
+        if (name == null) {
+            throw new IllegalArgumentException("gitPropertiesName must not be null")
+        }
+        def segments = name.split("[/\\\\]") as List
+        if (name.startsWith("/") || segments.contains("..")) {
+            throw new IllegalArgumentException(
+                "gitPropertiesName must be a relative path that stays under gitPropertiesResourceDir, got: '${name}'")
+        }
+        this.gitPropertiesName = name
+    }
+
     GitPropertiesPluginExtension(Project project) {
         gitPropertiesDir = project.objects.directoryProperty()
         gitPropertiesResourceDir = project.objects.directoryProperty()

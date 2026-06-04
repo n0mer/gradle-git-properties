@@ -410,6 +410,52 @@ class GitPropertiesPluginExtensionTest {
             str.contains("gitPropertiesName"))
     }
 
+    // === setGitPropertiesName() Validation Tests ===
+
+    @Test
+    void testSetGitPropertiesNamePlainFilename() {
+        def project = createProjectWithGit()
+        def ext = getExtension(project)
+        ext.setGitPropertiesName("my.properties")
+        assertEquals("my.properties", ext.gitPropertiesName)
+    }
+
+    @Test
+    void testSetGitPropertiesNameSubpath() {
+        def project = createProjectWithGit()
+        def ext = getExtension(project)
+        ext.setGitPropertiesName("discord4j/common/git.properties")
+        assertEquals("discord4j/common/git.properties", ext.gitPropertiesName)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testSetGitPropertiesNameNullRejected() {
+        def project = createProjectWithGit()
+        def ext = getExtension(project)
+        ext.setGitPropertiesName(null)
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testSetGitPropertiesNameLeadingSlashRejected() {
+        def project = createProjectWithGit()
+        def ext = getExtension(project)
+        ext.setGitPropertiesName("/git.properties")
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testSetGitPropertiesNameDotDotPrefixRejected() {
+        def project = createProjectWithGit()
+        def ext = getExtension(project)
+        ext.setGitPropertiesName("../git.properties")
+    }
+
+    @Test(expected = IllegalArgumentException)
+    void testSetGitPropertiesNameDotDotInMiddleRejected() {
+        def project = createProjectWithGit()
+        def ext = getExtension(project)
+        ext.setGitPropertiesName("some/../other/git.properties")
+    }
+
     // === Issue #234: commitIdAbbrevLength Tests ===
 
     @Test

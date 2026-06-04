@@ -29,14 +29,14 @@ Add the plugin to your build file:
 **Groovy DSL** (`build.gradle`)
 ```groovy
 plugins {
-    id "com.gorylenko.gradle-git-properties" version "4.0.1"
+    id "com.gorylenko.gradle-git-properties" version "4.0.2"
 }
 ```
 
 **Kotlin DSL** (`build.gradle.kts`)
 ```kotlin
 plugins {
-    id("com.gorylenko.gradle-git-properties") version "4.0.1"
+    id("com.gorylenko.gradle-git-properties") version "4.0.2"
 }
 ```
 
@@ -60,6 +60,16 @@ gitProperties {
     gitPropertiesResourceDir = file("${project.rootDir}/src/main/resources")
 }
 ```
+
+`gitPropertiesName` accepts either a plain filename or a **relative path**, which controls the subpath inside the JAR:
+
+```groovy
+gitProperties {
+    gitPropertiesName = "discord4j/common/git.properties"  // subpath in JAR
+}
+```
+
+> **Note:** `gitPropertiesName` must be a relative path. Leading `/` and `..` segments are rejected with a build error.
 
 > **Note:** The older `gitPropertiesDir` property is deprecated. Replace it with `gitPropertiesResourceDir`.
 
@@ -373,6 +383,7 @@ bootJar {
 
 | Plugin Version | Gradle | Java | Notes |
 |----------------|--------|------|-------|
+| 4.0.2          | 5.1 – 9.x | 17+ | `gitPropertiesName` supports relative paths for custom JAR subpath |
 | 4.0.x          | 5.1 – 9.x | 17+ | Fixed overlapping outputs; `processResources` auto-wired |
 | 3.0.x          | 5.1 – 9.x | 17+ | JGit backend, git worktree support |
 | 2.5.x          | 5.1 – 9.x | 8+ | Grgit backend (deprecated) |
