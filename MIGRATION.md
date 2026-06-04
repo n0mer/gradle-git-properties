@@ -52,10 +52,10 @@ gitProperties {
 
 The v4.0 migration guide said to rename `gitPropertiesDir` to `gitPropertiesResourceDir`. However, pointing `gitPropertiesResourceDir` at a path inside `build/resources/main/` recreates the overlapping-output problem that v4.0 was designed to fix: `generateGitProperties` and `processResources` would both own the same output directory, causing stale-output corruption on cached builds.
 
-As of v4.0.2, use `gitPropertiesName` with a relative path instead:
+As of v4.0.1, use `gitPropertiesName` with a relative path instead:
 
 ```groovy
-// After (v4.0.2) — correct
+// After (v4.0.1) — correct
 gitProperties {
     gitPropertiesName = "discord4j/common/git.properties"
 }
