@@ -29,14 +29,14 @@ Add the plugin to your build file:
 **Groovy DSL** (`build.gradle`)
 ```groovy
 plugins {
-    id "com.gorylenko.gradle-git-properties" version "4.0.2"
+    id "com.gorylenko.gradle-git-properties" version "4.0.1"
 }
 ```
 
 **Kotlin DSL** (`build.gradle.kts`)
 ```kotlin
 plugins {
-    id("com.gorylenko.gradle-git-properties") version "4.0.2"
+    id("com.gorylenko.gradle-git-properties") version "4.0.1"
 }
 ```
 
@@ -383,8 +383,7 @@ bootJar {
 
 | Plugin Version | Gradle | Java | Notes |
 |----------------|--------|------|-------|
-| 4.0.2          | 5.1 – 9.x | 17+ | `gitPropertiesName` supports relative paths for custom JAR subpath |
-| 4.0.x          | 5.1 – 9.x | 17+ | Fixed overlapping outputs; `processResources` auto-wired |
+| 4.0.x          | 5.1 – 9.x | 17+ | Fixed overlapping outputs; `processResources` auto-wired; `gitPropertiesName` supports relative paths |
 | 3.0.x          | 5.1 – 9.x | 17+ | JGit backend, git worktree support |
 | 2.5.x          | 5.1 – 9.x | 8+ | Grgit backend (deprecated) |
 
