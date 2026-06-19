@@ -63,16 +63,24 @@ gitProperties {
 
 > **Note:** The older `gitPropertiesDir` property is deprecated. Replace it with `gitPropertiesResourceDir`.
 
-### Date Format
+### Commit Timestamp Format
 
-Configure the format for `git.commit.time` using [SimpleDateFormat](https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html) patterns and [TimeZone](https://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html) IDs:
+Configure the format and timezone for `git.commit.time` using [SimpleDateFormat](https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html) patterns and [TimeZone](https://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html) IDs.
 
-```groovy
-gitProperties {
-    dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-    dateFormatTimeZone = "UTC"
-}
-```
+By default (no configuration), `git.commit.time` uses pattern `yyyy-MM-dd'T'HH:mm:ssZ` with the build machine's JVM default timezone.
+
+> **Note:** `Z` pattern (RFC 822 numeric offset) produces `+0000` for UTC, not a literal `Z`. Use `XXX` (ISO 8601) to get `Z` for UTC and offsets like `+05:30` for other timezones.
+
+> **Warning:** An unrecognized `dateFormatTimeZone` ID silently falls back to UTC — e.g. `EST` silently produces UTC output; use `America/New_York` instead. Verify IDs against [Java's supported timezone IDs](https://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html#getAvailableIDs--).
+
+| Goal | `dateFormat` | `dateFormatTimeZone` | Example output |
+|------|-------------|----------------------|----------------|
+| Default (no config) | *(not set)* | *(not set)* | `2024-03-20T08:13:53+0300` |
+| Epoch seconds *(empty string bypasses formatting)* | `""` | *(not set)* | `1710904433` |
+| RFC 822, forced UTC | `yyyy-MM-dd'T'HH:mm:ssZ` | `UTC` | `2024-03-20T05:13:53+0000` |
+| ISO 8601 with `Z` suffix | `yyyy-MM-dd'T'HH:mm:ssXXX` | `UTC` | `2024-03-20T05:13:53Z` |
+| ISO 8601 with specific timezone | `yyyy-MM-dd'T'HH:mm:ssXXX` | `America/New_York` | `2024-03-20T01:13:53-04:00` |
+| ISO 8601 with build machine timezone | `yyyy-MM-dd'T'HH:mm:ssXXX` | *(not set)* | `2024-03-20T08:13:53+03:00` |
 
 ### Commit ID Abbreviation Length
 
