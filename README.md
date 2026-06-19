@@ -63,27 +63,23 @@ gitProperties {
 
 > **Note:** The older `gitPropertiesDir` property is deprecated. Replace it with `gitPropertiesResourceDir`.
 
-### Date Format
+### Commit Timestamp Format
 
-Configure the format for `git.commit.time` using [SimpleDateFormat](https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html) patterns and [TimeZone](https://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html) IDs.
+Configure the format and timezone for `git.commit.time` using [SimpleDateFormat](https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html) patterns and [TimeZone](https://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html) IDs.
 
-> **Note:** `Z` in `SimpleDateFormat` is the RFC 822 timezone pattern — it produces `+0000` for UTC, not a literal `Z`.
-> Use `XXX` (ISO 8601) to get `Z` for UTC and `+HH:MM` for other timezones.
+By default (no configuration), `git.commit.time` is formatted as `yyyy-MM-dd'T'HH:mm:ssZ` using the local system timezone (RFC 822 numeric offset, e.g. `+0300`).
+
+> **Note:** `Z` pattern (RFC 822 numeric offset) produces `+0000` for UTC, not a literal `Z`. Use `XXX` (ISO 8601) to get `Z` for UTC and offsets like `+05:30` for other timezones.
+
+> **Warning:** An unrecognized `dateFormatTimeZone` ID silently falls back to UTC. Verify IDs against [Java's supported timezone IDs](https://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html#getAvailableIDs--).
 
 | Goal | `dateFormat` | `dateFormatTimeZone` | Example output |
 |------|-------------|----------------------|----------------|
-| Default (RFC 822, local timezone) | `yyyy-MM-dd'T'HH:mm:ssZ` *(default)* | *(not set, local timezone)* | `2024-03-20T08:13:53+0300` |
-| Epoch seconds | `""` (empty string) | *(not set)* | `1710904433` |
-| RFC 822 offset | `yyyy-MM-dd'T'HH:mm:ssZ` | `UTC` | `2024-03-20T05:13:53+0000` |
+| Default (no config) | `yyyy-MM-dd'T'HH:mm:ssZ` | *(local timezone)* | `2024-03-20T08:13:53+0300` |
+| RFC 822 numeric offset, UTC | `yyyy-MM-dd'T'HH:mm:ssZ` | `UTC` | `2024-03-20T05:13:53+0000` |
 | ISO 8601 with `Z` suffix | `yyyy-MM-dd'T'HH:mm:ssXXX` | `UTC` | `2024-03-20T05:13:53Z` |
-| ISO 8601 with local offset | `yyyy-MM-dd'T'HH:mm:ssXXX` | *(not set)* | `2024-03-20T08:13:53+03:00` |
-
-```groovy
-gitProperties {
-    dateFormat = "yyyy-MM-dd'T'HH:mm:ssXXX"
-    dateFormatTimeZone = "UTC"
-}
-```
+| ISO 8601 with local offset | `yyyy-MM-dd'T'HH:mm:ssXXX` | *(local timezone)* | `2024-03-20T08:13:53+03:00` |
+| Epoch seconds | `""` (empty string — bypasses SimpleDateFormat) | *(not set)* | `1710904433` |
 
 ### Commit ID Abbreviation Length
 
