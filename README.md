@@ -72,7 +72,7 @@ Configure the format for `git.commit.time` using [SimpleDateFormat](https://docs
 
 | Goal | `dateFormat` | `dateFormatTimeZone` | Example output |
 |------|-------------|----------------------|----------------|
-| Epoch seconds (default) | *(not set)* | *(not set)* | `1710904433` |
+| Epoch seconds | `""` (empty string) | *(not set)* | `1710904433` |
 | RFC 822 offset | `yyyy-MM-dd'T'HH:mm:ssZ` | `UTC` | `2024-03-20T05:13:53+0000` |
 | ISO 8601 with `Z` suffix | `yyyy-MM-dd'T'HH:mm:ssXXX` | `UTC` | `2024-03-20T05:13:53Z` |
 | ISO 8601 with local offset | `yyyy-MM-dd'T'HH:mm:ssXXX` | *(not set)* | `2024-03-20T08:13:53+03:00` |
