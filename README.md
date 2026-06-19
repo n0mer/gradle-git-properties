@@ -241,7 +241,7 @@ import org.gradle.kotlin.dsl.KotlinClosure1
 import com.gorylenko.jgit.GitFacade
 
 gitProperties {
-    dateFormat = "yyyy-MM-dd'T'HH:mm:ssXXX"
+    dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
     dateFormatTimeZone = "UTC"
     keys = listOf("git.branch", "git.commit.id", "git.commit.time")
     customProperty("greeting", "Hello")
