@@ -65,11 +65,21 @@ gitProperties {
 
 ### Date Format
 
-Configure the format for `git.commit.time` using [SimpleDateFormat](https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html) patterns and [TimeZone](https://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html) IDs:
+Configure the format for `git.commit.time` using [SimpleDateFormat](https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html) patterns and [TimeZone](https://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html) IDs.
+
+> **Note:** `Z` in `SimpleDateFormat` is the RFC 822 timezone pattern — it produces `+0000` for UTC, not a literal `Z`.
+> Use `XXX` (ISO 8601) to get `Z` for UTC and `+HH:MM` for other timezones.
+
+| Goal | `dateFormat` | `dateFormatTimeZone` | Example output |
+|------|-------------|----------------------|----------------|
+| Epoch seconds (default) | *(not set)* | *(not set)* | `1710904433` |
+| RFC 822 offset | `yyyy-MM-dd'T'HH:mm:ssZ` | `UTC` | `2024-03-20T05:13:53+0000` |
+| ISO 8601 with `Z` suffix | `yyyy-MM-dd'T'HH:mm:ssXXX` | `UTC` | `2024-03-20T05:13:53Z` |
+| ISO 8601 with local offset | `yyyy-MM-dd'T'HH:mm:ssXXX` | *(not set)* | `2024-03-20T08:13:53+03:00` |
 
 ```groovy
 gitProperties {
-    dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+    dateFormat = "yyyy-MM-dd'T'HH:mm:ssXXX"
     dateFormatTimeZone = "UTC"
 }
 ```
@@ -233,7 +243,7 @@ import org.gradle.kotlin.dsl.KotlinClosure1
 import com.gorylenko.jgit.GitFacade
 
 gitProperties {
-    dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+    dateFormat = "yyyy-MM-dd'T'HH:mm:ssXXX"
     dateFormatTimeZone = "UTC"
     keys = listOf("git.branch", "git.commit.id", "git.commit.time")
     customProperty("greeting", "Hello")
