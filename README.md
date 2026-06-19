@@ -67,7 +67,7 @@ gitProperties {
 
 Configure the format and timezone for `git.commit.time` using [SimpleDateFormat](https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html) patterns and [TimeZone](https://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html) IDs.
 
-By default (no configuration), `git.commit.time` is formatted as `yyyy-MM-dd'T'HH:mm:ssZ` using the local system timezone (RFC 822 numeric offset, e.g. `+0300`).
+By default (no configuration), `git.commit.time` uses pattern `yyyy-MM-dd'T'HH:mm:ssZ` with the build machine's JVM default timezone.
 
 > **Note:** `Z` pattern (RFC 822 numeric offset) produces `+0000` for UTC, not a literal `Z`. Use `XXX` (ISO 8601) to get `Z` for UTC and offsets like `+05:30` for other timezones.
 
@@ -75,11 +75,12 @@ By default (no configuration), `git.commit.time` is formatted as `yyyy-MM-dd'T'H
 
 | Goal | `dateFormat` | `dateFormatTimeZone` | Example output |
 |------|-------------|----------------------|----------------|
-| Default (no config) | `yyyy-MM-dd'T'HH:mm:ssZ` | *(local timezone)* | `2024-03-20T08:13:53+0300` |
-| RFC 822 numeric offset, UTC | `yyyy-MM-dd'T'HH:mm:ssZ` | `UTC` | `2024-03-20T05:13:53+0000` |
+| Default (no config) | *(not set)* | *(not set)* | `2024-03-20T08:13:53+0300` |
+| Epoch seconds | `""` | *(not set)* | `1710904433` |
+| RFC 822, forced UTC | `yyyy-MM-dd'T'HH:mm:ssZ` | `UTC` | `2024-03-20T05:13:53+0000` |
 | ISO 8601 with `Z` suffix | `yyyy-MM-dd'T'HH:mm:ssXXX` | `UTC` | `2024-03-20T05:13:53Z` |
-| ISO 8601 with local offset | `yyyy-MM-dd'T'HH:mm:ssXXX` | *(local timezone)* | `2024-03-20T08:13:53+03:00` |
-| Epoch seconds | `""` (empty string — bypasses SimpleDateFormat) | *(not set)* | `1710904433` |
+| ISO 8601 with specific timezone | `yyyy-MM-dd'T'HH:mm:ssXXX` | `America/New_York` | `2024-03-20T01:13:53-04:00` |
+| ISO 8601 with build machine timezone | `yyyy-MM-dd'T'HH:mm:ssXXX` | *(not set)* | `2024-03-20T08:13:53+03:00` |
 
 ### Commit ID Abbreviation Length
 
