@@ -118,7 +118,7 @@ Filter before comparing:
 
 100% parity on all comparable scenarios.
 
-## Test Scenarios (77 total)
+## Test Scenarios (82 total)
 
 ### Core Properties (01-14)
 - `01-basic-properties` - Standard git.properties with all default keys
@@ -216,3 +216,10 @@ Filter before comparing:
 ### Edge Cases (76-77)
 - `76-submodule` - Git submodule (.git file pointing to parent repo)
 - `77-no-git-user-config` - No user.name/email in git config
+
+### gitPropertiesName Relative Path (78-82)
+- `78-gitPropertiesName-subpath` - `gitPropertiesName = "discord4j/common/git.properties"` with java plugin; JAR must contain `discord4j/common/git.properties`, must NOT contain `git.properties` at root
+- `79-gitPropertiesName-plain-filename` - `gitPropertiesName = "git-info.properties"`; JAR must contain `git-info.properties` at root, no subdir
+- `80-gitPropertiesName-default-regression` - no `gitPropertiesName` set; JAR contains `git.properties` at root (unchanged behavior)
+- `81-gitPropertiesName-leading-slash` - `gitPropertiesName = "/git.properties"`; build must fail with "must be a relative path that stays under gitPropertiesResourceDir"
+- `82-gitPropertiesName-dotdot-segment` - `gitPropertiesName = "../git.properties"`; build must fail with same message

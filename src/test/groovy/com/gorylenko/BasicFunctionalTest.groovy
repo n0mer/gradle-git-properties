@@ -427,6 +427,229 @@ public class BasicFunctionalTest {
     }
 
     /**
+     * Behavior 1: gitPropertiesName with subpath places file under that subpath in the JAR.
+     * e.g. "discord4j/common/git.properties" → JAR entry "discord4j/common/git.properties"
+     * and file on disk at build/generated/resources/git/discord4j/common/git.properties
+     */
+    @Test
+    public void testGitPropertiesNameSubpathInJar() {
+        def projectDir = temporaryFolder.newFolder()
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+
+        new File(projectDir, "settings.gradle") << ""
+        new File(projectDir, "build.gradle") << """
+            plugins {
+                id('java')
+                id('com.gorylenko.gradle-git-properties')
+            }
+            gitProperties {
+                gitPropertiesName = 'discord4j/common/git.properties'
+            }
+        """.stripIndent()
+
+        def runner = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments("assemble")
+                .withProjectDir(projectDir)
+
+        def result = runner.build()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":generateGitProperties").outcome)
+
+        // File exists on disk at expected subpath
+        def diskFile = new File(projectDir, "build/generated/resources/git/discord4j/common/git.properties")
+        assertTrue("Expected file on disk at discord4j/common/git.properties", diskFile.exists())
+
+        // JAR contains the subpath entry
+        def libsDir = new File(projectDir, "build/libs")
+        def jarFiles = libsDir.listFiles({ File f -> f.name.endsWith(".jar") } as FileFilter)
+        assertNotNull("build/libs directory not found or empty", jarFiles)
+        assert jarFiles.length > 0 : "no JAR found in build/libs"
+
+        def zipFile = new ZipFile(jarFiles[0])
+        try {
+            def subpathEntry = zipFile.getEntry("discord4j/common/git.properties")
+            assertNotNull(
+                "JAR should contain entry 'discord4j/common/git.properties' " +
+                "(entries: ${zipFile.entries().collect { it.name }.join(', ')})",
+                subpathEntry
+            )
+            def rootEntry = zipFile.getEntry("git.properties")
+            assertNull(
+                "JAR should NOT contain root entry 'git.properties' when gitPropertiesName is a subpath",
+                rootEntry
+            )
+        } finally {
+            zipFile.close()
+        }
+    }
+
+    /**
+     * Behavior 2: gitPropertiesName = "git-info.properties" (plain filename, no subdir)
+     * → file on disk at build/generated/resources/git/git-info.properties
+     * → JAR contains root entry "git-info.properties", no subdirectory
+     */
+    @Test
+    public void testGitPropertiesNamePlainFilenameInJar() {
+        def projectDir = temporaryFolder.newFolder()
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+
+        new File(projectDir, "settings.gradle") << ""
+        new File(projectDir, "build.gradle") << """
+            plugins {
+                id('java')
+                id('com.gorylenko.gradle-git-properties')
+            }
+            gitProperties {
+                gitPropertiesName = 'git-info.properties'
+            }
+        """.stripIndent()
+
+        def runner = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments("assemble")
+                .withProjectDir(projectDir)
+
+        def result = runner.build()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":generateGitProperties").outcome)
+
+        // File exists on disk at root of resource dir (no subdir)
+        def diskFile = new File(projectDir, "build/generated/resources/git/git-info.properties")
+        assertTrue("Expected file on disk at build/generated/resources/git/git-info.properties", diskFile.exists())
+
+        def libsDir = new File(projectDir, "build/libs")
+        def jarFiles = libsDir.listFiles({ File f -> f.name.endsWith(".jar") } as FileFilter)
+        assertNotNull("build/libs directory not found or empty", jarFiles)
+        assert jarFiles.length > 0 : "no JAR found in build/libs"
+
+        def zipFile = new ZipFile(jarFiles[0])
+        try {
+            def entry = zipFile.getEntry("git-info.properties")
+            assertNotNull(
+                "JAR should contain root entry 'git-info.properties' " +
+                "(entries: ${zipFile.entries().collect { it.name }.join(', ')})",
+                entry
+            )
+        } finally {
+            zipFile.close()
+        }
+    }
+
+    /**
+     * Behavior 3: default (no gitPropertiesName set) — regression guard.
+     * JAR contains root entry "git.properties".
+     */
+    @Test
+    public void testDefaultGitPropertiesNameInJar() {
+        def projectDir = temporaryFolder.newFolder()
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+
+        new File(projectDir, "settings.gradle") << ""
+        new File(projectDir, "build.gradle") << """
+            plugins {
+                id('java')
+                id('com.gorylenko.gradle-git-properties')
+            }
+        """.stripIndent()
+
+        def runner = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments("assemble")
+                .withProjectDir(projectDir)
+
+        def result = runner.build()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":generateGitProperties").outcome)
+
+        def libsDir = new File(projectDir, "build/libs")
+        def jarFiles = libsDir.listFiles({ File f -> f.name.endsWith(".jar") } as FileFilter)
+        assertNotNull("build/libs directory not found or empty", jarFiles)
+        assert jarFiles.length > 0 : "no JAR found in build/libs"
+
+        def zipFile = new ZipFile(jarFiles[0])
+        try {
+            def entry = zipFile.getEntry("git.properties")
+            assertNotNull(
+                "JAR should contain root entry 'git.properties' by default " +
+                "(entries: ${zipFile.entries().collect { it.name }.join(', ')})",
+                entry
+            )
+        } finally {
+            zipFile.close()
+        }
+    }
+
+    /**
+     * Behavior 4: gitPropertiesName with leading slash → build fails with validation error.
+     */
+    @Test
+    public void testGitPropertiesNameLeadingSlashFailsFast() {
+        def projectDir = temporaryFolder.newFolder()
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+
+        new File(projectDir, "settings.gradle") << ""
+        new File(projectDir, "build.gradle") << """
+            plugins {
+                id('com.gorylenko.gradle-git-properties')
+            }
+            gitProperties {
+                gitPropertiesName = '/git.properties'
+            }
+        """.stripIndent()
+
+        def runner = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments("generateGitProperties")
+                .withProjectDir(projectDir)
+
+        def result = runner.buildAndFail()
+        assertThat(result.output, containsString("must be a relative path that stays under gitPropertiesResourceDir"))
+    }
+
+    /**
+     * Behavior 5: gitPropertiesName with ".." segment → build fails with validation error.
+     */
+    @Test
+    public void testGitPropertiesNameDotDotSegmentFailsFast() {
+        def projectDir = temporaryFolder.newFolder()
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+
+        new File(projectDir, "settings.gradle") << ""
+        new File(projectDir, "build.gradle") << """
+            plugins {
+                id('com.gorylenko.gradle-git-properties')
+            }
+            gitProperties {
+                gitPropertiesName = '../git.properties'
+            }
+        """.stripIndent()
+
+        def runner = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments("generateGitProperties")
+                .withProjectDir(projectDir)
+
+        def result = runner.buildAndFail()
+        assertThat(result.output, containsString("must be a relative path that stays under gitPropertiesResourceDir"))
+    }
+
+    /**
      * Issue #304: Control test — extProperty works correctly when gitProperties block
      * appears BEFORE the task reference (the "safe" order).
      *

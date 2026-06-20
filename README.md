@@ -61,6 +61,16 @@ gitProperties {
 }
 ```
 
+`gitPropertiesName` accepts either a plain filename or a **relative path**, which controls the subpath inside the JAR:
+
+```groovy
+gitProperties {
+    gitPropertiesName = "discord4j/common/git.properties"  // subpath in JAR
+}
+```
+
+> **Note:** `gitPropertiesName` must be a relative path. Leading `/` and `..` segments are rejected with a build error.
+
 > **Note:** The older `gitPropertiesDir` property is deprecated. Replace it with `gitPropertiesResourceDir`.
 
 ### Commit Timestamp Format
@@ -381,7 +391,7 @@ bootJar {
 
 | Plugin Version | Gradle | Java | Notes |
 |----------------|--------|------|-------|
-| 4.0.x          | 5.1 – 9.x | 17+ | Fixed overlapping outputs; `processResources` auto-wired |
+| 4.0.x          | 5.1 – 9.x | 17+ | Fixed overlapping outputs; `processResources` auto-wired; `gitPropertiesName` supports relative paths |
 | 3.0.x          | 5.1 – 9.x | 17+ | JGit backend, git worktree support |
 | 2.5.x          | 5.1 – 9.x | 8+ | Grgit backend (deprecated) |
 
