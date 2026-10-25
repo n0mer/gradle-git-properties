@@ -57,10 +57,13 @@ class GitPropertiesPlugin implements Plugin<Project> {
                 if (!extension.gitPropertiesDir.present) {
                     String gitPropertiesDir = getGitPropertiesDir(extension, project.layout).asFile.absolutePath
                     def sourceSets = project.extensions.getByType(SourceSetContainer)
+                    // builtBy carries the dependency on generateGitProperties to every consumer of
+                    // main resources (processResources, sourcesJar, ...), not just processResources
                     sourceSets.named(SourceSet.MAIN_SOURCE_SET_NAME).configure {
-                        it.resources.srcDir(gitPropertiesDir)
+                        it.resources.srcDir(project.files(gitPropertiesDir).builtBy(task))
                     }
-                    // Ensure processResources depends on generateGitProperties
+                    // Kept for builds that drop the directory from main resources and copy it
+                    // into processResources themselves
                     project.tasks.named(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).configure {
                         dependsOn(task)
                     }

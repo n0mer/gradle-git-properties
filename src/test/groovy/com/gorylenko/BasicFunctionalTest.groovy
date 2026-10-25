@@ -187,6 +187,147 @@ public class BasicFunctionalTest {
         assert new File(customDir, "git.properties").exists()
     }
 
+    /**
+     * Every consumer of main resources must depend on generateGitProperties, not only processResources.
+     *
+     * Without the fix, `build` with withSourcesJar() fails Gradle validation with:
+     * "Task ':sourcesJar' uses this output of task ':generateGitProperties'
+     *  without declaring an explicit or implicit dependency."
+     * and a standalone `sourcesJar` silently skips generating git.properties.
+     */
+    @Test
+    public void testSourcesJarDependsOnGenerateGitProperties() {
+        def projectDir = temporaryFolder.newFolder()
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+
+        new File(projectDir, "settings.gradle") << ""
+        new File(projectDir, "build.gradle") << """
+            plugins {
+                id('java')
+                id('com.gorylenko.gradle-git-properties')
+            }
+            java {
+                withSourcesJar()
+            }
+        """.stripIndent()
+
+        def sourcesJarResult = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments("sourcesJar")
+                .withProjectDir(projectDir)
+                .build()
+
+        assertNotNull("generateGitProperties was not scheduled for sourcesJar",
+                sourcesJarResult.task(":generateGitProperties"))
+        assertEquals(TaskOutcome.SUCCESS, sourcesJarResult.task(":generateGitProperties").outcome)
+
+        def buildResult = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments("clean", "build")
+                .withProjectDir(projectDir)
+                .build()
+
+        assertEquals(TaskOutcome.SUCCESS, buildResult.task(":sourcesJar").outcome)
+    }
+
+    /**
+     * Same as testSourcesJarDependsOnGenerateGitProperties, with gitPropertiesResourceDir
+     * pointing to a custom directory.
+     */
+    @Test
+    public void testSourcesJarDependsOnGenerateGitPropertiesWithCustomResourceDir() {
+        def projectDir = temporaryFolder.newFolder()
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+
+        new File(projectDir, "settings.gradle") << ""
+        new File(projectDir, "build.gradle") << """
+            plugins {
+                id('java')
+                id('com.gorylenko.gradle-git-properties')
+            }
+            java {
+                withSourcesJar()
+            }
+            gitProperties {
+                gitPropertiesResourceDir = file('custom-git-props')
+            }
+        """.stripIndent()
+
+        def sourcesJarResult = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments("sourcesJar")
+                .withProjectDir(projectDir)
+                .build()
+
+        assertNotNull("generateGitProperties was not scheduled for sourcesJar",
+                sourcesJarResult.task(":generateGitProperties"))
+        assertEquals(TaskOutcome.SUCCESS, sourcesJarResult.task(":generateGitProperties").outcome)
+        assert new File(projectDir, "custom-git-props/git.properties").exists()
+
+        def buildResult = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments("clean", "build")
+                .withProjectDir(projectDir)
+                .build()
+
+        assertEquals(TaskOutcome.SUCCESS, buildResult.task(":sourcesJar").outcome)
+    }
+
+    /**
+     * Builds may remove the generated directory from main resources (e.g. to keep git.properties
+     * out of the sources jar) and copy it into processResources themselves. processResources must
+     * still depend on generateGitProperties explicitly in that case.
+     */
+    @Test
+    public void testProcessResourcesDependsOnGenerateGitPropertiesWhenDirRemovedFromSourceSet() {
+        def projectDir = temporaryFolder.newFolder()
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+
+        new File(projectDir, "settings.gradle") << ""
+        new File(projectDir, "build.gradle") << """
+            plugins {
+                id('java')
+                id('com.gorylenko.gradle-git-properties')
+            }
+            java {
+                withSourcesJar()
+            }
+            gradle.projectsEvaluated {
+                sourceSets.main.resources.srcDirs = ['src/main/resources']
+            }
+            tasks.named('processResources') {
+                from(layout.buildDirectory.dir('generated/resources/git'))
+            }
+        """.stripIndent()
+
+        def processResourcesResult = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments("processResources")
+                .withProjectDir(projectDir)
+                .build()
+
+        assertNotNull("generateGitProperties was not scheduled for processResources",
+                processResourcesResult.task(":generateGitProperties"))
+        assert new File(projectDir, "build/resources/main/git.properties").exists()
+
+        def buildResult = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments("clean", "build")
+                .withProjectDir(projectDir)
+                .build()
+
+        assertEquals(TaskOutcome.SUCCESS, buildResult.task(":processResources").outcome)
+    }
+
     // Issue #234: Configurable commit ID abbreviation length
 
     @Test

@@ -145,4 +145,43 @@ public class ConfigurationCacheFunctionalTest {
         assertTrue("Should reuse configuration cache", secondResult.output.contains('Reusing configuration cache.'))
         assertEquals(TaskOutcome.UP_TO_DATE, secondResult.task(":generateGitProperties").outcome)
     }
+
+    /**
+     * The dependency of sourcesJar on generateGitProperties must survive the configuration cache,
+     * since it comes from the main resources registration rather than an explicit dependsOn.
+     */
+    @Test
+    public void testPluginSupportsConfigurationCacheWithSourcesJar() {
+        def projectDir = temporaryFolder.newFolder()
+
+        GitRepositoryBuilder.setupProjectDir(projectDir, { gitRepoBuilder ->
+            gitRepoBuilder.commitFile("hello.txt", "Hello", "Added hello.txt")
+        })
+
+        new File(projectDir, "settings.gradle") << ""
+        new File(projectDir, "build.gradle") << """
+            plugins {
+                id('java')
+                id('com.gorylenko.gradle-git-properties')
+            }
+            java {
+                withSourcesJar()
+            }
+        """.stripIndent()
+
+        def runner = GradleRunner.create()
+                .withPluginClasspath()
+                .withArguments("--configuration-cache", "clean", "build")
+                .withProjectDir(projectDir)
+
+        def firstResult = runner.build()
+        assertEquals(TaskOutcome.SUCCESS, firstResult.task(":generateGitProperties").outcome)
+        assertEquals(TaskOutcome.SUCCESS, firstResult.task(":sourcesJar").outcome)
+
+        // Second run after clean - generator must still run before sourcesJar when loaded from cache
+        def secondResult = runner.build()
+        assertTrue("Should reuse configuration cache", secondResult.output.contains('Reusing configuration cache.'))
+        assertEquals(TaskOutcome.SUCCESS, secondResult.task(":generateGitProperties").outcome)
+        assertEquals(TaskOutcome.SUCCESS, secondResult.task(":sourcesJar").outcome)
+    }
 }
